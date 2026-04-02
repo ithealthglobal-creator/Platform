@@ -6,6 +6,8 @@ IThealth is an IT Managed Service Provider building a multi-sided platform with 
 
 Admins log in with email/password and land directly on a Dashboard — no onboarding flow. The admin area provides a navigation shell with a database-driven menu system and a menu editor for managing it.
 
+Public users are unauthenticated visitors with no `profiles` record or auth account.
+
 ## Tech Stack
 
 - **Framework**: Next.js (App Router), all admin pages as client components (SPA behavior)
@@ -38,8 +40,11 @@ IThealth.ai/
 │   │   ├── layout.tsx              # Root layout (client)
 │   │   ├── page.tsx                # Public home page
 │   │   ├── (auth)/
-│   │   │   ├── login/page.tsx
+│   │   │   ├── login/page.tsx      # Includes forgot-password as inline UI state
 │   │   │   └── reset-password/page.tsx
+│   │   ├── api/
+│   │   │   └── admin/
+│   │   │       └── users/route.ts  # Server-side admin ops (service_role key)
 │   │   └── (admin)/
 │   │       ├── layout.tsx          # Admin shell (sidebar + mega menu + auth guard)
 │   │       ├── dashboard/page.tsx
@@ -57,6 +62,7 @@ IThealth.ai/
 │   ├── components/
 │   │   ├── sidebar.tsx
 │   │   ├── mega-menu.tsx
+│   │   ├── breadcrumb.tsx
 │   │   ├── auth-guard.tsx
 │   │   └── ui/                     # shadcn components
 │   ├── lib/
@@ -81,6 +87,7 @@ IThealth.ai/
 | name | text | |
 | is_active | boolean | |
 | created_at | timestamptz | |
+| updated_at | timestamptz | |
 
 IThealth itself is a company in this table. Admin users belong to the IThealth company.
 
@@ -98,6 +105,9 @@ Extends Supabase `auth.users`.
 | avatar_url | text | nullable |
 | is_active | boolean | |
 | created_at | timestamptz | |
+| updated_at | timestamptz | |
+
+`profiles.email` is a denormalized copy of `auth.users.email`. A database trigger on `auth.users` keeps it in sync. This avoids needing service_role access for basic user listing queries.
 
 Every user belongs to a company. Admins belong to the IThealth company.
 
@@ -116,6 +126,7 @@ Adjacency list for hierarchical menu.
 | level | int | 1-4, denormalized for easy querying |
 | is_active | boolean | Toggle visibility |
 | created_at | timestamptz | |
+| updated_at | timestamptz | |
 
 **Hierarchy:**
 - L1 (parent_id = null): Sidebar items — Dashboard, Growth, Sales, Services, Delivery, Academy, People, Settings
@@ -127,15 +138,16 @@ Adjacency list for hierarchical menu.
 
 | Column | Type | Notes |
 |--------|------|-------|
-| id | uuid | PK |
 | role | enum | `admin`, `customer`, `partner` |
 | menu_item_id | uuid | FK to menu_items |
+
+Primary key is the composite `(role, menu_item_id)`. No separate `id` column.
 
 ### RLS Policies
 
 - `companies`: Admins read/write all. Others read own company only.
 - `profiles`: Admins read/write all. Others read own company's users only.
-- `menu_items`: Read access filtered through `role_menu_access` by user's role.
+- `menu_items`: Read access via a Postgres `security definer` function `get_menu_tree(user_role)` that joins `menu_items` with `role_menu_access` and returns the full tree. This avoids complex cross-table RLS policies and is more performant.
 - `role_menu_access`: Read for all authenticated. Write for admins only.
 
 ## Authentication
@@ -149,11 +161,13 @@ Adjacency list for hierarchical menu.
 - Link to forgot password flow
 - No signup on login page — admins created by other admins or seed data
 
-### Forgot Password (`/login` > link)
+### Forgot Password (inline UI state within `/login`)
 
-- Email input form
+- Toggled via "Forgot password?" link on the login form
+- Replaces the login form with an email input form
 - `supabase.auth.resetPasswordForEmail()`
 - Shows confirmation: "Check your email"
+- "Back to login" link to return to the login form
 - Email contains link to `/reset-password`
 
 ### Reset Password (`/reset-password`)
@@ -166,8 +180,20 @@ Adjacency list for hierarchical menu.
 ### Admin Reset User Password (People > Users)
 
 - Admin selects a user, clicks "Reset Password"
-- Sends password reset email via Supabase Admin API
-- Or: sets temporary password directly, flags user to change on next login
+- Client calls `POST /api/admin/users` Route Handler
+- Route Handler uses Supabase service_role client to call `supabase.auth.admin.resetPasswordForEmail()`
+- User receives reset email
+
+### Server-Side Admin Operations
+
+Admin operations that require the Supabase `service_role` key (user creation, password reset, user deletion) are handled via Next.js Route Handlers at `/api/admin/users/`. The service_role key is never exposed to the client.
+
+Operations routed through the API:
+- Create user: `supabase.auth.admin.createUser()` + insert profile
+- Reset user password: `supabase.auth.admin.resetPasswordForEmail()`
+- Delete/deactivate user: `supabase.auth.admin.updateUserById()`
+
+The Route Handler verifies the calling user is an admin before executing.
 
 ### Auth Guard (`auth-guard.tsx`)
 
@@ -224,7 +250,7 @@ Adjacency list for hierarchical menu.
 
 - Tree view of all menu items showing hierarchy
 - Add/edit/delete items at any level
-- Sort order input for reordering
+- Sort order via numeric input fields (drag-and-drop is a future enhancement)
 - Toggle `is_active` to show/hide items
 - Assign roles via `role_menu_access`
 - Changes save to DB and refresh menu context immediately
@@ -286,7 +312,7 @@ Dashboard gets a richer placeholder: welcome message, quick stats cards with dum
 ## User Management (People Section)
 
 ### Companies (People > Companies)
-- Table listing all companies (name, active status, user count)
+- Table listing all companies (name, active status, user count via aggregation query)
 - Create new company (name, active toggle)
 - Edit company
 - IThealth company appears in the list alongside all others
@@ -298,6 +324,14 @@ Dashboard gets a richer placeholder: welcome message, quick stats cards with dum
 - Edit user: update name, company, role, active status
 - Reset password: sends reset email or sets temporary password
 - Admin users (IThealth company) appear in the list alongside all other users
+
+## Loading & Error Handling
+
+- **Loading states**: Skeleton loaders for page content, spinner for auth check on mount
+- **Success feedback**: Toast notifications (shadcn Sonner/Toast) for create/edit/delete operations
+- **Error feedback**: Toast for API errors, inline messages for form validation errors
+- **Menu fetch failure**: Show sidebar with cached/fallback icons, toast error prompting retry
+- **Auth errors**: Redirect to login with optional error message param
 
 ## Future Considerations (Out of Scope)
 
