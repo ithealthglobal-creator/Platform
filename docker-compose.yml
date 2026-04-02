@@ -1,0 +1,35 @@
+# Local Supabase development environment
+#
+# PRIMARY APPROACH: Use the Supabase CLI (recommended):
+#   npx supabase start
+#   npx supabase stop
+#
+# This starts Postgres, GoTrue (auth), PostgREST, Studio, and all other
+# Supabase services via Docker containers managed by the CLI.
+#
+# Studio: http://localhost:54323
+# API:    http://localhost:54321
+# DB:     postgresql://postgres:postgres@localhost:54322/postgres
+#
+# ALTERNATIVE: If you prefer a standalone docker-compose setup,
+# you can use the official Supabase self-hosted docker-compose from:
+# https://github.com/supabase/supabase/tree/master/docker
+#
+# The Supabase CLI approach is simpler and keeps config in supabase/config.toml.
+
+version: '3.8'
+
+services:
+  # This file is a placeholder. Use `npx supabase start` instead.
+  # The Supabase CLI manages all required containers automatically.
+  #
+  # If you need additional services beyond Supabase, add them here:
+  app:
+    build: .
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+    profiles:
+      - app
