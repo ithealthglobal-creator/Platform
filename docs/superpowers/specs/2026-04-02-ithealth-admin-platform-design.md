@@ -11,7 +11,7 @@ Public users are unauthenticated visitors with no `profiles` record or auth acco
 ## Tech Stack
 
 - **Framework**: Next.js (App Router), all admin pages as client components (SPA behavior)
-- **UI**: React, shadcn/ui, Tailwind CSS, Lucide icons
+- **UI**: React, shadcn/ui, Tailwind CSS, IBM Carbon icons (@carbon/icons-react), Poppins font
 - **Backend**: Local Docker Supabase (Postgres, GoTrue auth, PostgREST, Studio)
 - **State**: React context for auth and menu state
 - **Language**: TypeScript
@@ -25,7 +25,7 @@ Public users are unauthenticated visitors with no `profiles` record or auth acco
 | @supabase/supabase-js | Supabase client |
 | tailwindcss | Styling |
 | shadcn/ui | Component library |
-| lucide-react | Icons |
+| @carbon/icons-react | IBM Carbon UI icons |
 
 ## Project Structure
 
@@ -120,7 +120,7 @@ Adjacency list for hierarchical menu.
 | id | uuid | PK |
 | parent_id | uuid | nullable, FK to self (null = L1 sidebar item) |
 | label | text | Display text |
-| icon | text | Lucide icon name, L1 only |
+| icon | text | IBM Carbon icon name, L1 only |
 | route | text | URL path, nullable for parent-only items |
 | sort_order | int | Ordering within same level |
 | level | int | 1-4, denormalized for easy querying |
@@ -297,7 +297,8 @@ Dashboard gets a richer placeholder: welcome message, quick stats cards with dum
 - Light theme overall, dark sidebar
 - IThealth brand colours (configurable in Tailwind config)
 - shadcn default component styling as baseline
-- Lucide icons throughout
+- IBM Carbon icons throughout (https://www.ibm.com/design/language/iconography/ui-icons/library/)
+- Poppins font for all text
 - Clean, professional look
 
 ## Seed Data

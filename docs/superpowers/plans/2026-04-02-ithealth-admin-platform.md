@@ -6,7 +6,7 @@
 
 **Architecture:** Next.js App Router with all admin pages as `"use client"` components (SPA). Supabase for auth and database via Docker. React context for auth and menu state. Server-side Route Handlers for admin operations requiring the service_role key.
 
-**Tech Stack:** Next.js, React, TypeScript, shadcn/ui, Tailwind CSS, Lucide icons, Supabase (Docker), @supabase/supabase-js
+**Tech Stack:** Next.js, React, TypeScript, shadcn/ui, Tailwind CSS, IBM Carbon icons (@carbon/icons-react), Poppins font, Supabase (Docker), @supabase/supabase-js
 
 **Spec:** `docs/superpowers/specs/2026-04-02-ithealth-admin-platform-design.md`
 
@@ -69,7 +69,7 @@ IThealth.ai/
 │   ├── lib/
 │   │   ├── supabase-client.ts              # Browser Supabase client
 │   │   ├── supabase-server.ts              # Service role client (server only)
-│   │   ├── icon-map.ts                     # Lucide icon name -> component map
+│   │   ├── icon-map.ts                     # Carbon icon name -> component map
 │   │   └── types.ts                        # TypeScript types + DB enums
 │   └── contexts/
 │       ├── auth-context.tsx
@@ -95,9 +95,11 @@ Accept defaults. This creates the base Next.js + Tailwind + TypeScript setup.
 - [ ] **Step 2: Install dependencies**
 
 ```bash
-npm install @supabase/supabase-js lucide-react
+npm install @supabase/supabase-js @carbon/icons-react
 npm install -D @types/node
 ```
+
+Note: We use IBM Carbon UI icons (`@carbon/icons-react`) instead of Lucide. All icons come from https://www.ibm.com/design/language/iconography/ui-icons/library/
 
 - [ ] **Step 3: Initialize shadcn/ui**
 
@@ -216,36 +218,51 @@ export interface RoleMenuAccess {
 }
 ```
 
-- [ ] **Step 10: Create Lucide icon map**
+- [ ] **Step 10: Create Carbon icon map**
 
 Create `src/lib/icon-map.ts`:
 
 ```typescript
 import {
-  LayoutDashboard,
-  TrendingUp,
-  DollarSign,
-  Wrench,
-  Truck,
-  GraduationCap,
-  Users,
+  Dashboard,
+  GrowthChart,  
+  Currency,
+  ToolKit,
+  Delivery,
+  Education,
+  UserMultiple,
   Settings,
-  type LucideIcon,
-} from 'lucide-react'
+  Logout,
+  ChevronRight,
+  Add,
+  Edit,
+  TrashCan,
+  Password,
+  CircleDash,
+} from '@carbon/icons-react'
+import { ComponentType } from 'react'
 
-export const iconMap: Record<string, LucideIcon> = {
-  'layout-dashboard': LayoutDashboard,
-  'trending-up': TrendingUp,
-  'dollar-sign': DollarSign,
-  'wrench': Wrench,
-  'truck': Truck,
-  'graduation-cap': GraduationCap,
-  'users': Users,
+export const iconMap: Record<string, ComponentType<{ size?: number; className?: string }>> = {
+  'dashboard': Dashboard,
+  'growth-chart': GrowthChart,
+  'currency': Currency,
+  'tool-kit': ToolKit,
+  'delivery': Delivery,
+  'education': Education,
+  'user-multiple': UserMultiple,
   'settings': Settings,
+  'logout': Logout,
+  'chevron-right': ChevronRight,
+  'add': Add,
+  'edit': Edit,
+  'trash-can': TrashCan,
+  'password': Password,
+  'circle-dash': CircleDash,
 }
 ```
 
-This avoids importing all of Lucide. When new icons are needed (e.g., via the menu editor), add them here.
+All icons from IBM Carbon UI library: https://www.ibm.com/design/language/iconography/ui-icons/library/
+When new icons are needed (e.g., via the menu editor), add them here.
 
 - [ ] **Step 11: Update root layout**
 
@@ -253,11 +270,11 @@ Replace `src/app/layout.tsx` with a minimal client layout:
 
 ```typescript
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700'] })
 
 export const metadata: Metadata = {
   title: 'IThealth',
@@ -271,7 +288,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={poppins.className}>
         {children}
         <Toaster />
       </body>
@@ -553,13 +570,13 @@ ON CONFLICT (id) DO NOTHING;
 
 -- L1 Menu Items (Sidebar)
 INSERT INTO public.menu_items (id, parent_id, label, icon, route, sort_order, level) VALUES
-  ('10000000-0000-0000-0000-000000000001', NULL, 'Dashboard', 'layout-dashboard', '/dashboard', 1, 1),
-  ('10000000-0000-0000-0000-000000000002', NULL, 'Growth', 'trending-up', '/growth', 2, 1),
-  ('10000000-0000-0000-0000-000000000003', NULL, 'Sales', 'dollar-sign', '/sales', 3, 1),
-  ('10000000-0000-0000-0000-000000000004', NULL, 'Services', 'wrench', '/services', 4, 1),
-  ('10000000-0000-0000-0000-000000000005', NULL, 'Delivery', 'truck', '/delivery', 5, 1),
-  ('10000000-0000-0000-0000-000000000006', NULL, 'Academy', 'graduation-cap', '/academy', 6, 1),
-  ('10000000-0000-0000-0000-000000000007', NULL, 'People', 'users', '/people', 7, 1),
+  ('10000000-0000-0000-0000-000000000001', NULL, 'Dashboard', 'dashboard', '/dashboard', 1, 1),
+  ('10000000-0000-0000-0000-000000000002', NULL, 'Growth', 'growth-chart', '/growth', 2, 1),
+  ('10000000-0000-0000-0000-000000000003', NULL, 'Sales', 'currency', '/sales', 3, 1),
+  ('10000000-0000-0000-0000-000000000004', NULL, 'Services', 'tool-kit', '/services', 4, 1),
+  ('10000000-0000-0000-0000-000000000005', NULL, 'Delivery', 'delivery', '/delivery', 5, 1),
+  ('10000000-0000-0000-0000-000000000006', NULL, 'Academy', 'education', '/academy', 6, 1),
+  ('10000000-0000-0000-0000-000000000007', NULL, 'People', 'user-multiple', '/people', 7, 1),
   ('10000000-0000-0000-0000-000000000008', NULL, 'Settings', 'settings', '/settings', 8, 1);
 
 -- L2 Menu Items (Mega Menu tabs)
@@ -1191,13 +1208,19 @@ import { useMenu } from '@/contexts/menu-context'
 import { useAuth } from '@/contexts/auth-context'
 import { usePathname, useRouter } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { LogOut, Circle } from 'lucide-react'
 import { iconMap } from '@/lib/icon-map'
 
 function getIcon(iconName: string | null) {
-  if (!iconName) return <Circle className="h-5 w-5" />
+  if (!iconName) {
+    const Fallback = iconMap['circle-dash']
+    return <Fallback size={20} />
+  }
   const Icon = iconMap[iconName]
-  return Icon ? <Icon className="h-5 w-5" /> : <Circle className="h-5 w-5" />
+  if (!Icon) {
+    const Fallback = iconMap['circle-dash']
+    return <Fallback size={20} />
+  }
+  return <Icon size={20} />
 }
 
 export function Sidebar() {
@@ -1252,7 +1275,7 @@ export function Sidebar() {
               onClick={signOut}
               className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
             >
-              <LogOut className="h-5 w-5" />
+              {(() => { const LogoutIcon = iconMap['logout']; return <LogoutIcon size={20} /> })()}
             </button>
           </TooltipTrigger>
           <TooltipContent side="right">Logout</TooltipContent>
@@ -1379,7 +1402,9 @@ function MegaMenuDropdown({ l2Item, onNavigate }: { l2Item: MenuItem; onNavigate
 
 import { useMenu } from '@/contexts/menu-context'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { iconMap } from '@/lib/icon-map'
+
+const ChevronRight = iconMap['chevron-right']
 
 export function Breadcrumb() {
   const { flatMenu } = useMenu()
@@ -1395,7 +1420,7 @@ export function Breadcrumb() {
     <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
       {crumbs.map((crumb, i) => (
         <span key={crumb.id} className="flex items-center gap-1">
-          {i > 0 && <ChevronRight className="h-3 w-3" />}
+          {i > 0 && <ChevronRight size={12} />}
           <span className={i === crumbs.length - 1 ? 'text-foreground font-medium' : ''}>
             {crumb.label}
           </span>
@@ -1469,7 +1494,7 @@ git commit -m "feat: add admin shell with sidebar, mega menu, and breadcrumb"
 import { useAuth } from '@/contexts/auth-context'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Users, Building2, Ticket, TrendingUp } from 'lucide-react'
+import { UserMultiple, Building, TaskComplete, GrowthChart } from '@carbon/icons-react'
 
 export default function DashboardPage() {
   const { profile } = useAuth()
@@ -1484,7 +1509,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building size={16} className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24</div>
@@ -1493,7 +1518,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <UserMultiple size={16} className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">142</div>
@@ -1502,7 +1527,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Open Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
+            <TaskComplete size={16} className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">18</div>
@@ -1511,7 +1536,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">MRR</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <GrowthChart size={16} className="text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">$48,200</div>
@@ -1688,7 +1713,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Plus, Pencil } from 'lucide-react'
+import { Add, Edit } from '@carbon/icons-react'
 
 interface CompanyWithCount extends Company {
   user_count: number
@@ -1759,7 +1784,7 @@ export default function CompaniesPage() {
       <Breadcrumb />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Companies</h1>
-        <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Add Company</Button>
+        <Button onClick={openCreate}><Add size={16} className="mr-2" /> Add Company</Button>
       </div>
 
       <Table>
@@ -1783,7 +1808,7 @@ export default function CompaniesPage() {
               </TableCell>
               <TableCell>
                 <Button variant="ghost" size="icon" onClick={() => openEdit(company)}>
-                  <Pencil className="h-4 w-4" />
+                  <Edit size={16} />
                 </Button>
               </TableCell>
             </TableRow>
@@ -1852,7 +1877,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Plus, Pencil, KeyRound } from 'lucide-react'
+import { Add, Edit, Password } from '@carbon/icons-react'
 
 export default function UsersPage() {
   const { session } = useAuth()
@@ -1983,7 +2008,7 @@ export default function UsersPage() {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={openCreate}><Plus className="h-4 w-4 mr-2" /> Add User</Button>
+          <Button onClick={openCreate}><Add size={16} className="mr-2" /> Add User</Button>
         </div>
       </div>
 
@@ -2012,10 +2037,10 @@ export default function UsersPage() {
               </TableCell>
               <TableCell className="flex gap-1">
                 <Button variant="ghost" size="icon" onClick={() => openEdit(user)}>
-                  <Pencil className="h-4 w-4" />
+                  <Edit size={16} />
                 </Button>
                 <Button variant="ghost" size="icon" onClick={() => handleResetPassword(user)}>
-                  <KeyRound className="h-4 w-4" />
+                  <Password size={16} />
                 </Button>
               </TableCell>
             </TableRow>
@@ -2119,7 +2144,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Plus, Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { Add, Edit, TrashCan, ChevronRight } from '@carbon/icons-react'
 
 export default function MenuEditorPage() {
   const { refresh } = useMenu()
@@ -2274,7 +2299,7 @@ export default function MenuEditorPage() {
           style={{ paddingLeft: `${depth * 24 + 12}px` }}
         >
           {item.children && item.children.length > 0 && (
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            <ChevronRight size={16} className="text-muted-foreground" />
           )}
           <span className="flex-1 text-sm font-medium">{item.label}</span>
           <span className="text-xs text-muted-foreground">{item.route}</span>
@@ -2284,14 +2309,14 @@ export default function MenuEditorPage() {
           <div className="flex gap-1">
             {depth < 3 && (
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openCreate(item.id)}>
-                <Plus className="h-3 w-3" />
+                <Add size={12} />
               </Button>
             )}
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(item)}>
-              <Pencil className="h-3 w-3" />
+              <Edit size={12} />
             </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleDelete(item.id)}>
-              <Trash2 className="h-3 w-3" />
+              <TrashCan size={12} />
             </Button>
           </div>
         </div>
@@ -2305,7 +2330,7 @@ export default function MenuEditorPage() {
       <Breadcrumb />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Menu Editor</h1>
-        <Button onClick={() => openCreate()}><Plus className="h-4 w-4 mr-2" /> Add Root Item</Button>
+        <Button onClick={() => openCreate()}><Add size={16} className="mr-2" /> Add Root Item</Button>
       </div>
 
       <div className="rounded-lg border bg-white">
