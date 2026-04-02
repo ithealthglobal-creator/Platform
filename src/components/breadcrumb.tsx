@@ -11,7 +11,7 @@ export function Breadcrumb() {
   const pathname = usePathname()
 
   const crumbs = flatMenu
-    .filter(item => item.route && pathname.startsWith(item.route))
+    .filter(item => item.route && (pathname === item.route || pathname.startsWith(item.route + '/')))
     .sort((a, b) => a.level - b.level)
 
   if (crumbs.length === 0) return null

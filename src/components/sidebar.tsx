@@ -36,7 +36,7 @@ export function Sidebar() {
 
         <nav className="flex flex-1 flex-col items-center gap-1">
           {l1Items.map(item => {
-            const isActive = pathname.startsWith(item.route || '')
+            const isActive = item.route ? (pathname === item.route || pathname.startsWith(item.route + '/')) : false
             return (
               <Tooltip key={item.id}>
                 <TooltipTrigger

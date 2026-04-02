@@ -214,6 +214,7 @@ export default function UsersPage() {
   }
 
   async function handleResetPassword(user: Profile) {
+    if (!confirm(`Send a password reset email to ${user.email}?`)) return
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: {

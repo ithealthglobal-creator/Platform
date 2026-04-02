@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMenu } from '@/contexts/menu-context'
 import { usePathname, useRouter } from 'next/navigation'
 import { MenuItem } from '@/lib/types'
@@ -10,6 +10,19 @@ export function MegaMenu() {
   const pathname = usePathname()
   const router = useRouter()
   const [expandedL2, setExpandedL2] = useState<string | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setExpandedL2(null)
+      }
+    }
+    if (expandedL2) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [expandedL2])
 
   const activeL1 = menuTree.find(item =>
     item.level === 1 && pathname.startsWith(item.route || '')
@@ -20,7 +33,7 @@ export function MegaMenu() {
   const l2Items = activeL1.children || []
 
   return (
-    <div className="relative border-b bg-white">
+    <div ref={menuRef} className="relative border-b bg-white">
       <div className="flex h-12 items-center gap-1 px-4">
         {l2Items.map(item => {
           const isActive = pathname.startsWith(item.route || '')
