@@ -1,12 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { Persona } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -15,26 +14,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Add, Edit, TrashCan } from '@carbon/icons-react'
 
 export default function PersonasPage() {
+  const router = useRouter()
   const [personas, setPersonas] = useState<Persona[]>([])
   const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingItem, setEditingItem] = useState<Persona | null>(null)
-  const [formName, setFormName] = useState('')
-  const [formDescription, setFormDescription] = useState('')
-  const [formActive, setFormActive] = useState(true)
-  const [saving, setSaving] = useState(false)
 
   const fetchPersonas = useCallback(async () => {
     setLoading(true)
@@ -57,22 +44,6 @@ export default function PersonasPage() {
     fetchPersonas()
   }, [fetchPersonas])
 
-  function openAddDialog() {
-    setEditingItem(null)
-    setFormName('')
-    setFormDescription('')
-    setFormActive(true)
-    setDialogOpen(true)
-  }
-
-  function openEditDialog(item: Persona) {
-    setEditingItem(item)
-    setFormName(item.name)
-    setFormDescription(item.description ?? '')
-    setFormActive(item.is_active)
-    setDialogOpen(true)
-  }
-
   async function handleDelete(item: Persona) {
     if (!confirm(`Delete persona "${item.name}"? This cannot be undone.`)) return
 
@@ -90,53 +61,6 @@ export default function PersonasPage() {
     fetchPersonas()
   }
 
-  async function handleSave() {
-    const trimmedName = formName.trim()
-    if (!trimmedName) {
-      toast.error('Name is required')
-      return
-    }
-
-    setSaving(true)
-
-    const payload = {
-      name: trimmedName,
-      description: formDescription.trim() || null,
-      is_active: formActive,
-    }
-
-    if (editingItem) {
-      const { error } = await supabase
-        .from('personas')
-        .update(payload)
-        .eq('id', editingItem.id)
-
-      if (error) {
-        toast.error('Failed to update persona')
-        setSaving(false)
-        return
-      }
-
-      toast.success('Persona updated')
-    } else {
-      const { error } = await supabase
-        .from('personas')
-        .insert(payload)
-
-      if (error) {
-        toast.error('Failed to create persona')
-        setSaving(false)
-        return
-      }
-
-      toast.success('Persona created')
-    }
-
-    setSaving(false)
-    setDialogOpen(false)
-    fetchPersonas()
-  }
-
   return (
     <div>
       <Breadcrumb />
@@ -148,7 +72,7 @@ export default function PersonasPage() {
             Target buyer personas
           </p>
         </div>
-        <Button onClick={openAddDialog}>
+        <Button onClick={() => router.push('/growth/market/personas/new')}>
           <Add size={16} />
           Add Persona
         </Button>
@@ -192,7 +116,7 @@ export default function PersonasPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => openEditDialog(item)}
+                        onClick={() => router.push(`/growth/market/personas/${item.id}/edit`)}
                       >
                         <Edit size={16} />
                       </Button>
@@ -211,53 +135,6 @@ export default function PersonasPage() {
           </TableBody>
         </Table>
       </div>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingItem ? 'Edit Persona' : 'Add Persona'}</DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-2">
-            <div className="grid gap-2">
-              <Label htmlFor="persona-name">Name</Label>
-              <Input
-                id="persona-name"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="e.g., IT Manager, Business Owner"
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="persona-description">Description</Label>
-              <Input
-                id="persona-description"
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                placeholder="Persona description"
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="persona-active"
-                checked={formActive}
-                onChange={(e) => setFormActive(e.target.checked)}
-                className="h-4 w-4 rounded border-border"
-              />
-              <Label htmlFor="persona-active">Active</Label>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : editingItem ? 'Update' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

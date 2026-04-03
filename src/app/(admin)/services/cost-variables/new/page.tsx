@@ -1,0 +1,113 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase-client'
+import { Breadcrumb } from '@/components/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { toast } from 'sonner'
+import { ArrowLeft, Save } from '@carbon/icons-react'
+
+export default function NewCostVariablePage() {
+  const router = useRouter()
+  const [formName, setFormName] = useState('')
+  const [formDescription, setFormDescription] = useState('')
+  const [formUnitLabel, setFormUnitLabel] = useState('')
+  const [formActive, setFormActive] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  async function handleSave() {
+    const trimmedName = formName.trim()
+    if (!trimmedName) {
+      toast.error('Name is required')
+      return
+    }
+
+    setSaving(true)
+
+    const { error } = await supabase
+      .from('cost_variables')
+      .insert({
+        name: trimmedName,
+        description: formDescription.trim() || null,
+        unit_label: formUnitLabel.trim() || null,
+        is_active: formActive,
+      })
+
+    if (error) {
+      toast.error('Failed to create cost variable')
+      setSaving(false)
+      return
+    }
+
+    toast.success('Cost variable created')
+    router.push('/services/cost-variables')
+  }
+
+  return (
+    <div>
+      <Breadcrumb />
+      <div className="mb-6">
+        <button
+          onClick={() => router.push('/services/cost-variables')}
+          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft size={16} /> Back to Cost Variables
+        </button>
+      </div>
+      <h1 className="text-2xl font-bold mb-6">New Cost Variable</h1>
+
+      <div className="grid gap-4 max-w-lg">
+        <div className="grid gap-2">
+          <Label htmlFor="cv-name">Name</Label>
+          <Input
+            id="cv-name"
+            value={formName}
+            onChange={(e) => setFormName(e.target.value)}
+            placeholder="e.g., Users"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="cv-description">Description</Label>
+          <Input
+            id="cv-description"
+            value={formDescription}
+            onChange={(e) => setFormDescription(e.target.value)}
+            placeholder="What this variable represents"
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="cv-unit-label">Unit Label</Label>
+          <Input
+            id="cv-unit-label"
+            value={formUnitLabel}
+            onChange={(e) => setFormUnitLabel(e.target.value)}
+            placeholder="e.g., users, devices"
+          />
+        </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="cv-active"
+            checked={formActive}
+            onChange={(e) => setFormActive(e.target.checked)}
+            className="h-4 w-4 rounded border-border"
+          />
+          <Label htmlFor="cv-active">Active</Label>
+        </div>
+
+        <div>
+          <Button onClick={handleSave} disabled={saving}>
+            <Save size={16} className="mr-2" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}

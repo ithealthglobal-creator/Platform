@@ -1,12 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Breadcrumb } from '@/components/breadcrumb'
 import { Company } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Table,
   TableBody,
@@ -15,13 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { Add, Edit } from '@carbon/icons-react'
@@ -31,15 +23,9 @@ interface CompanyWithCount extends Company {
 }
 
 export default function CompaniesPage() {
+  const router = useRouter()
   const [companies, setCompanies] = useState<CompanyWithCount[]>([])
   const [loading, setLoading] = useState(true)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingCompany, setEditingCompany] = useState<CompanyWithCount | null>(
-    null
-  )
-  const [formName, setFormName] = useState('')
-  const [formActive, setFormActive] = useState(true)
-  const [saving, setSaving] = useState(false)
 
   const fetchCompanies = useCallback(async () => {
     setLoading(true)
@@ -76,61 +62,6 @@ export default function CompaniesPage() {
     fetchCompanies()
   }, [fetchCompanies])
 
-  function openCreateDialog() {
-    setEditingCompany(null)
-    setFormName('')
-    setFormActive(true)
-    setDialogOpen(true)
-  }
-
-  function openEditDialog(company: CompanyWithCount) {
-    setEditingCompany(company)
-    setFormName(company.name)
-    setFormActive(company.is_active)
-    setDialogOpen(true)
-  }
-
-  async function handleSave() {
-    const trimmedName = formName.trim()
-    if (!trimmedName) {
-      toast.error('Company name is required')
-      return
-    }
-
-    setSaving(true)
-
-    if (editingCompany) {
-      const { error } = await supabase
-        .from('companies')
-        .update({ name: trimmedName, is_active: formActive })
-        .eq('id', editingCompany.id)
-
-      if (error) {
-        toast.error('Failed to update company')
-        setSaving(false)
-        return
-      }
-
-      toast.success('Company updated successfully')
-    } else {
-      const { error } = await supabase
-        .from('companies')
-        .insert({ name: trimmedName, is_active: formActive })
-
-      if (error) {
-        toast.error('Failed to create company')
-        setSaving(false)
-        return
-      }
-
-      toast.success('Company created successfully')
-    }
-
-    setSaving(false)
-    setDialogOpen(false)
-    fetchCompanies()
-  }
-
   return (
     <div>
       <Breadcrumb />
@@ -142,7 +73,7 @@ export default function CompaniesPage() {
             Manage companies and their status
           </p>
         </div>
-        <Button onClick={openCreateDialog}>
+        <Button onClick={() => router.push('/people/companies/new')}>
           <Add size={16} />
           Add Company
         </Button>
@@ -185,7 +116,7 @@ export default function CompaniesPage() {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      onClick={() => openEditDialog(company)}
+                      onClick={() => router.push(`/people/companies/${company.id}/edit`)}
                     >
                       <Edit size={16} />
                     </Button>
@@ -196,48 +127,6 @@ export default function CompaniesPage() {
           </TableBody>
         </Table>
       </div>
-
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {editingCompany ? 'Edit Company' : 'Add Company'}
-            </DialogTitle>
-          </DialogHeader>
-
-          <div className="grid gap-4 py-2">
-            <div className="grid gap-2">
-              <Label htmlFor="company-name">Name</Label>
-              <Input
-                id="company-name"
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder="Company name"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !saving) handleSave()
-                }}
-              />
-            </div>
-
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="company-active"
-                checked={formActive}
-                onChange={(e) => setFormActive(e.target.checked)}
-                className="h-4 w-4 rounded border-border"
-              />
-              <Label htmlFor="company-active">Active</Label>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving...' : editingCompany ? 'Update' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
