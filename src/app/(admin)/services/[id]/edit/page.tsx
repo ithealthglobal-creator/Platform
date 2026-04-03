@@ -17,6 +17,7 @@ import { DescriptionTab } from '@/components/services/description-tab'
 import { MarketTab } from '@/components/services/market-tab'
 import { ProductsTab } from '@/components/services/products-tab'
 import { SkillsTab } from '@/components/services/skills-tab'
+import { RunbookTab } from '@/components/services/runbook-tab'
 
 export default function ServiceEditorPage() {
   const params = useParams()
@@ -142,7 +143,7 @@ export default function ServiceEditorPage() {
         </TabsContent>
 
         <TabsContent value="runbook">
-          <p className="py-8 text-center text-muted-foreground">Coming soon</p>
+          <RunbookTab serviceId={serviceId!} />
         </TabsContent>
 
         <TabsContent value="growth">
