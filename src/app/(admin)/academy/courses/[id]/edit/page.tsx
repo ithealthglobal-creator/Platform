@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
 import { Breadcrumb } from '@/components/breadcrumb'
-import { Course, Phase } from '@/lib/types'
+import { Course, CourseSection, Phase } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,7 +22,8 @@ import {
   TabsContent,
 } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from '@carbon/icons-react'
+import { ArrowLeft, Save, Add } from '@carbon/icons-react'
+import { SectionEditor } from '@/components/academy/section-editor'
 
 export default function CourseEditorPage() {
   const params = useParams()
@@ -40,6 +41,10 @@ export default function CourseEditorPage() {
   const [phaseId, setPhaseId] = useState<string>('')
   const [isPublished, setIsPublished] = useState(false)
   const [isActive, setIsActive] = useState(true)
+
+  // Sections
+  const [sections, setSections] = useState<CourseSection[]>([])
+  const [addingSection, setAddingSection] = useState(false)
 
   // Phases for dropdown
   const [phases, setPhases] = useState<Phase[]>([])
@@ -85,10 +90,74 @@ export default function CourseEditorPage() {
     setLoading(false)
   }, [id, isNew])
 
+  const fetchSections = useCallback(async () => {
+    if (!courseId) return
+
+    const { data, error } = await supabase
+      .from('course_sections')
+      .select('*')
+      .eq('course_id', courseId)
+      .order('sort_order')
+
+    if (error) {
+      toast.error('Failed to load sections')
+      return
+    }
+
+    setSections((data as CourseSection[]) ?? [])
+  }, [courseId])
+
   useEffect(() => {
     fetchPhases()
     fetchCourse()
   }, [fetchPhases, fetchCourse])
+
+  useEffect(() => {
+    fetchSections()
+  }, [fetchSections])
+
+  async function addSection() {
+    if (!courseId) return
+
+    setAddingSection(true)
+
+    const nextOrder = sections.length > 0
+      ? Math.max(...sections.map((s) => s.sort_order)) + 1
+      : 1
+
+    const { error } = await supabase
+      .from('course_sections')
+      .insert({
+        course_id: courseId,
+        name: 'New Section',
+        sort_order: nextOrder,
+      })
+
+    if (error) {
+      toast.error('Failed to add section')
+      setAddingSection(false)
+      return
+    }
+
+    toast.success('Section added')
+    setAddingSection(false)
+    fetchSections()
+  }
+
+  async function deleteSection(sectionId: string) {
+    const { error } = await supabase
+      .from('course_sections')
+      .delete()
+      .eq('id', sectionId)
+
+    if (error) {
+      toast.error('Failed to delete section')
+      return
+    }
+
+    toast.success('Section deleted')
+    fetchSections()
+  }
 
   async function handleSave() {
     const trimmedName = name.trim()
@@ -262,8 +331,29 @@ export default function CourseEditorPage() {
         </TabsContent>
 
         <TabsContent value="sections">
-          <div className="py-8 text-center text-muted-foreground">
-            Sections editor coming soon
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Sections</h2>
+              <Button onClick={addSection} disabled={addingSection} size="sm">
+                <Add size={16} />
+                {addingSection ? 'Adding...' : 'Add Section'}
+              </Button>
+            </div>
+
+            {sections.length === 0 ? (
+              <p className="py-8 text-center text-muted-foreground">
+                No sections yet. Add one to get started.
+              </p>
+            ) : (
+              sections.map((section) => (
+                <SectionEditor
+                  key={section.id}
+                  section={section}
+                  onUpdate={fetchSections}
+                  onDelete={deleteSection}
+                />
+              ))
+            )}
           </div>
         </TabsContent>
       </Tabs>
