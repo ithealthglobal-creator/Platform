@@ -284,7 +284,7 @@ export default function EditAssessmentPage() {
             <Label>Phase Tag</Label>
             <Select
               value={questionForm.phase_id || 'none'}
-              onValueChange={(v) => setQuestionForm({ ...questionForm, phase_id: v === 'none' ? '' : v })}
+              onValueChange={(v) => setQuestionForm({ ...questionForm, phase_id: v === 'none' ? '' : v ?? '' })}
             >
               <SelectTrigger className="w-[180px]">
                 <SelectValue />
@@ -380,7 +380,7 @@ export default function EditAssessmentPage() {
         {formScope === 'phase' && (
           <div className="grid gap-2">
             <Label>Phase</Label>
-            <Select value={formPhaseId} onValueChange={(v) => setFormPhaseId(v)}>
+            <Select value={formPhaseId} onValueChange={(v) => setFormPhaseId(v ?? '')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select phase" />
               </SelectTrigger>
@@ -396,7 +396,7 @@ export default function EditAssessmentPage() {
         {formScope === 'service' && (
           <div className="grid gap-2">
             <Label>Service</Label>
-            <Select value={formServiceId} onValueChange={(v) => setFormServiceId(v)}>
+            <Select value={formServiceId} onValueChange={(v) => setFormServiceId(v ?? '')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select service" />
               </SelectTrigger>

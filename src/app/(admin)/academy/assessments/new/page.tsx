@@ -118,7 +118,7 @@ export default function NewAssessmentPage() {
         {formScope === 'phase' && (
           <div className="grid gap-2">
             <Label>Phase</Label>
-            <Select value={formPhaseId} onValueChange={(v) => setFormPhaseId(v)}>
+            <Select value={formPhaseId} onValueChange={(v) => setFormPhaseId(v ?? '')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select phase" />
               </SelectTrigger>
@@ -136,7 +136,7 @@ export default function NewAssessmentPage() {
         {formScope === 'service' && (
           <div className="grid gap-2">
             <Label>Service</Label>
-            <Select value={formServiceId} onValueChange={(v) => setFormServiceId(v)}>
+            <Select value={formServiceId} onValueChange={(v) => setFormServiceId(v ?? '')}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select service" />
               </SelectTrigger>
