@@ -234,3 +234,83 @@ export interface UserSectionProgress {
   created_at: string
   updated_at: string
 }
+
+export type ServiceStatus = 'draft' | 'active' | 'archived'
+export type CostingCategory = 'setup' | 'maintenance'
+export type PricingType = 'tiered' | 'formula'
+
+export interface CostingTier {
+  min: number
+  max: number | null
+  rate: number
+}
+
+export interface Service {
+  id: string
+  name: string
+  description: string | null
+  long_description: string | null
+  phase_id: string
+  status: ServiceStatus
+  hero_image_url: string | null
+  thumbnail_url: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  phase?: Phase
+}
+
+export interface ServiceProduct {
+  service_id: string
+  product_id: string
+  notes: string | null
+  product?: Product
+}
+
+export interface ServiceSkill {
+  service_id: string
+  skill_id: string
+  notes: string | null
+  skill?: Skill
+}
+
+export interface ServiceRunbookStep {
+  id: string
+  service_id: string
+  title: string
+  description: string | null
+  estimated_minutes: number | null
+  product_id: string | null
+  skill_id: string | null
+  role: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  product?: Product
+  skill?: Skill
+}
+
+export interface ServiceCostingItem {
+  id: string
+  service_id: string
+  name: string
+  category: CostingCategory
+  pricing_type: PricingType
+  cost_variable_id: string | null
+  formula: string | null
+  base_cost: string | null
+  tiers: CostingTier[] | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  cost_variable?: CostVariable
+}
+
+export interface ServiceAcademyLink {
+  service_id: string
+  course_id: string
+  is_required: boolean
+  course?: Course
+}
