@@ -53,7 +53,7 @@ export function JourneySection() {
         {phases.map((phase, index) => (
           <div key={phase.name} className="flex items-center gap-4 md:gap-8">
             <div className="flex items-center gap-2">
-              <Image src={phase.icon} alt={phase.name} width={48} height={48} />
+              <Image src={phase.icon} alt={phase.name} width={48} height={48} className="h-12 w-12" />
               <span className="font-semibold text-lg" style={{ color: phase.color }}>
                 {phase.name}
               </span>
@@ -96,6 +96,7 @@ export function JourneySection() {
         <Button
           className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
           size="lg"
+          nativeButton={false}
           render={<Link href="/login" />}
         >
           Start Your Journey

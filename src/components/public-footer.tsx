@@ -13,6 +13,7 @@ export function PublicFooter() {
               alt="IThealth"
               width={160}
               height={40}
+              className="h-10 w-auto"
             />
             <p className="text-sm text-white/70">
               Your IT Modernisation Champions

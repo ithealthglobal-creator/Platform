@@ -38,6 +38,7 @@ export function PublicHeader() {
             alt="IThealth"
             width={160}
             height={40}
+            className="h-10 w-auto"
             priority
           />
         </Link>
@@ -62,6 +63,7 @@ export function PublicHeader() {
 
           <Button
             className="bg-white/15 text-white hover:bg-white/25"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Login
@@ -69,6 +71,7 @@ export function PublicHeader() {
 
           <Button
             className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
+            nativeButton={false}
             render={<Link href="/login" />}
           >
             Start Now
@@ -92,6 +95,7 @@ export function PublicHeader() {
                   alt="IThealth"
                   width={140}
                   height={35}
+                  className="h-9 w-auto"
                 />
 
                 <nav className="flex flex-col gap-4">
@@ -110,6 +114,7 @@ export function PublicHeader() {
                 <div className="flex flex-col gap-3 pt-4">
                   <Button
                     className="w-full bg-white/15 text-white hover:bg-white/25"
+                    nativeButton={false}
                     render={<Link href="/login" />}
                     onClick={() => setSheetOpen(false)}
                   >
@@ -117,6 +122,7 @@ export function PublicHeader() {
                   </Button>
                   <Button
                     className="w-full bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
+                    nativeButton={false}
                     render={<Link href="/login" />}
                     onClick={() => setSheetOpen(false)}
                   >

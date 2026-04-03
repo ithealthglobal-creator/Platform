@@ -10,6 +10,7 @@ export function Hero() {
       <Button
         className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
         size="lg"
+        nativeButton={false}
         render={<Link href="/login" />}
       >
         Start Now
