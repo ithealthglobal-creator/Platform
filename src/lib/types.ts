@@ -122,3 +122,115 @@ export interface Skill {
   created_at: string
   updated_at: string
 }
+
+export type AssessmentType = 'pre' | 'post'
+
+export interface QuestionOption {
+  label: string
+  value: string
+  is_correct: boolean
+}
+
+export interface Course {
+  id: string
+  name: string
+  description: string | null
+  phase_id: string | null
+  service_id: string | null
+  thumbnail_url: string | null
+  is_published: boolean
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  phase?: Phase
+  sections?: CourseSection[]
+}
+
+export interface CourseSection {
+  id: string
+  course_id: string
+  name: string
+  description: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  modules?: CourseModule[]
+  assessments?: Assessment[]
+}
+
+export interface CourseModule {
+  id: string
+  section_id: string
+  title: string
+  description: string | null
+  youtube_url: string
+  duration_minutes: number | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Assessment {
+  id: string
+  section_id: string
+  type: AssessmentType
+  name: string
+  description: string | null
+  pass_threshold: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  questions?: AssessmentQuestion[]
+}
+
+export interface AssessmentQuestion {
+  id: string
+  assessment_id: string
+  question_text: string
+  options: QuestionOption[]
+  sort_order: number
+  points: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface AssessmentAttempt {
+  id: string
+  assessment_id: string
+  user_id: string
+  score: number
+  passed: boolean
+  answers: { question_id: string; selected_option: string; correct: boolean }[]
+  started_at: string
+  completed_at: string | null
+  created_at: string
+}
+
+export interface Certificate {
+  id: string
+  course_id: string
+  user_id: string
+  certificate_number: string
+  issued_at: string
+  revoked_at: string | null
+  score: number
+  pdf_url: string | null
+  created_at: string
+  course?: Course
+  user?: Profile
+}
+
+export interface UserSectionProgress {
+  id: string
+  user_id: string
+  section_id: string
+  required: boolean
+  modules_completed: string[]
+  pre_assessment_passed: boolean
+  post_assessment_passed: boolean
+  created_at: string
+  updated_at: string
+}
