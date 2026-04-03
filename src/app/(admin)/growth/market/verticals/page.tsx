@@ -149,7 +149,7 @@ export default function VerticalsPage() {
           </p>
         </div>
         <Button onClick={openAddDialog}>
-          <Add size={16} className="mr-2" />
+          <Add size={16} />
           Add Vertical
         </Button>
       </div>

@@ -149,7 +149,7 @@ export default function PersonasPage() {
           </p>
         </div>
         <Button onClick={openAddDialog}>
-          <Add size={16} className="mr-2" />
+          <Add size={16} />
           Add Persona
         </Button>
       </div>

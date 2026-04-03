@@ -153,7 +153,7 @@ export default function CostVariablesPage() {
           </p>
         </div>
         <Button onClick={openAddDialog}>
-          <Add size={16} className="mr-2" />
+          <Add size={16} />
           Add Cost Variable
         </Button>
       </div>

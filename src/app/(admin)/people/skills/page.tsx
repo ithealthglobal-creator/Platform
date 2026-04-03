@@ -153,7 +153,7 @@ export default function SkillsPage() {
           </p>
         </div>
         <Button onClick={openAddDialog}>
-          <Add size={16} className="mr-2" />
+          <Add size={16} />
           Add Skill
         </Button>
       </div>
