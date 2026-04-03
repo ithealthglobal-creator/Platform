@@ -63,7 +63,7 @@ function MultiSelectSection({
     setAllItems((refResult.data as ReferenceItem[]) ?? [])
     setLinkedIds(
       new Set(
-        (junctionResult.data as Record<string, string>[]).map(
+        (junctionResult.data as unknown as Record<string, string>[]).map(
           (row) => row[foreignKey]
         )
       )
