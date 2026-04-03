@@ -43,4 +43,5 @@ next-env.d.ts
 # project-specific
 .env.local
 .superpowers/
+.worktrees/
 docker-volumes/
