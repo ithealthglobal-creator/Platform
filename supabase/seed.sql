@@ -84,3 +84,34 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.role_menu_access (role, menu_item_id)
 SELECT 'admin', id FROM public.menu_items
 ON CONFLICT (role, menu_item_id) DO NOTHING;
+
+-- Blog post seed data
+INSERT INTO public.blog_posts (title, slug, excerpt, content, cover_image_url, category, status, published_at) VALUES
+  ('The Complete Guide to IT Modernisation for SMBs', 'complete-guide-it-modernisation-smbs', 'Everything you need to know about transforming your IT infrastructure, from assessment to acceleration.', '<h2>Why Modernise?</h2><p>In today''s rapidly evolving digital landscape, outdated IT infrastructure isn''t just inconvenient—it''s a business risk. Modern IT modernisation is about more than upgrading hardware; it''s about transforming how your business operates, competes, and grows.</p><h2>The Four Phases</h2><p>IThealth''s modernisation journey follows four proven phases: Operate, Secure, Streamline, and Accelerate. Each phase builds on the last, creating a solid foundation for digital maturity.</p>', NULL, 'Strategy', 'published', now()),
+  ('Why SMBs Need Zero Trust Security in 2026', 'smbs-zero-trust-security-2026', 'The threat landscape has changed dramatically. Here''s how Zero Trust architecture can protect your business.', '<h2>The Evolving Threat Landscape</h2><p>Cyber threats targeting small and medium businesses have increased by 300% in the last three years. Traditional perimeter-based security is no longer sufficient.</p><h2>What is Zero Trust?</h2><p>Zero Trust operates on a simple principle: never trust, always verify. Every user, device, and connection is authenticated and authorised before access is granted.</p>', NULL, 'Security', 'published', now()),
+  ('Cloud Migration: A Step-by-Step Guide for SMBs', 'cloud-migration-step-by-step-guide', 'Moving to the cloud doesn''t have to be overwhelming. Follow our structured approach to a successful migration.', '<h2>Planning Your Migration</h2><p>A successful cloud migration starts with understanding what you have, what you need, and where you want to go. Start with an inventory of your current infrastructure.</p><h2>Choosing the Right Model</h2><p>Public cloud, private cloud, or hybrid? The right choice depends on your compliance requirements, budget, and growth plans.</p>', NULL, 'Cloud', 'published', now()),
+  ('5 Signs Your IT Infrastructure Needs Modernising', 'five-signs-it-needs-modernising', 'Outdated infrastructure costs more than you think. Watch for these warning signs.', '<h2>1. Frequent Downtime</h2><p>If your team regularly experiences outages or slowdowns, your infrastructure is telling you something. Modern businesses can''t afford unreliable IT.</p><h2>2. Rising Costs</h2><p>Legacy systems often cost more to maintain than to replace. If your IT budget keeps growing without improved outcomes, it''s time to modernise.</p>', NULL, 'Operations', 'published', now())
+ON CONFLICT DO NOTHING;
+
+-- Testimonial seed data
+INSERT INTO public.testimonials (name, company, role, quote, sort_order) VALUES
+  ('Sarah Chen', 'TechFlow Ltd', 'CTO', 'IThealth transformed our IT infrastructure. We went from constant firefighting to proactive management. Their modernisation journey gave us a clear path forward.', 1),
+  ('James Wright', 'Wright & Co Attorneys', 'Managing Partner', 'The modernisation journey framework gave us a clear roadmap. Best IT decision we''ve made. Our team is more productive and our data is finally secure.', 2),
+  ('Maria Santos', 'Santos Financial Advisory', 'Managing Director', 'Professional, responsive, and they actually understand small business IT needs. IThealth doesn''t just fix problems—they prevent them.', 3)
+ON CONFLICT DO NOTHING;
+
+-- Partner seed data
+INSERT INTO public.partners (name, description, website, sort_order) VALUES
+  ('Microsoft', 'Cloud and productivity solutions', 'https://microsoft.com', 1),
+  ('Datto', 'Business continuity and disaster recovery', 'https://datto.com', 2),
+  ('SentinelOne', 'AI-powered endpoint security', 'https://sentinelone.com', 3),
+  ('ConnectWise', 'IT management and automation platform', 'https://connectwise.com', 4)
+ON CONFLICT DO NOTHING;
+
+-- Menu additions for seed (matching migration IDs)
+INSERT INTO public.menu_items (id, parent_id, label, icon, route, sort_order, level) VALUES
+  ('20000000-0000-0000-0000-000000000201', '10000000-0000-0000-0000-000000000002', 'Content', NULL, '/growth/content', 2, 2),
+  ('30000000-0000-0000-0000-000000000201', '20000000-0000-0000-0000-000000000201', 'Blog', NULL, '/growth/content/blog', 1, 3),
+  ('30000000-0000-0000-0000-000000000202', '20000000-0000-0000-0000-000000000105', 'Testimonials', NULL, '/growth/market/testimonials', 5, 3),
+  ('20000000-0000-0000-0000-000000000202', '10000000-0000-0000-0000-000000000007', 'Partners', NULL, '/people/partners', 4, 2)
+ON CONFLICT (id) DO NOTHING;

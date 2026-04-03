@@ -314,3 +314,67 @@ export interface ServiceAcademyLink {
   is_required: boolean
   course?: Course
 }
+
+export type BlogPostStatus = 'draft' | 'published'
+
+export interface BlogPost {
+  id: string
+  title: string
+  slug: string
+  excerpt: string | null
+  content: string | null
+  cover_image_url: string | null
+  category: string | null
+  author_id: string | null
+  status: BlogPostStatus
+  published_at: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Testimonial {
+  id: string
+  name: string
+  company: string | null
+  role: string | null
+  quote: string
+  avatar_url: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ContactSubmission {
+  id: string
+  name: string
+  email: string
+  phone: string | null
+  company: string | null
+  message: string
+  created_at: string
+}
+
+export interface PartnerApplication {
+  id: string
+  company_name: string
+  contact_name: string
+  email: string
+  phone: string | null
+  website: string | null
+  message: string | null
+  created_at: string
+}
+
+export interface Partner {
+  id: string
+  name: string
+  logo_url: string | null
+  website: string | null
+  description: string | null
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
