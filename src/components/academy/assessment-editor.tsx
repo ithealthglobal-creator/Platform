@@ -115,6 +115,7 @@ export function AssessmentEditor({ sectionId, type }: AssessmentEditorProps) {
       name: label,
       description: null,
       pass_threshold: 80,
+      scope: 'course_section',
     }
 
     const { data, error } = await supabase

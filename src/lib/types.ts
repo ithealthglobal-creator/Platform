@@ -124,6 +124,7 @@ export interface Skill {
 }
 
 export type AssessmentType = 'pre' | 'post'
+export type AssessmentScope = 'journey' | 'phase' | 'service' | 'course_section'
 
 export interface QuestionOption {
   label: string
@@ -174,7 +175,10 @@ export interface CourseModule {
 
 export interface Assessment {
   id: string
-  section_id: string
+  section_id: string | null
+  scope: AssessmentScope
+  phase_id: string | null
+  service_id: string | null
   type: AssessmentType
   name: string
   description: string | null
@@ -183,6 +187,9 @@ export interface Assessment {
   created_at: string
   updated_at: string
   questions?: AssessmentQuestion[]
+  phase?: Phase
+  service?: { id: string; name: string }
+  section?: { id: string; name: string; course?: { id: string; name: string } }
 }
 
 export interface AssessmentQuestion {
@@ -192,9 +199,12 @@ export interface AssessmentQuestion {
   options: QuestionOption[]
   sort_order: number
   points: number
+  weight: number
+  phase_id: string | null
   is_active: boolean
   created_at: string
   updated_at: string
+  phase?: Phase
 }
 
 export interface AssessmentAttempt {
@@ -204,6 +214,7 @@ export interface AssessmentAttempt {
   score: number
   passed: boolean
   answers: { question_id: string; selected_option: string; correct: boolean }[]
+  phase_scores: Record<string, number> | null
   started_at: string
   completed_at: string | null
   created_at: string
