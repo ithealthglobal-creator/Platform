@@ -14,6 +14,9 @@ import {
 import { toast } from 'sonner'
 import { ArrowLeft } from '@carbon/icons-react'
 import { DescriptionTab } from '@/components/services/description-tab'
+import { MarketTab } from '@/components/services/market-tab'
+import { ProductsTab } from '@/components/services/products-tab'
+import { SkillsTab } from '@/components/services/skills-tab'
 
 export default function ServiceEditorPage() {
   const params = useParams()
@@ -127,15 +130,15 @@ export default function ServiceEditorPage() {
         </TabsContent>
 
         <TabsContent value="market">
-          <p className="py-8 text-center text-muted-foreground">Coming soon</p>
+          <MarketTab serviceId={serviceId!} />
         </TabsContent>
 
         <TabsContent value="products">
-          <p className="py-8 text-center text-muted-foreground">Coming soon</p>
+          <ProductsTab serviceId={serviceId!} />
         </TabsContent>
 
         <TabsContent value="skills">
-          <p className="py-8 text-center text-muted-foreground">Coming soon</p>
+          <SkillsTab serviceId={serviceId!} />
         </TabsContent>
 
         <TabsContent value="runbook">
