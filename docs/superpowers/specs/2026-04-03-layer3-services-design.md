@@ -97,7 +97,8 @@ Ordered steps that make up the service delivery runbook.
 |---|---|---|---|
 | id | uuid | PK, default gen_random_uuid() | |
 | service_id | uuid | FK to services, NOT NULL, ON DELETE CASCADE | |
-| description | text | NOT NULL | What this step involves |
+| title | text | NOT NULL | Short step name (e.g., "Install agent") |
+| description | text | | Detailed step instructions |
 | estimated_minutes | integer | | Estimated time for this step |
 | product_id | uuid | FK to products, nullable | Optional linked product (from service's products) |
 | skill_id | uuid | FK to skills, nullable | Optional required skill (from service's skills) |
@@ -136,7 +137,12 @@ The `tiers` JSONB structure (for tiered pricing):
 ]
 ```
 
-For formula-based items, `formula` contains a simple expression string and `base_cost` + `cost_variable_id` define the calculation. The formula is evaluated client-side for preview.
+For formula-based items, `formula` contains a simple arithmetic expression using `{variable}` as the placeholder for the cost variable value. Examples:
+- `{users} * 10` — $10 per user
+- `500 + {users} * 5` — $500 base + $5 per user
+- `{devices} * 2.50` — $2.50 per device
+
+Supported operators: `+`, `-`, `*`, `/`, parentheses, and numeric literals. The `{variable}` placeholder is replaced with the cost variable's value at evaluation time. Evaluated client-side using a safe expression parser (no `eval`). `base_cost` is a convenience field for simple base + rate patterns.
 
 ### `service_academy_links` (Academy tab — many-to-many)
 
@@ -209,13 +215,13 @@ Each is a searchable multi-select. Selected items shown as badges/chips that can
 
 #### Tab 5: Runbook
 - Ordered list of steps
-- Each step: description (text), estimated time (minutes), product dropdown (filtered to service's selected products), skill dropdown (filtered to service's selected skills), role (text input)
+- Each step: title (text), description (textarea), estimated time (minutes), product dropdown (filtered to service's selected products), skill dropdown (filtered to service's selected skills), role (text input)
 - Add step button, reorder via sort_order input, delete step
 - Steps are created/edited inline (not in a dialog)
 
 #### Tab 6: Growth
-- Short description (textarea — same as Description tab's short description, or separate marketing copy)
-- Long description (rich textarea or markdown)
+- Short description — read-only mirror of Description tab's `description` field (displayed for context, not editable here)
+- Long description (textarea — stored in `long_description` column, marketing/public-facing content)
 - Hero image upload (Supabase Storage via file input)
 - Thumbnail upload (Supabase Storage via file input)
 

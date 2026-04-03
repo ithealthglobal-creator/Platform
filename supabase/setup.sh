@@ -3,11 +3,11 @@ set -e
 
 # Configuration — adjust for your local Supabase setup
 DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-54322}"
+DB_PORT="${DB_PORT:-54342}"
 DB_USER="${DB_USER:-postgres}"
 DB_PASSWORD="${DB_PASSWORD:-postgres}"
 DB_NAME="${DB_NAME:-postgres}"
-SUPABASE_URL="${SUPABASE_URL:-http://localhost:54321}"
+SUPABASE_URL="${SUPABASE_URL:-http://localhost:54341}"
 SERVICE_ROLE_KEY="${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU}"
 
 PGPASSWORD="$DB_PASSWORD"

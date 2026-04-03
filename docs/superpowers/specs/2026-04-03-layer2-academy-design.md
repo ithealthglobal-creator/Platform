@@ -150,6 +150,7 @@ Issued when a user passes all post-assessments for a course.
 | user_id | uuid | FK to auth.users, NOT NULL | |
 | certificate_number | text | NOT NULL, UNIQUE | Auto-generated (e.g., CERT-2026-00001) |
 | issued_at | timestamptz | NOT NULL, DEFAULT now() | |
+| revoked_at | timestamptz | | Null if active; set when revoked |
 | score | integer | NOT NULL | Overall course score (average of post-assessments) |
 | pdf_url | text | | URL to generated PDF in Supabase Storage |
 | created_at | timestamptz | NOT NULL, DEFAULT now() | |
