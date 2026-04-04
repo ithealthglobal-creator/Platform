@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { Metadata } from 'next'
 import { BlogPost } from '@/lib/types'
 import { CTABanner } from '@/components/cta-banner'
+import { ScrollReveal } from '@/components/scroll-reveal'
 
 function getSupabase() {
   return createClient(
@@ -58,7 +59,7 @@ export default async function BlogPostPage({
     <>
       {/* Cover image */}
       {post.cover_image_url ? (
-        <div className="relative h-64 md:h-80 w-full">
+        <div className="relative h-80 md:h-[480px] w-full">
           <img
             src={post.cover_image_url}
             alt={post.title}
@@ -66,15 +67,16 @@ export default async function BlogPostPage({
           />
         </div>
       ) : (
-        <div className="h-64 md:h-80 bg-gradient-to-br from-[var(--brand-primary)]/30 to-[var(--brand-secondary)]/30" />
+        <div className="h-80 md:h-[480px] bg-gradient-to-br from-[var(--brand-primary)]/30 to-[var(--brand-secondary)]/30" />
       )}
 
-      <article className="max-w-3xl mx-auto px-6 py-12">
+      <ScrollReveal>
+      <article className="max-w-3xl mx-auto px-8 py-24">
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">{post.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-bold mb-8">{post.title}</h1>
 
         {/* Meta row */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-8 mb-16">
           {post.category && (
             <span className="inline-block text-xs bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-2 py-1 rounded-full">
               {post.category}
@@ -97,6 +99,7 @@ export default async function BlogPostPage({
           dangerouslySetInnerHTML={{ __html: post.content ?? '' }}
         />
       </article>
+      </ScrollReveal>
 
       {/* CTA */}
       <CTABanner />
