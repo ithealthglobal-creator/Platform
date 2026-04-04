@@ -6,6 +6,8 @@ import { Email, Phone, Location } from '@carbon/icons-react'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { PageHero } from '@/components/page-hero'
+import { ScrollReveal } from '@/components/scroll-reveal'
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -49,16 +51,14 @@ export default function ContactPage() {
   return (
     <>
       {/* Page Header */}
-      <section className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-dark)] py-16 px-6 text-center text-white">
-        <h1 className="text-4xl font-bold">Contact Us</h1>
-        <p className="text-white/80 mt-2">Get in touch with our team</p>
-      </section>
+      <PageHero title="Contact Us" subtitle="Get in touch with our team" />
 
       {/* Contact Content */}
-      <section className="py-16 px-6 md:px-12 bg-white">
+      <section className="py-32 px-8 md:px-16 bg-white">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Left Column — Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <ScrollReveal direction="left">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
                 Name <span className="text-red-500">*</span>
@@ -134,12 +134,14 @@ export default function ContactPage() {
               {loading ? 'Sending...' : 'Send Message'}
             </Button>
           </form>
+          </ScrollReveal>
 
           {/* Right Column — Contact Info */}
-          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-100 h-fit">
-            <h2 className="text-xl font-semibold text-[var(--brand-dark)] mb-6">Get In Touch</h2>
+          <ScrollReveal direction="right">
+          <div className="bg-white rounded-xl p-12 shadow-sm border border-gray-100 h-fit">
+            <h2 className="text-xl font-semibold text-[var(--brand-dark)] mb-12">Get In Touch</h2>
 
-            <div className="space-y-5">
+            <div className="space-y-8">
               <div className="flex items-start gap-3">
                 <Email size={20} className="text-[var(--brand-primary)] mt-0.5 shrink-0" />
                 <div>
@@ -175,8 +177,8 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <p className="text-sm text-gray-600 mb-4">
+            <div className="mt-16 pt-12 border-t border-gray-100">
+              <p className="text-sm text-gray-600 mb-8">
                 Ready to start your IT modernisation journey?
               </p>
               <Link href="/login">
@@ -190,6 +192,7 @@ export default function ContactPage() {
               </Link>
             </div>
           </div>
+          </ScrollReveal>
         </div>
       </section>
     </>
