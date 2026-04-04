@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { createClient } from '@supabase/supabase-js'
 import { BlogPost } from '@/lib/types'
 import { BlogCard } from '@/components/blog-card'
+import { PageHero } from '@/components/page-hero'
+import { ScrollReveal } from '@/components/scroll-reveal'
 
 export const metadata = {
   title: 'Blog | IThealth',
@@ -55,16 +57,11 @@ export default async function BlogPage({
   return (
     <>
       {/* Page header */}
-      <section className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-dark)] py-16 px-6 text-center">
-        <h1 className="text-4xl font-bold text-white mb-4">Blog</h1>
-        <p className="text-white/80 text-lg">
-          Expert insights on IT modernisation
-        </p>
-      </section>
+      <PageHero title="Blog" subtitle="Expert insights on IT modernisation" />
 
       {/* Category filter pills */}
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex flex-wrap gap-2 mb-10">
+      <div className="max-w-6xl mx-auto px-8 py-16">
+        <div className="flex flex-wrap gap-4 mb-20">
           <Link
             href="/blog"
             className={`px-4 py-2 rounded-full text-sm font-medium transition ${
@@ -92,51 +89,55 @@ export default async function BlogPage({
 
         {/* Featured post */}
         {featured && (
-          <Link href={`/blog/${featured.slug}`} className="block mb-12">
-            <article className="rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition bg-white md:flex">
-              {featured.cover_image_url ? (
-                <div className="relative md:w-1/2 h-64 md:h-auto bg-gray-100">
-                  <img
-                    src={featured.cover_image_url}
-                    alt={featured.title}
-                    className="w-full h-full object-cover"
-                  />
+          <ScrollReveal>
+            <Link href={`/blog/${featured.slug}`} className="block mb-24">
+              <article className="rounded-lg overflow-hidden border shadow-sm hover:shadow-md transition bg-white md:flex">
+                {featured.cover_image_url ? (
+                  <div className="relative md:w-1/2 h-64 md:h-auto bg-gray-100">
+                    <img
+                      src={featured.cover_image_url}
+                      alt={featured.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="md:w-1/2 h-64 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/20" />
+                )}
+                <div className="p-6 md:w-1/2 flex flex-col justify-center">
+                  {featured.category && (
+                    <span className="inline-block text-xs bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-2 py-1 rounded-full mb-3 w-fit">
+                      {featured.category}
+                    </span>
+                  )}
+                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                    {featured.title}
+                  </h2>
+                  {featured.excerpt && (
+                    <p className="text-muted-foreground mb-4 line-clamp-3">
+                      {featured.excerpt}
+                    </p>
+                  )}
+                  {featured.published_at && (
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(featured.published_at).toLocaleDateString(
+                        'en-GB',
+                        { day: 'numeric', month: 'long', year: 'numeric' }
+                      )}
+                    </p>
+                  )}
                 </div>
-              ) : (
-                <div className="md:w-1/2 h-64 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/20" />
-              )}
-              <div className="p-6 md:w-1/2 flex flex-col justify-center">
-                {featured.category && (
-                  <span className="inline-block text-xs bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] px-2 py-1 rounded-full mb-3 w-fit">
-                    {featured.category}
-                  </span>
-                )}
-                <h2 className="text-2xl md:text-3xl font-bold mb-3">
-                  {featured.title}
-                </h2>
-                {featured.excerpt && (
-                  <p className="text-muted-foreground mb-4 line-clamp-3">
-                    {featured.excerpt}
-                  </p>
-                )}
-                {featured.published_at && (
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(featured.published_at).toLocaleDateString(
-                      'en-GB',
-                      { day: 'numeric', month: 'long', year: 'numeric' }
-                    )}
-                  </p>
-                )}
-              </div>
-            </article>
-          </Link>
+              </article>
+            </Link>
+          </ScrollReveal>
         )}
 
         {/* Post grid */}
         {remaining.length > 0 && (
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {remaining.map((post) => (
-              <BlogCard key={post.id} post={post} />
+          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+            {remaining.map((post, index) => (
+              <ScrollReveal key={post.id} delay={index * 0.1}>
+                <BlogCard post={post} />
+              </ScrollReveal>
             ))}
           </div>
         )}
