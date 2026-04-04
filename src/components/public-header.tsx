@@ -39,6 +39,7 @@ export function PublicHeader() {
             width={112}
             height={28}
             className="h-7 w-auto"
+            style={{ height: 'auto' }}
             priority
           />
         </Link>
@@ -96,6 +97,7 @@ export function PublicHeader() {
                   width={96}
                   height={24}
                   className="h-6 w-auto"
+                  style={{ height: 'auto' }}
                 />
 
                 <nav className="flex flex-col gap-4">

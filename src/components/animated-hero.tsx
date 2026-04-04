@@ -11,10 +11,10 @@ import { Button } from '@/components/ui/button'
 gsap.registerPlugin(ScrollTrigger)
 
 const phases = [
-  { name: 'Operate', icon: '/phases/operate.svg', color: 'var(--phase-operate)', from: { x: -50, opacity: 0 } },
-  { name: 'Secure', icon: '/phases/secure.svg', color: 'var(--phase-secure)', from: { y: 50, opacity: 0 } },
-  { name: 'Streamline', icon: '/phases/streamline.svg', color: 'var(--phase-streamline)', from: { x: 50, opacity: 0 } },
-  { name: 'Accelerate', icon: '/phases/accelerate.svg', color: 'var(--phase-accelerate)', from: { y: 50, opacity: 0 } },
+  { name: 'Operate', icon: '/phases/operate.svg', color: 'var(--phase-operate)', initialOffset: { x: -50 } },
+  { name: 'Secure', icon: '/phases/secure.svg', color: 'var(--phase-secure)', initialOffset: { y: 50 } },
+  { name: 'Streamline', icon: '/phases/streamline.svg', color: 'var(--phase-streamline)', initialOffset: { x: 50 } },
+  { name: 'Accelerate', icon: '/phases/accelerate.svg', color: 'var(--phase-accelerate)', initialOffset: { y: 50 } },
 ]
 
 const headlineWords = 'Your IT Modernisation Champions'.split(' ')
@@ -34,26 +34,36 @@ export function AnimatedHero() {
         },
       })
 
+      // Set initial positions for phase icons (they start at opacity:0 via inline style)
+      phases.forEach((phase, i) => {
+        gsap.set(`.hero-phase-${i}`, { ...phase.initialOffset })
+      })
+      // Set initial offset for hero words
+      gsap.set('.hero-word', { y: 30 })
+      gsap.set('.hero-cta', { scale: 0.5 })
+      gsap.set('.hero-subtitle', { y: 20 })
+      gsap.set('.hero-copy', { y: 20 })
+
       // 0% → 20%: Headline words fade in one by one
-      tl.from('.hero-word', {
-        opacity: 0,
-        y: 30,
+      tl.to('.hero-word', {
+        opacity: 1,
+        y: 0,
         stagger: 0.1,
         duration: 0.3,
       })
 
       // 20% → 35%: CTA button scales up, subtitle fades in
-      tl.from('.hero-cta', {
-        scale: 0.5,
-        opacity: 0,
+      tl.to('.hero-cta', {
+        scale: 1,
+        opacity: 1,
         duration: 0.3,
         ease: 'back.out(1.7)',
       })
-      tl.from(
+      tl.to(
         '.hero-subtitle',
         {
-          opacity: 0,
-          y: 20,
+          opacity: 1,
+          y: 0,
           duration: 0.2,
         },
         '-=0.1'
@@ -61,8 +71,10 @@ export function AnimatedHero() {
 
       // 35% → 75%: Phase icons animate in one by one
       phases.forEach((phase, i) => {
-        tl.from(`.hero-phase-${i}`, {
-          ...phase.from,
+        tl.to(`.hero-phase-${i}`, {
+          opacity: 1,
+          x: 0,
+          y: 0,
           duration: 0.25,
         })
       })
@@ -72,11 +84,11 @@ export function AnimatedHero() {
         opacity: 1,
         duration: 0.3,
       })
-      tl.from(
+      tl.to(
         '.hero-copy',
         {
-          opacity: 0,
-          y: 20,
+          opacity: 1,
+          y: 0,
           duration: 0.25,
         },
         '-=0.15'

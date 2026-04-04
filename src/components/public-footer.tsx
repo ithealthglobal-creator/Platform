@@ -18,6 +18,7 @@ export function PublicFooter() {
               width={112}
               height={28}
               className="h-7 w-auto"
+              style={{ height: 'auto' }}
             />
             <p className="text-sm text-white/70">
               Your IT Modernisation Champions
