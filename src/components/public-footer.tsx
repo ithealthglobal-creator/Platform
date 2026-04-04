@@ -11,9 +11,9 @@ export function PublicFooter() {
             <Image
               src="/logos/ithealth-logo-white.svg"
               alt="IThealth"
-              width={160}
-              height={40}
-              className="h-10 w-auto"
+              width={112}
+              height={28}
+              className="h-7 w-auto"
             />
             <p className="text-sm text-white/70">
               Your IT Modernisation Champions

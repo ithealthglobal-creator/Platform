@@ -36,9 +36,9 @@ export function PublicHeader() {
           <Image
             src="/logos/ithealth-logo-white.svg"
             alt="IThealth"
-            width={160}
-            height={40}
-            className="h-10 w-auto"
+            width={112}
+            height={28}
+            className="h-7 w-auto"
             priority
           />
         </Link>
@@ -93,9 +93,9 @@ export function PublicHeader() {
                 <Image
                   src="/logos/ithealth-logo-white.svg"
                   alt="IThealth"
-                  width={140}
-                  height={35}
-                  className="h-9 w-auto"
+                  width={96}
+                  height={24}
+                  className="h-6 w-auto"
                 />
 
                 <nav className="flex flex-col gap-4">
