@@ -1,9 +1,13 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
+import { ScrollReveal } from '@/components/scroll-reveal'
 
 export function PublicFooter() {
   return (
     <footer className="bg-[var(--brand-footer)] text-white">
+      <ScrollReveal direction="none">
       <div className="mx-auto max-w-7xl px-8 py-24 md:px-16 lg:px-24">
         <div className="grid grid-cols-1 gap-16 md:grid-cols-4">
           {/* Column 1: Logo & tagline */}
@@ -84,6 +88,7 @@ export function PublicFooter() {
           </div>
         </div>
       </div>
+      </ScrollReveal>
     </footer>
   )
 }
