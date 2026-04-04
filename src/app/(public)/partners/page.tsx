@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import type { Partner } from '@/lib/types'
+import { PageHero } from '@/components/page-hero'
+import { ScrollReveal } from '@/components/scroll-reveal'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -89,25 +91,21 @@ export default function PartnersPage() {
   return (
     <>
       {/* Page Header */}
-      <section className="bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-dark)] py-16 px-6 text-center text-white">
-        <h1 className="text-4xl font-bold">Our Partners</h1>
-        <p className="text-white/80 mt-2">Trusted technology partnerships</p>
-      </section>
+      <PageHero title="Our Partners" subtitle="Trusted technology partnerships" />
 
       {/* Partner Logo Grid */}
-      <section className="py-16 px-6 bg-white">
+      <section className="py-32 px-8 bg-white">
         {partners.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {partners.map((partner) => {
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-4xl mx-auto">
+            {partners.map((partner, index) => {
               const card = (
                 <div
-                  key={partner.id}
-                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex flex-col items-center"
+                  className="bg-white rounded-xl p-10 shadow-sm border border-gray-100 flex flex-col items-center"
                 >
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] mx-auto mb-3" />
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] mx-auto mb-6" />
                   <p className="font-semibold text-center">{partner.name}</p>
                   {partner.description && (
-                    <p className="text-sm text-muted-foreground text-center mt-1">
+                    <p className="text-sm text-muted-foreground text-center mt-2">
                       {partner.description}
                     </p>
                   )}
@@ -116,47 +114,47 @@ export default function PartnersPage() {
 
               if (partner.website) {
                 return (
-                  <a
-                    key={partner.id}
-                    href={partner.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:opacity-80 transition-opacity"
-                  >
-                    {card}
-                  </a>
+                  <ScrollReveal key={partner.id} delay={index * 0.1}>
+                    <a href={partner.website} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
+                      {card}
+                    </a>
+                  </ScrollReveal>
                 )
               }
 
-              return card
+              return (
+                <ScrollReveal key={partner.id} delay={index * 0.1}>
+                  {card}
+                </ScrollReveal>
+              )
             })}
           </div>
         )}
       </section>
 
       {/* Become a Partner */}
-      <section className="py-16 px-6 bg-gray-50">
+      <section className="py-32 px-8 bg-gray-50">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-[var(--brand-dark)] mb-10">
+          <h2 className="text-3xl font-bold text-center text-[var(--brand-dark)] mb-20">
             Become a Partner
           </h2>
 
           {/* Benefits */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            {benefits.map((benefit) => (
-              <div
-                key={benefit.title}
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 text-center"
-              >
-                <benefit.icon size={32} className={`${benefit.color} mx-auto mb-3`} />
-                <h3 className="font-semibold text-lg mb-2">{benefit.title}</h3>
-                <p className="text-sm text-muted-foreground">{benefit.description}</p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-24">
+            {benefits.map((benefit, index) => (
+              <ScrollReveal key={benefit.title} delay={index * 0.15}>
+                <div className="bg-white rounded-xl p-10 shadow-sm border border-gray-100 text-center">
+                  <benefit.icon size={32} className={`${benefit.color} mx-auto mb-6`} />
+                  <h3 className="font-semibold text-lg mb-4">{benefit.title}</h3>
+                  <p className="text-sm text-muted-foreground">{benefit.description}</p>
+                </div>
+              </ScrollReveal>
             ))}
           </div>
 
           {/* Application Form */}
-          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-5">
+          <ScrollReveal>
+          <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-8">
             <div>
               <label htmlFor="company_name" className="block text-sm font-medium text-gray-700 mb-1">
                 Company Name <span className="text-red-500">*</span>
@@ -232,6 +230,7 @@ export default function PartnersPage() {
               {loading ? 'Submitting...' : 'Submit Application'}
             </Button>
           </form>
+          </ScrollReveal>
         </div>
       </section>
     </>
