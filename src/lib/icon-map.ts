@@ -14,6 +14,9 @@ import {
   TrashCan,
   Password,
   CircleDash,
+  Home,
+  Roadmap,
+  Help,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -33,4 +36,7 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'trash-can': TrashCan,
   'password': Password,
   'circle-dash': CircleDash,
+  'home': Home,
+  'roadmap': Roadmap,
+  'help': Help,
 }

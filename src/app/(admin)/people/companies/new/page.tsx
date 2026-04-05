@@ -3,17 +3,28 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
+import { CompanyType, CompanyStatus } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from '@carbon/icons-react'
+import { Save } from '@carbon/icons-react'
+
+const COMPANY_TYPES: CompanyType[] = ['admin', 'customer', 'partner']
+const COMPANY_STATUSES: CompanyStatus[] = ['prospect', 'active', 'churned', 'pending', 'approved', 'inactive']
 
 export default function NewCompanyPage() {
   const router = useRouter()
   const [formName, setFormName] = useState('')
-  const [formActive, setFormActive] = useState(true)
+  const [formType, setFormType] = useState<CompanyType>('customer')
+  const [formStatus, setFormStatus] = useState<CompanyStatus>('active')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
@@ -27,7 +38,7 @@ export default function NewCompanyPage() {
 
     const { error } = await supabase
       .from('companies')
-      .insert({ name: trimmedName, is_active: formActive })
+      .insert({ name: trimmedName, type: formType, status: formStatus })
 
     if (error) {
       toast.error('Failed to create company')
@@ -41,17 +52,6 @@ export default function NewCompanyPage() {
 
   return (
     <div>
-      <Breadcrumb />
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/people/companies')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Back to Companies
-        </button>
-      </div>
-      <h1 className="text-2xl font-bold mb-6">New Company</h1>
-
       <div className="grid gap-4 max-w-lg">
         <div className="grid gap-2">
           <Label htmlFor="company-name">Name</Label>
@@ -66,15 +66,36 @@ export default function NewCompanyPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="company-active"
-            checked={formActive}
-            onChange={(e) => setFormActive(e.target.checked)}
-            className="h-4 w-4 rounded border-border"
-          />
-          <Label htmlFor="company-active">Active</Label>
+        <div className="grid gap-2">
+          <Label>Type</Label>
+          <Select value={formType} onValueChange={(v) => setFormType(v as CompanyType)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COMPANY_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Status</Label>
+          <Select value={formStatus} onValueChange={(v) => setFormStatus(v as CompanyStatus)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COMPANY_STATUSES.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s.charAt(0).toUpperCase() + s.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div>

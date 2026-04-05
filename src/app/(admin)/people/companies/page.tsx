@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
-import { Company } from '@/lib/types'
+import { Company, CompanyType, CompanyStatus } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -44,7 +43,8 @@ export default function CompaniesPage() {
       (c: Record<string, unknown>) => ({
         id: c.id as string,
         name: c.name as string,
-        is_active: c.is_active as boolean,
+        type: c.type as CompanyType,
+        status: c.status as CompanyStatus,
         created_at: c.created_at as string,
         updated_at: c.updated_at as string,
         user_count:
@@ -64,15 +64,7 @@ export default function CompaniesPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Companies</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage companies and their status
-          </p>
-        </div>
+      <div className="flex justify-end mb-6">
         <Button onClick={() => router.push('/people/companies/new')}>
           <Add size={16} />
           Add Company
@@ -85,6 +77,7 @@ export default function CompaniesPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead className="w-[100px]">Users</TableHead>
+              <TableHead className="w-[100px]">Type</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
             </TableRow>
@@ -92,13 +85,13 @@ export default function CompaniesPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : companies.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No companies found
                 </TableCell>
               </TableRow>
@@ -108,8 +101,13 @@ export default function CompaniesPage() {
                   <TableCell className="font-medium">{company.name}</TableCell>
                   <TableCell>{company.user_count}</TableCell>
                   <TableCell>
-                    <Badge variant={company.is_active ? 'default' : 'secondary'}>
-                      {company.is_active ? 'Active' : 'Inactive'}
+                    <Badge variant="outline">
+                      {company.type.charAt(0).toUpperCase() + company.type.slice(1)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={company.status === 'active' || company.status === 'approved' ? 'default' : 'secondary'}>
+                      {company.status.charAt(0).toUpperCase() + company.status.slice(1)}
                     </Badge>
                   </TableCell>
                   <TableCell>

@@ -1,9 +1,13 @@
 export type UserRole = 'admin' | 'customer' | 'partner'
 
+export type CompanyType = 'admin' | 'customer' | 'partner'
+export type CompanyStatus = 'prospect' | 'active' | 'churned' | 'pending' | 'approved' | 'inactive'
+
 export interface Company {
   id: string
   name: string
-  is_active: boolean
+  type: CompanyType
+  status: CompanyStatus
   created_at: string
   updated_at: string
 }
@@ -184,6 +188,11 @@ export interface Assessment {
   description: string | null
   pass_threshold: number
   is_active: boolean
+  is_onboarding: boolean
+  welcome_heading: string | null
+  welcome_description: string | null
+  completion_heading: string | null
+  completion_description: string | null
   created_at: string
   updated_at: string
   questions?: AssessmentQuestion[]
@@ -388,4 +397,28 @@ export interface Partner {
   is_active: boolean
   created_at: string
   updated_at: string
+}
+
+export interface SalesStage {
+  id: string
+  name: string
+  sort_order: number
+  color: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface SalesLead {
+  id: string
+  company_id: string
+  stage_id: string
+  assessment_attempt_id: string | null
+  contact_name: string
+  contact_email: string
+  notes: string | null
+  created_at: string
+  updated_at: string
+  company?: Company
+  assessment_attempt?: AssessmentAttempt
 }
