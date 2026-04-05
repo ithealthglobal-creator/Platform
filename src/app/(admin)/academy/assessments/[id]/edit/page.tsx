@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Assessment, AssessmentQuestion, Phase, Service, AssessmentScope, QuestionOption } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { ArrowLeft, Save, Add, Edit, TrashCan } from '@carbon/icons-react'
+import { Save, Add, Edit, TrashCan } from '@carbon/icons-react'
 
 const SCOPE_OPTIONS: { value: AssessmentScope; label: string }[] = [
   { value: 'journey', label: 'Entire Journey' },
@@ -60,6 +59,11 @@ export default function EditAssessmentPage() {
   const [formDescription, setFormDescription] = useState('')
   const [formPassThreshold, setFormPassThreshold] = useState('80')
   const [formActive, setFormActive] = useState(true)
+  const [formOnboarding, setFormOnboarding] = useState(false)
+  const [formWelcomeHeading, setFormWelcomeHeading] = useState('')
+  const [formWelcomeDescription, setFormWelcomeDescription] = useState('')
+  const [formCompletionHeading, setFormCompletionHeading] = useState('')
+  const [formCompletionDescription, setFormCompletionDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -115,6 +119,11 @@ export default function EditAssessmentPage() {
       setFormDescription(a.description ?? '')
       setFormPassThreshold(String(a.pass_threshold))
       setFormActive(a.is_active)
+      setFormOnboarding(a.is_onboarding ?? false)
+      setFormWelcomeHeading(a.welcome_heading ?? '')
+      setFormWelcomeDescription(a.welcome_description ?? '')
+      setFormCompletionHeading(a.completion_heading ?? '')
+      setFormCompletionDescription(a.completion_description ?? '')
       setLoading(false)
     }
 
@@ -149,6 +158,11 @@ export default function EditAssessmentPage() {
         scope: formScope,
         phase_id: formScope === 'phase' ? formPhaseId : null,
         service_id: formScope === 'service' ? formServiceId : null,
+        is_onboarding: formOnboarding,
+        welcome_heading: formOnboarding ? formWelcomeHeading.trim() || null : null,
+        welcome_description: formOnboarding ? formWelcomeDescription.trim() || null : null,
+        completion_heading: formOnboarding ? formCompletionHeading.trim() || null : null,
+        completion_description: formOnboarding ? formCompletionDescription.trim() || null : null,
       })
       .eq('id', id)
 
@@ -342,7 +356,6 @@ export default function EditAssessmentPage() {
   if (loading) {
     return (
       <div>
-        <Breadcrumb />
         <p className="text-muted-foreground">Loading...</p>
       </div>
     )
@@ -350,17 +363,6 @@ export default function EditAssessmentPage() {
 
   return (
     <div>
-      <Breadcrumb />
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/academy/assessments')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Back to Assessments
-        </button>
-      </div>
-      <h1 className="text-2xl font-bold mb-6">Edit Assessment</h1>
-
       {/* Assessment metadata */}
       <div className="grid gap-4 max-w-lg mb-8">
         <div className="grid gap-2">
@@ -455,6 +457,39 @@ export default function EditAssessmentPage() {
           />
           <Label htmlFor="assessment-active">Active</Label>
         </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="onboarding"
+            checked={formOnboarding}
+            onChange={(e) => setFormOnboarding(e.target.checked)}
+            className="rounded"
+          />
+          <Label htmlFor="onboarding">Use as Onboarding Assessment</Label>
+        </div>
+
+        {formOnboarding && (
+          <div className="space-y-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-medium text-blue-700">Onboarding Screen Text</p>
+            <div>
+              <Label>Welcome Heading</Label>
+              <Input value={formWelcomeHeading} onChange={e => setFormWelcomeHeading(e.target.value)} placeholder="e.g., Discover Your IT Maturity" />
+            </div>
+            <div>
+              <Label>Welcome Description</Label>
+              <Input value={formWelcomeDescription} onChange={e => setFormWelcomeDescription(e.target.value)} placeholder="e.g., Answer a few questions..." />
+            </div>
+            <div>
+              <Label>Completion Heading</Label>
+              <Input value={formCompletionHeading} onChange={e => setFormCompletionHeading(e.target.value)} placeholder="e.g., Your Assessment is Complete!" />
+            </div>
+            <div>
+              <Label>Completion Description</Label>
+              <Input value={formCompletionDescription} onChange={e => setFormCompletionDescription(e.target.value)} placeholder="e.g., Enter your details to see your score" />
+            </div>
+          </div>
+        )}
 
         <div>
           <Button onClick={handleSave} disabled={saving}>

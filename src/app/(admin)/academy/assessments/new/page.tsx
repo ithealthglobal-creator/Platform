@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Phase, Service, AssessmentScope } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from '@carbon/icons-react'
+import { Save } from '@carbon/icons-react'
 
 const SCOPE_OPTIONS: { value: AssessmentScope; label: string }[] = [
   { value: 'journey', label: 'Entire Journey' },
@@ -31,6 +30,11 @@ export default function NewAssessmentPage() {
   const [formDescription, setFormDescription] = useState('')
   const [formPassThreshold, setFormPassThreshold] = useState('80')
   const [formActive, setFormActive] = useState(true)
+  const [formOnboarding, setFormOnboarding] = useState(false)
+  const [formWelcomeHeading, setFormWelcomeHeading] = useState('')
+  const [formWelcomeDescription, setFormWelcomeDescription] = useState('')
+  const [formCompletionHeading, setFormCompletionHeading] = useState('')
+  const [formCompletionDescription, setFormCompletionDescription] = useState('')
   const [saving, setSaving] = useState(false)
 
   const fetchOptions = useCallback(async () => {
@@ -73,6 +77,11 @@ export default function NewAssessmentPage() {
       phase_id: formScope === 'phase' ? formPhaseId : null,
       service_id: formScope === 'service' ? formServiceId : null,
       section_id: null,
+      is_onboarding: formOnboarding,
+      welcome_heading: formOnboarding ? formWelcomeHeading.trim() || null : null,
+      welcome_description: formOnboarding ? formWelcomeDescription.trim() || null : null,
+      completion_heading: formOnboarding ? formCompletionHeading.trim() || null : null,
+      completion_description: formOnboarding ? formCompletionDescription.trim() || null : null,
     })
 
     if (error) {
@@ -87,17 +96,6 @@ export default function NewAssessmentPage() {
 
   return (
     <div>
-      <Breadcrumb />
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/academy/assessments')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Back to Assessments
-        </button>
-      </div>
-      <h1 className="text-2xl font-bold mb-6">New Assessment</h1>
-
       <div className="grid gap-4 max-w-lg">
         <div className="grid gap-2">
           <Label>Scope</Label>
@@ -195,6 +193,39 @@ export default function NewAssessmentPage() {
           />
           <Label htmlFor="assessment-active">Active</Label>
         </div>
+
+        <div className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="onboarding"
+            checked={formOnboarding}
+            onChange={(e) => setFormOnboarding(e.target.checked)}
+            className="rounded"
+          />
+          <Label htmlFor="onboarding">Use as Onboarding Assessment</Label>
+        </div>
+
+        {formOnboarding && (
+          <div className="space-y-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <p className="text-xs font-medium text-blue-700">Onboarding Screen Text</p>
+            <div>
+              <Label>Welcome Heading</Label>
+              <Input value={formWelcomeHeading} onChange={e => setFormWelcomeHeading(e.target.value)} placeholder="e.g., Discover Your IT Maturity" />
+            </div>
+            <div>
+              <Label>Welcome Description</Label>
+              <Input value={formWelcomeDescription} onChange={e => setFormWelcomeDescription(e.target.value)} placeholder="e.g., Answer a few questions..." />
+            </div>
+            <div>
+              <Label>Completion Heading</Label>
+              <Input value={formCompletionHeading} onChange={e => setFormCompletionHeading(e.target.value)} placeholder="e.g., Your Assessment is Complete!" />
+            </div>
+            <div>
+              <Label>Completion Description</Label>
+              <Input value={formCompletionDescription} onChange={e => setFormCompletionDescription(e.target.value)} placeholder="e.g., Enter your details to see your score" />
+            </div>
+          </div>
+        )}
 
         <div>
           <Button onClick={handleSave} disabled={saving}>
