@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase-client'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'login' | 'forgot'>('login')
@@ -26,7 +27,21 @@ export default function LoginPage() {
     if (error) {
       toast.error(error.message)
     } else {
-      router.replace('/dashboard')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+        if (profileData?.role === 'customer') {
+          router.replace('/home')
+        } else {
+          router.replace('/dashboard')
+        }
+      } else {
+        router.replace('/dashboard')
+      }
     }
   }
 
