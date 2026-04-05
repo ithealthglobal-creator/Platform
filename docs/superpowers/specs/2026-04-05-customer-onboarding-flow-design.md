@@ -12,12 +12,15 @@ A customer onboarding journey that starts with a public-facing Modernisation Ass
 ### Step 1: Public Assessment (`/get-started`)
 
 - No authentication required
-- Fetches the assessment marked `is_onboarding = true` from the database
+- Reached via CTA button on the public homepage and/or a "Get Started" link in the public header
+- Uses its own layout (no PublicHeader/PublicFooter) — a full-screen wizard experience. Place under a new `(onboarding)/` route group to avoid inheriting the `(public)` layout
+- Fetches the assessment marked `is_onboarding = true` from the database (public read via anon key — RLS policy allows unauthenticated reads of onboarding assessments)
 - Marketing-style wizard: one question per screen, grouped by phase (Operate, Secure, Streamline, Accelerate)
 - Each phase section has a visual header with the phase icon, colour, and name
 - Progress indicator shows current phase and overall completion
 - All questions required (no skip) for accurate scoring
 - Answers stored in browser local state
+- If user already has an account (returns to `/get-started`), show a message: "Already have an account? Log in" with a link to `/login`
 
 ### Step 2: Capture Details Screen
 
@@ -29,43 +32,48 @@ After the final question:
 
 ### Step 3: Backend Processing (`POST /api/onboarding`)
 
-On form submission, the API route (using service role) performs these operations:
+This is a **public API route** (no authentication required) that uses the service role key server-side. It must include rate limiting (e.g., check for duplicate emails within a time window) to prevent abuse.
 
-1. Creates a **company** record (type: `customer`, status: `prospect`)
-2. Creates an **auth user** via `auth.admin.createUser()` with `email_confirm: false`
-3. Creates a **profile** (role: `customer`, linked to the new company)
-4. Saves an **assessment attempt** with answers and phase scores
-5. Creates a **sales lead** in the first active sales stage
-6. Sends a Supabase invite email via `auth.admin.inviteUserByEmail()`
-7. Returns success → frontend shows "Check your email" confirmation screen
+On form submission:
+
+1. **Check for existing user** — query `profiles` by email. If found, return error: "An account with this email already exists. Please log in."
+2. **Create company** — insert into `companies` (type: `customer`, status: `prospect`)
+3. **Create auth user + send invite** — use `auth.admin.inviteUserByEmail(email, { data: { company_id, display_name }, redirectTo: '{origin}/set-password' })`. This creates the auth user AND sends the invite email in a single call. The `redirectTo` URL must be added to `additional_redirect_urls` in Supabase config.
+4. **Create profile** — insert into `profiles` (role: `customer`, linked to new company, using the user ID returned from step 3)
+5. **Save assessment attempt** — insert into `assessment_attempts` with answers and phase scores (requires the user ID from step 3)
+6. **Create sales lead** — insert into `sales_leads` in the first active sales stage (by sort_order)
+7. **Return success** → frontend shows "Check your email" confirmation screen
+
+**Error handling:** If any step after company creation fails, clean up previous records. Specifically: if profile creation fails, delete the auth user (following the pattern in the existing `/api/admin/users/route.ts`). If assessment attempt or sales lead creation fails, delete profile and auth user. Log errors server-side for debugging.
 
 ### Step 4: Set Password (`/set-password`)
 
-- Supabase invite link redirects here with a token in the URL
-- Exchanges token for session via `auth.verifyOtp()` (type: `invite`)
-- Simple form: password + confirm password
-- On success → redirect to `/login`
+- Supabase invite link redirects here (configured via `redirectTo` in step 3)
+- Supabase automatically exchanges the token on page load via the hash fragment — the `AuthProvider` wrapping `(auth)` layout detects the session via `onAuthStateChange` (same mechanism as existing `/reset-password` page)
+- Once session is detected, show form: password + confirm password (min 6 chars, matching Supabase config)
+- Calls `auth.updateUser({ password })` to set the password
+- On success → redirect to `/login` with a toast "Password set successfully. Please log in."
 
 ### Step 5: Login → Customer Area
 
-- Existing login page handles both admin and customer roles
-- AuthContext detects `profile.role === 'customer'` → redirects to `/home`
+- **Modify the existing login page** (`/src/app/(auth)/login/page.tsx`): after successful `signIn()`, fetch the user's profile and check `profile.role`. If `admin` → `router.replace('/dashboard')`. If `customer` → `router.replace('/home')`. Currently the login page hardcodes `router.replace('/dashboard')` — this must be changed to role-based routing.
 - Customer layout loads sidebar with menu items from `get_menu_tree('customer')`
 
 ## Database Changes
 
 ### Extend `companies` table
 
-Add two new columns:
+Add two new columns and deprecate `is_active`:
 
 - `type`: enum `company_type` — values: `admin`, `customer`, `partner`
 - `status`: enum `company_status` — values: `prospect`, `active`, `churned`, `pending`, `approved`, `inactive`
+- **Deprecate `is_active`**: the `status` column replaces it. `active` and `approved` statuses mean the company is active; all others mean inactive. Update existing queries that use `is_active` to use `status` instead. Migrate existing data: `is_active = true` → `status = 'active'`, `is_active = false` → `status = 'inactive'`. Then drop the `is_active` column.
 
 ### Extend `assessments` table
 
 Add columns for onboarding configuration:
 
-- `is_onboarding` (boolean, default false) — only one assessment can have this set to true
+- `is_onboarding` (boolean, default false) — enforced unique via partial index: `CREATE UNIQUE INDEX idx_assessments_onboarding ON assessments (is_onboarding) WHERE is_onboarding = true`
 - `welcome_heading` (text, nullable) — heading shown on the first screen of `/get-started`
 - `welcome_description` (text, nullable) — description shown on the first screen
 - `completion_heading` (text, nullable) — heading shown on the capture details screen
@@ -109,23 +117,27 @@ RLS: Admin full access.
 
 Seed into `menu_items` with `role_menu_access` for the `customer` role:
 
-| Label | Icon | Route | Sort Order |
-|-------|------|-------|------------|
-| Home | Home | /home | 1 |
-| Journey | Roadmap | /journey | 2 |
-| Academy | Document | /academy | 3 |
-| Services | Edit | /services | 4 |
-| Team | UserMultiple | /team | 5 |
-| Support | Time | /support | 6 |
-| Settings | Settings | /settings | 7 |
+| Label | Icon (Carbon name) | Route | Sort Order |
+|-------|-------------------|-------|------------|
+| Home | home | /home | 1 |
+| Journey | roadmap | /journey | 2 |
+| Academy | education | /academy | 3 |
+| Services | tool-kit | /services | 4 |
+| Team | user-multiple | /team | 5 |
+| Support | help | /support | 6 |
+| Settings | settings | /settings | 7 |
+
+The icon names must match entries in `/src/lib/icon-map.ts`. Add any missing icons (`home`, `roadmap`, `help`) to the icon map.
 
 ## Route Structure
 
 ```
 src/app/
+├── (onboarding)/
+│   ├── layout.tsx                    # Minimal layout (no header/footer)
+│   └── get-started/page.tsx          # Public assessment wizard
 ├── (public)/
-│   ├── get-started/page.tsx          # Public assessment wizard
-│   └── ...existing
+│   └── ...existing (add CTA link to /get-started)
 ├── (auth)/
 │   ├── set-password/page.tsx         # New — invite link landing
 │   └── ...existing
@@ -187,19 +199,39 @@ src/app/
 - Company edit form: add Type and Status dropdown fields
 - Users list: unchanged (already shows all users with role badges)
 
-## Login Routing
+## Scoring
 
-After successful login, the AuthContext checks `profile.role`:
+Assessment questions have `weight` and `points` fields, and each is assigned to a `phase_id`. Scoring works as follows:
 
-- `admin` → redirect to `/dashboard`
-- `customer` → redirect to `/home`
+- **Per-phase score:** For each phase, sum the points earned by the user's selected answers, divided by the maximum possible points for that phase. Express as percentage (0-100).
+- **Overall score:** Weighted average of all phase scores (equal weight per phase unless specified otherwise). Express as 0-100.
+- **Maturity labels:** Based on overall score:
+  - 0-25: **Foundational**
+  - 26-50: **Developing**
+  - 51-75: **Maturing**
+  - 76-100: **Optimised**
 
-## Auth Flow
+Phase scores and overall score are stored in the `assessment_attempts` record (existing `score` and `phase_scores` fields).
 
-- Uses existing Supabase Auth infrastructure
-- Invite email sent via `auth.admin.inviteUserByEmail()`
-- `/set-password` page exchanges the invite token via `auth.verifyOtp({ type: 'invite' })`
-- After password set → redirect to `/login`
+## TypeScript Type Updates
+
+Add/update in `/src/lib/types.ts`:
+
+- Update `Company` interface: add `type: CompanyType` and `status: CompanyStatus`, remove `is_active`
+- Add `CompanyType = 'admin' | 'customer' | 'partner'`
+- Add `CompanyStatus = 'prospect' | 'active' | 'churned' | 'pending' | 'approved' | 'inactive'`
+- Add `SalesStage` interface: `id`, `name`, `sort_order`, `color`, `is_active`, timestamps
+- Add `SalesLead` interface: `id`, `company_id`, `stage_id`, `assessment_attempt_id`, `contact_name`, `contact_email`, `notes`, timestamps, plus optional `company?: Company`, `assessment_attempt?: AssessmentAttempt`
+- Update `Assessment` interface: add `is_onboarding`, `welcome_heading`, `welcome_description`, `completion_heading`, `completion_description`
+
+## Supabase Configuration
+
+- Add `/set-password` to `additional_redirect_urls` in `supabase/config.toml`
+- Ensure invite email template is configured (for local dev, Inbucket handles this automatically)
+
+## Customer Sidebar — Menu Hierarchy
+
+The customer sidebar is flat (L1 only) — no mega menu, no L2/L3/L4 items. The `(customer)/layout.tsx` renders only the sidebar component (not the `<MegaMenu />` used in the admin layout). The sidebar reads L1 items from `get_menu_tree('customer')` and renders them directly.
 
 ## Existing Patterns Followed
 
