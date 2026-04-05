@@ -12,7 +12,7 @@ A customer onboarding journey that starts with a public-facing Modernisation Ass
 ### Step 1: Public Assessment (`/get-started`)
 
 - No authentication required
-- Reached via CTA button on the public homepage and/or a "Get Started" link in the public header
+- Reached via a "Get Started" CTA button on the public homepage hero section AND a "Get Started" link in the public header navigation
 - Uses its own layout (no PublicHeader/PublicFooter) — a full-screen wizard experience. Place under a new `(onboarding)/` route group to avoid inheriting the `(public)` layout
 - Fetches the assessment marked `is_onboarding = true` from the database (public read via anon key — RLS policy allows unauthenticated reads of onboarding assessments)
 - Marketing-style wizard: one question per screen, grouped by phase (Operate, Secure, Streamline, Accelerate)
@@ -38,7 +38,7 @@ On form submission:
 
 1. **Check for existing user** — query `profiles` by email. If found, return error: "An account with this email already exists. Please log in."
 2. **Create company** — insert into `companies` (type: `customer`, status: `prospect`)
-3. **Create auth user + send invite** — use `auth.admin.inviteUserByEmail(email, { data: { company_id, display_name }, redirectTo: '{origin}/set-password' })`. This creates the auth user AND sends the invite email in a single call. The `redirectTo` URL must be added to `additional_redirect_urls` in Supabase config.
+3. **Create auth user + send invite** — use `auth.admin.inviteUserByEmail(email, { data: { company_id, display_name }, redirectTo: '${siteUrl}/set-password' })` where `siteUrl` is computed from the request `Origin` header or `process.env.NEXT_PUBLIC_SUPABASE_URL`'s origin, falling back to `process.env.NEXT_PUBLIC_SITE_URL`. This creates the auth user AND sends the invite email in a single call. The `redirectTo` URL must be added to `additional_redirect_urls` in Supabase config.
 4. **Create profile** — insert into `profiles` (role: `customer`, linked to new company, using the user ID returned from step 3)
 5. **Save assessment attempt** — insert into `assessment_attempts` with answers and phase scores (requires the user ID from step 3)
 6. **Create sales lead** — insert into `sales_leads` in the first active sales stage (by sort_order)
@@ -50,7 +50,8 @@ On form submission:
 
 - Supabase invite link redirects here (configured via `redirectTo` in step 3)
 - Supabase automatically exchanges the token on page load via the hash fragment — the `AuthProvider` wrapping `(auth)` layout detects the session via `onAuthStateChange` (same mechanism as existing `/reset-password` page)
-- Once session is detected, show form: password + confirm password (min 6 chars, matching Supabase config)
+- Once session is detected, show form: password + confirm password (min 8 chars — align with existing `/reset-password` page; update Supabase config `minimum_password_length` to 8 if needed)
+- If session exists but profile is null (edge case from partial rollback), show a message: "Something went wrong. Please contact support or try the assessment again."
 - Calls `auth.updateUser({ password })` to set the password
 - On success → redirect to `/login` with a toast "Password set successfully. Please log in."
 
@@ -93,7 +94,9 @@ Configurable kanban columns for the sales pipeline.
 | created_at | timestamptz | Default now() |
 | updated_at | timestamptz | Default now() |
 
-RLS: Admin full access.
+RLS: Admin full access. Note: `is_active` is acceptable here (simple on/off toggle) unlike `companies` which needs a multi-state lifecycle.
+
+**Default seed data:** Insert one default stage: "New Lead" (sort_order: 1, color: `#1175E4`, is_active: true). Additional stages can be configured later via the admin settings modal.
 
 ### New table: `sales_leads`
 
