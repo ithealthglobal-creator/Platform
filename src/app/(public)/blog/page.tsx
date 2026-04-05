@@ -101,7 +101,7 @@ export default async function BlogPage({
                     />
                   </div>
                 ) : (
-                  <div className="md:w-1/2 h-64 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/20" />
+                  <div className="md:w-1/2 h-64 bg-[var(--brand-primary)]/10" />
                 )}
                 <div className="p-6 md:w-1/2 flex flex-col justify-center">
                   {featured.category && (

@@ -44,7 +44,7 @@ export function calculatePhaseScores(
         if (!isNaN(numericValue) && numericValue >= 0) {
           // Maturity scoring: option value is a score (0 to maxPoints)
           group.weightedEarned += Math.min(numericValue, maxPoints) * weight
-        } else if (selectedOption.correct) {
+        } else if (selectedOption.is_correct) {
           // Binary scoring: correct = full points
           group.weightedEarned += maxPoints * weight
         }

@@ -33,7 +33,7 @@ export default function AboutPage() {
             </div>
           </ScrollReveal>
           <ScrollReveal direction="right">
-            <div className="rounded-xl h-64 md:h-80 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/20" />
+            <div className="rounded-xl h-64 md:h-80 bg-[var(--brand-primary)]/10" />
           </ScrollReveal>
         </div>
       </section>

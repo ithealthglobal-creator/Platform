@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Product, LicensingModel } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -69,15 +68,7 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Products</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage products and software catalogue
-          </p>
-        </div>
+      <div className="flex justify-end mb-6">
         <Button onClick={() => router.push('/services/products/new')}>
           <Add size={16} />
           Add Product

@@ -67,7 +67,7 @@ export default async function BlogPostPage({
           />
         </div>
       ) : (
-        <div className="h-80 md:h-[480px] bg-gradient-to-br from-[var(--brand-primary)]/30 to-[var(--brand-secondary)]/30" />
+        <div className="h-80 md:h-[480px] bg-[var(--brand-primary)]/15" />
       )}
 
       <ScrollReveal>

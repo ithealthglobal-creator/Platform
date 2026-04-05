@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Service } from '@/lib/types'
 import {
   Tabs,
@@ -12,7 +11,6 @@ import {
   TabsContent,
 } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { ArrowLeft } from '@carbon/icons-react'
 import { DescriptionTab } from '@/components/services/description-tab'
 import { MarketTab } from '@/components/services/market-tab'
 import { ProductsTab } from '@/components/services/products-tab'
@@ -70,7 +68,6 @@ export default function ServiceEditorPage() {
   if (loading) {
     return (
       <div>
-        <Breadcrumb />
         <p className="text-muted-foreground py-8 text-center">Loading...</p>
       </div>
     )
@@ -78,27 +75,6 @@ export default function ServiceEditorPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/services')}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Services
-        </button>
-
-        <h1 className="text-2xl font-bold mb-1">
-          {isNew && !serviceId ? 'New Service' : 'Edit Service'}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {isNew && !serviceId
-            ? 'Create a new service'
-            : 'Edit service details and configuration'}
-        </p>
-      </div>
-
       <Tabs defaultValue="description">
         <TabsList>
           <TabsTrigger value="description">Description</TabsTrigger>

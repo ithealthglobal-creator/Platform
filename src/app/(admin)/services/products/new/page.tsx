@@ -3,13 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LicensingModel } from '@/lib/types'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from '@carbon/icons-react'
+import { Save } from '@carbon/icons-react'
 
 const LICENSING_OPTIONS: { value: LicensingModel; label: string }[] = [
   { value: 'per_user', label: 'Per User' },
@@ -65,17 +64,6 @@ export default function NewProductPage() {
 
   return (
     <div>
-      <Breadcrumb />
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/services/products')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Back to Products
-        </button>
-      </div>
-      <h1 className="text-2xl font-bold mb-6">New Product</h1>
-
       <div className="grid gap-4 max-w-lg">
         <div className="grid gap-2">
           <Label htmlFor="product-name">Name</Label>

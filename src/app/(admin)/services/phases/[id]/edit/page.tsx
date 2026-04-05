@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { ArrowLeft, Save } from '@carbon/icons-react'
+import { Save } from '@carbon/icons-react'
 
 export default function EditPhasePage() {
   const router = useRouter()
@@ -76,7 +75,6 @@ export default function EditPhasePage() {
   if (loading) {
     return (
       <div>
-        <Breadcrumb />
         <p className="text-muted-foreground">Loading...</p>
       </div>
     )
@@ -84,17 +82,6 @@ export default function EditPhasePage() {
 
   return (
     <div>
-      <Breadcrumb />
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/services/phases')}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} /> Back to Phases
-        </button>
-      </div>
-      <h1 className="text-2xl font-bold mb-6">Edit Phase</h1>
-
       <div className="grid gap-4 max-w-lg">
         <div className="grid gap-2">
           <Label htmlFor="phase-name">Name</Label>

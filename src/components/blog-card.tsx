@@ -16,7 +16,7 @@ export function BlogCard({ post }: { post: BlogPost }) {
             />
           </div>
         ) : (
-          <div className="h-48 bg-gradient-to-br from-[var(--brand-primary)]/20 to-[var(--brand-secondary)]/20" />
+          <div className="h-48 bg-[var(--brand-primary)]/10" />
         )}
         <div className="p-4">
           {post.category && (

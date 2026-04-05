@@ -9,7 +9,7 @@ interface PageHeroProps {
 
 export function PageHero({ title, subtitle }: PageHeroProps) {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[var(--brand-primary)] to-[var(--brand-dark)] px-8 text-center text-white">
+    <section className="min-h-screen flex items-center justify-center bg-[var(--brand-primary)] px-8 text-center text-white">
       <div>
         <motion.h1
           className="text-4xl md:text-5xl font-bold"

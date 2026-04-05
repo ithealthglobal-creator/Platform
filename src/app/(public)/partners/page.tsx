@@ -102,7 +102,7 @@ export default function PartnersPage() {
                 <div
                   className="bg-white rounded-xl p-10 shadow-sm border border-gray-100 flex flex-col items-center"
                 >
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-[var(--brand-primary)] to-[var(--brand-secondary)] mx-auto mb-6" />
+                  <div className="h-16 w-16 rounded-full bg-[var(--brand-primary)] mx-auto mb-6" />
                   <p className="font-semibold text-center">{partner.name}</p>
                   {partner.description && (
                     <p className="text-sm text-muted-foreground text-center mt-2">

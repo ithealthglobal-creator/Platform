@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Course, CourseSection, Phase } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,7 +21,7 @@ import {
   TabsContent,
 } from '@/components/ui/tabs'
 import { toast } from 'sonner'
-import { ArrowLeft, Save, Add } from '@carbon/icons-react'
+import { Save, Add } from '@carbon/icons-react'
 import { SectionEditor } from '@/components/academy/section-editor'
 
 export default function CourseEditorPage() {
@@ -216,7 +215,6 @@ export default function CourseEditorPage() {
   if (loading) {
     return (
       <div>
-        <Breadcrumb />
         <p className="text-muted-foreground py-8 text-center">Loading...</p>
       </div>
     )
@@ -224,27 +222,6 @@ export default function CourseEditorPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="mb-6">
-        <button
-          onClick={() => router.push('/academy/courses')}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"
-        >
-          <ArrowLeft size={16} />
-          Back to Courses
-        </button>
-
-        <h1 className="text-2xl font-bold mb-1">
-          {isNew && !courseId ? 'New Course' : 'Edit Course'}
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          {isNew && !courseId
-            ? 'Create a new academy course'
-            : 'Edit course details and content'}
-        </p>
-      </div>
-
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>

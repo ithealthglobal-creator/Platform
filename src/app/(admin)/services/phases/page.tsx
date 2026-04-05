@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase-client'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Phase } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import {
@@ -46,17 +45,6 @@ export default function PhasesPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Phases</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage modernisation phases and their status
-          </p>
-        </div>
-      </div>
-
       <div className="rounded-lg border">
         <Table>
           <TableHeader>

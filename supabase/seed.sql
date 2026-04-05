@@ -115,3 +115,14 @@ INSERT INTO public.menu_items (id, parent_id, label, icon, route, sort_order, le
   ('30000000-0000-0000-0000-000000000202', '20000000-0000-0000-0000-000000000105', 'Testimonials', NULL, '/growth/market/testimonials', 5, 3),
   ('20000000-0000-0000-0000-000000000202', '10000000-0000-0000-0000-000000000007', 'Partners', NULL, '/people/partners', 4, 2)
 ON CONFLICT (id) DO NOTHING;
+
+-- Grant admin access to new menu items (Content, Blog, Testimonials, Partners)
+INSERT INTO public.role_menu_access (role, menu_item_id)
+SELECT 'admin', id FROM public.menu_items
+WHERE id IN (
+  '20000000-0000-0000-0000-000000000201',
+  '30000000-0000-0000-0000-000000000201',
+  '30000000-0000-0000-0000-000000000202',
+  '20000000-0000-0000-0000-000000000202'
+)
+ON CONFLICT (role, menu_item_id) DO NOTHING;

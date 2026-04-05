@@ -1,7 +1,5 @@
 'use client'
 
-import { useAuth } from '@/contexts/auth-context'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserMultiple, Building, Task, Growth } from '@carbon/icons-react'
 
@@ -13,18 +11,8 @@ const stats = [
 ]
 
 export default function DashboardPage() {
-  const { profile } = useAuth()
-
   return (
     <div>
-      <Breadcrumb />
-      <h1 className="text-2xl font-bold mb-1">
-        Welcome back, {profile?.display_name ?? 'Admin'}
-      </h1>
-      <p className="text-muted-foreground mb-6">
-        Here is an overview of your platform.
-      </p>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon

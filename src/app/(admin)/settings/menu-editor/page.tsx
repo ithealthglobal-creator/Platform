@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { useMenu } from '@/contexts/menu-context'
-import { Breadcrumb } from '@/components/breadcrumb'
 import { MenuItem, UserRole } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -306,15 +305,7 @@ export default function MenuEditorPage() {
 
   return (
     <div>
-      <Breadcrumb />
-
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Menu Editor</h1>
-          <p className="text-muted-foreground text-sm">
-            Manage navigation menu items, hierarchy, and role access
-          </p>
-        </div>
+      <div className="flex justify-end mb-6">
         <Button onClick={() => openCreate(null)}>
           <Add size={16} />
           Add Root Item
