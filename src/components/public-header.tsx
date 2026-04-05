@@ -36,10 +36,9 @@ export function PublicHeader() {
           <Image
             src="/logos/ithealth-logo-white.svg"
             alt="IThealth"
-            width={112}
-            height={28}
-            className="h-7 w-auto"
-            style={{ height: 'auto' }}
+            width={120}
+            height={32}
+            className="h-8 w-auto"
             priority
           />
         </Link>
@@ -61,6 +60,13 @@ export function PublicHeader() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <Link
+            href="/get-started"
+            className="rounded-lg bg-[#1175E4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d5fc2] transition-colors"
+          >
+            Get Started
+          </Link>
 
           <Button
             className="bg-white/15 text-white hover:bg-white/25"
