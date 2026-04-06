@@ -55,7 +55,7 @@ export function CustomerSidebar() {
       {/* Logout */}
       <div className="border-t border-white/15 p-2 pb-4">
         <button
-          onClick={signOut}
+          onClick={async () => { await signOut(); router.replace('/login') }}
           className="flex w-full items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-[13px] text-white/50 hover:bg-white/10 hover:text-white/75 transition-colors"
         >
           {iconMap['logout'] && (() => { const LogoutIcon = iconMap['logout']; return <LogoutIcon size={18} /> })()}
