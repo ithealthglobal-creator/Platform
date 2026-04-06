@@ -121,7 +121,7 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Grant admin access to all admin menu items
 INSERT INTO public.role_menu_access (role, menu_item_id)
-SELECT 'admin', id FROM public.menu_items WHERE id NOT LIKE 'c0000000%'
+SELECT 'admin', id FROM public.menu_items WHERE id::text NOT LIKE 'c0000000%'
 ON CONFLICT (role, menu_item_id) DO NOTHING;
 
 -- Grant customer access to customer menu items
