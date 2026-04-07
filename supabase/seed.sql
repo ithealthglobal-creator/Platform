@@ -804,3 +804,708 @@ BEGIN
     'Onboarding assessment completed. Overall score 40% (Developing). Critical gaps in Secure and Accelerate phases.'
   ) ON CONFLICT (id) DO NOTHING;
 END $$;
+
+-- ---------------------------------------------------------------------------
+-- 22. SAMPLE ACADEMY COURSES (for testing)
+-- ---------------------------------------------------------------------------
+-- Courses: d0000000-0000-0000-000a-... series
+-- Sections: d1000000-...
+-- Modules: d2000000-...
+-- Assessments: d3000000-...
+-- Questions: d4000000-...
+
+-- Courses
+INSERT INTO public.courses (id, name, description, phase_id, is_published, is_active) VALUES
+  ('d0000000-0000-0000-000a-000000000001',
+   'Cloud Infrastructure Basics',
+   'A practical introduction to cloud infrastructure for IT professionals. Covers cloud architecture fundamentals, provisioning resources, and managing workloads in Azure.',
+   'a0000000-0000-0000-0000-000000000001', -- Operate
+   true, true),
+
+  ('d0000000-0000-0000-000a-000000000002',
+   'Security Fundamentals',
+   'Build a strong security foundation for your organisation. Covers threat landscapes, identity management, endpoint protection, and security hygiene best practices.',
+   'a0000000-0000-0000-0000-000000000002', -- Secure
+   true, true),
+
+  ('d0000000-0000-0000-000a-000000000003',
+   'Process Automation Guide',
+   'Learn how to identify, design, and implement process automations using Power Automate and PowerShell. Reduce manual effort and eliminate human error across your business.',
+   'a0000000-0000-0000-0000-000000000003', -- Streamline
+   true, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Course Sections
+-- ---------------------------------------------------------------------------
+
+-- Cloud Infrastructure Basics — 3 sections
+INSERT INTO public.course_sections (id, course_id, name, description, sort_order) VALUES
+  ('d1000000-0000-0000-000a-000000000001',
+   'd0000000-0000-0000-000a-000000000001',
+   'Cloud Fundamentals',
+   'Understand cloud computing models, service types (IaaS, PaaS, SaaS), and the core benefits of moving to the cloud.',
+   1),
+  ('d1000000-0000-0000-000a-000000000002',
+   'd0000000-0000-0000-000a-000000000001',
+   'Azure Core Services',
+   'Explore Azure virtual machines, storage accounts, virtual networks, and the Azure portal.',
+   2),
+  ('d1000000-0000-0000-000a-000000000003',
+   'd0000000-0000-0000-000a-000000000001',
+   'Managing Cloud Resources',
+   'Learn resource groups, cost management, tagging strategies, and Azure RBAC for access control.',
+   3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals — 3 sections
+INSERT INTO public.course_sections (id, course_id, name, description, sort_order) VALUES
+  ('d1000000-0000-0000-000b-000000000001',
+   'd0000000-0000-0000-000a-000000000002',
+   'Understanding the Threat Landscape',
+   'Survey modern cyber threats — ransomware, phishing, supply chain attacks — and understand how attackers operate.',
+   1),
+  ('d1000000-0000-0000-000b-000000000002',
+   'd0000000-0000-0000-000a-000000000002',
+   'Identity & Access Management',
+   'Implement MFA, conditional access, and least-privilege principles to protect user accounts and sensitive data.',
+   2),
+  ('d1000000-0000-0000-000b-000000000003',
+   'd0000000-0000-0000-000a-000000000002',
+   'Endpoint & Network Security',
+   'Deploy endpoint detection and response tools, configure firewalls, and harden devices against common attacks.',
+   3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Process Automation Guide — 2 sections
+INSERT INTO public.course_sections (id, course_id, name, description, sort_order) VALUES
+  ('d1000000-0000-0000-000c-000000000001',
+   'd0000000-0000-0000-000a-000000000003',
+   'Identifying Automation Opportunities',
+   'Map your existing manual processes, score them by automation potential, and build a priority backlog.',
+   1),
+  ('d1000000-0000-0000-000c-000000000002',
+   'd0000000-0000-0000-000a-000000000003',
+   'Building Automations with Power Automate',
+   'Create flows, configure triggers and actions, handle errors, and integrate with Microsoft 365 and external services.',
+   2)
+ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Course Modules
+-- ---------------------------------------------------------------------------
+
+-- Cloud Infrastructure Basics > Section 1: Cloud Fundamentals
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000a-000000000001',
+   'd1000000-0000-0000-000a-000000000001',
+   'What is Cloud Computing?',
+   'Demystify cloud computing — shared resources, on-demand provisioning, and the pay-as-you-go model.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 1),
+  ('d2000000-0000-0000-000a-000000000002',
+   'd1000000-0000-0000-000a-000000000001',
+   'IaaS, PaaS, and SaaS Explained',
+   'Understand the three cloud service models and when to use each for SMB workloads.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 12, 2),
+  ('d2000000-0000-0000-000a-000000000003',
+   'd1000000-0000-0000-000a-000000000001',
+   'Public, Private, and Hybrid Cloud',
+   'Compare deployment models and choose the right approach for your organisation''s needs and compliance requirements.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 9, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Cloud Infrastructure Basics > Section 2: Azure Core Services
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000a-000000000004',
+   'd1000000-0000-0000-000a-000000000002',
+   'Azure Virtual Machines',
+   'Provision, configure, and connect to Azure VMs. Understand VM sizes, availability sets, and OS images.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 15, 1),
+  ('d2000000-0000-0000-000a-000000000005',
+   'd1000000-0000-0000-000a-000000000002',
+   'Azure Storage & Blob',
+   'Work with Azure Storage accounts, blob containers, and file shares for cloud-native data storage.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 11, 2),
+  ('d2000000-0000-0000-000a-000000000006',
+   'd1000000-0000-0000-000a-000000000002',
+   'Virtual Networks & Subnets',
+   'Design Azure virtual networks, configure subnets, NSGs, and connect on-premises networks via VPN gateway.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 14, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Cloud Infrastructure Basics > Section 3: Managing Cloud Resources
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000a-000000000007',
+   'd1000000-0000-0000-000a-000000000003',
+   'Resource Groups & Tagging',
+   'Organise Azure resources with resource groups, apply tags for cost tracking, and apply naming conventions.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 8, 1),
+  ('d2000000-0000-0000-000a-000000000008',
+   'd1000000-0000-0000-000a-000000000003',
+   'Azure RBAC & Permissions',
+   'Assign built-in roles, create custom roles, and apply least-privilege access across your Azure subscription.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 13, 2)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals > Section 1: Threat Landscape
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000b-000000000001',
+   'd1000000-0000-0000-000b-000000000001',
+   'How Ransomware Works',
+   'Trace a ransomware attack from initial phishing email through lateral movement to encryption and extortion.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 12, 1),
+  ('d2000000-0000-0000-000b-000000000002',
+   'd1000000-0000-0000-000b-000000000001',
+   'Social Engineering & Phishing',
+   'Recognise phishing emails, pretexting calls, and social engineering techniques used against SMB staff.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 2),
+  ('d2000000-0000-0000-000b-000000000003',
+   'd1000000-0000-0000-000b-000000000001',
+   'Supply Chain & Insider Threats',
+   'Understand risks from third-party vendors, compromised software updates, and malicious insiders.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 9, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals > Section 2: Identity & Access Management
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000b-000000000004',
+   'd1000000-0000-0000-000b-000000000002',
+   'Multi-Factor Authentication',
+   'Enable and enforce MFA across Microsoft 365, VPN, and business applications. Compare authenticator apps vs SMS.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 11, 1),
+  ('d2000000-0000-0000-000b-000000000005',
+   'd1000000-0000-0000-000b-000000000002',
+   'Conditional Access Policies',
+   'Configure Entra ID conditional access to enforce MFA, block risky sign-ins, and restrict access by location.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 14, 2)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals > Section 3: Endpoint & Network Security
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000b-000000000006',
+   'd1000000-0000-0000-000b-000000000003',
+   'EDR vs Traditional Antivirus',
+   'Understand why endpoint detection and response (EDR) outperforms legacy antivirus for modern threats.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 1),
+  ('d2000000-0000-0000-000b-000000000007',
+   'd1000000-0000-0000-000b-000000000003',
+   'Firewall Rules & Network Segmentation',
+   'Configure next-generation firewall rules, VLAN segmentation, and isolate critical systems from user networks.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 13, 2),
+  ('d2000000-0000-0000-000b-000000000008',
+   'd1000000-0000-0000-000b-000000000003',
+   'Patch Management & Hardening',
+   'Automate patch deployment, apply CIS benchmarks, and disable unnecessary services to reduce attack surface.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 12, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Process Automation Guide > Section 1: Identifying Automation Opportunities
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000c-000000000001',
+   'd1000000-0000-0000-000c-000000000001',
+   'Process Mapping Techniques',
+   'Use swimlane diagrams and value stream maps to document current-state processes and highlight waste.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 1),
+  ('d2000000-0000-0000-000c-000000000002',
+   'd1000000-0000-0000-000c-000000000001',
+   'Scoring & Prioritising Automations',
+   'Score candidate processes by effort, impact, and frequency to build a prioritised automation backlog.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 8, 2),
+  ('d2000000-0000-0000-000c-000000000003',
+   'd1000000-0000-0000-000c-000000000001',
+   'Building the Business Case',
+   'Quantify time savings and error reduction to build a compelling business case for process automation investment.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 11, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- Process Automation Guide > Section 2: Building with Power Automate
+INSERT INTO public.course_modules (id, section_id, title, description, youtube_url, duration_minutes, sort_order) VALUES
+  ('d2000000-0000-0000-000c-000000000004',
+   'd1000000-0000-0000-000c-000000000002',
+   'Power Automate Fundamentals',
+   'Navigate the Power Automate interface, understand flow types (cloud, desktop, instant), and create your first flow.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 14, 1),
+  ('d2000000-0000-0000-000c-000000000005',
+   'd1000000-0000-0000-000c-000000000002',
+   'Connecting to Microsoft 365',
+   'Use built-in connectors for SharePoint, Outlook, Teams, and Forms to automate common M365 workflows.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 12, 2),
+  ('d2000000-0000-0000-000c-000000000006',
+   'd1000000-0000-0000-000c-000000000002',
+   'Error Handling & Monitoring',
+   'Configure run-after conditions, send failure notifications, and monitor flow run history for reliability.',
+   'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 10, 3)
+ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Section Assessments (pre + post per section)
+-- ---------------------------------------------------------------------------
+
+-- Cloud Infrastructure Basics — Section 1 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000a-000000000001',
+   'd1000000-0000-0000-000a-000000000001',
+   'course_section', 'pre',
+   'Cloud Fundamentals — Pre-Assessment',
+   'Test your existing knowledge of cloud computing concepts before starting this section.',
+   80, true),
+  ('d3000000-0000-0000-000a-000000000002',
+   'd1000000-0000-0000-000a-000000000001',
+   'course_section', 'post',
+   'Cloud Fundamentals — Post-Assessment',
+   'Confirm your understanding of cloud computing models and deployment options.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Cloud Infrastructure Basics — Section 2 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000a-000000000003',
+   'd1000000-0000-0000-000a-000000000002',
+   'course_section', 'pre',
+   'Azure Core Services — Pre-Assessment',
+   'Assess your familiarity with Azure services before diving into this section.',
+   80, true),
+  ('d3000000-0000-0000-000a-000000000004',
+   'd1000000-0000-0000-000a-000000000002',
+   'course_section', 'post',
+   'Azure Core Services — Post-Assessment',
+   'Verify your knowledge of Azure VMs, storage, and networking.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Cloud Infrastructure Basics — Section 3 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000a-000000000005',
+   'd1000000-0000-0000-000a-000000000003',
+   'course_section', 'pre',
+   'Managing Cloud Resources — Pre-Assessment',
+   'Check your prior knowledge of Azure resource management and access control.',
+   80, true),
+  ('d3000000-0000-0000-000a-000000000006',
+   'd1000000-0000-0000-000a-000000000003',
+   'course_section', 'post',
+   'Managing Cloud Resources — Post-Assessment',
+   'Confirm you can apply RBAC, resource groups, and cost management in Azure.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals — Section 1 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000b-000000000001',
+   'd1000000-0000-0000-000b-000000000001',
+   'course_section', 'pre',
+   'Threat Landscape — Pre-Assessment',
+   'Gauge your awareness of common cyber threats before starting this section.',
+   80, true),
+  ('d3000000-0000-0000-000b-000000000002',
+   'd1000000-0000-0000-000b-000000000001',
+   'course_section', 'post',
+   'Threat Landscape — Post-Assessment',
+   'Confirm you can identify and describe modern attack vectors.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals — Section 2 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000b-000000000003',
+   'd1000000-0000-0000-000b-000000000002',
+   'course_section', 'pre',
+   'Identity & Access Management — Pre-Assessment',
+   'Test your existing knowledge of MFA and access control before this section.',
+   80, true),
+  ('d3000000-0000-0000-000b-000000000004',
+   'd1000000-0000-0000-000b-000000000002',
+   'course_section', 'post',
+   'Identity & Access Management — Post-Assessment',
+   'Verify that you can implement MFA and conditional access policies.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Security Fundamentals — Section 3 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000b-000000000005',
+   'd1000000-0000-0000-000b-000000000003',
+   'course_section', 'pre',
+   'Endpoint & Network Security — Pre-Assessment',
+   'Assess your prior knowledge of endpoint protection and network hardening.',
+   80, true),
+  ('d3000000-0000-0000-000b-000000000006',
+   'd1000000-0000-0000-000b-000000000003',
+   'course_section', 'post',
+   'Endpoint & Network Security — Post-Assessment',
+   'Confirm your understanding of EDR, firewall configuration, and patch management.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Process Automation Guide — Section 1 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000c-000000000001',
+   'd1000000-0000-0000-000c-000000000001',
+   'course_section', 'pre',
+   'Identifying Automation Opportunities — Pre-Assessment',
+   'Check what you already know about process mapping and automation potential.',
+   80, true),
+  ('d3000000-0000-0000-000c-000000000002',
+   'd1000000-0000-0000-000c-000000000001',
+   'course_section', 'post',
+   'Identifying Automation Opportunities — Post-Assessment',
+   'Verify you can map processes and build a prioritised automation backlog.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Process Automation Guide — Section 2 assessments
+INSERT INTO public.assessments (id, section_id, scope, type, name, description, pass_threshold, is_active) VALUES
+  ('d3000000-0000-0000-000c-000000000003',
+   'd1000000-0000-0000-000c-000000000002',
+   'course_section', 'pre',
+   'Building Automations — Pre-Assessment',
+   'Test your familiarity with Power Automate before starting this section.',
+   80, true),
+  ('d3000000-0000-0000-000c-000000000004',
+   'd1000000-0000-0000-000c-000000000002',
+   'course_section', 'post',
+   'Building Automations — Post-Assessment',
+   'Confirm you can build, connect, and monitor Power Automate flows.',
+   80, true)
+ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- Assessment Questions (3 per assessment)
+-- ---------------------------------------------------------------------------
+
+-- d3000000-0000-0000-000a-000000000001 : Cloud Fundamentals Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000001',
+   'd3000000-0000-0000-000a-000000000001',
+   'Which cloud service model gives you the most control over the underlying operating system?',
+   '[{"label":"SaaS","value":"a","is_correct":false},{"label":"PaaS","value":"b","is_correct":false},{"label":"IaaS","value":"c","is_correct":true},{"label":"FaaS","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000002',
+   'd3000000-0000-0000-000a-000000000001',
+   'What is the primary advantage of a public cloud deployment?',
+   '[{"label":"Complete isolation from the internet","value":"a","is_correct":false},{"label":"On-demand scalability with no upfront capital expenditure","value":"b","is_correct":true},{"label":"Dedicated hardware for your organisation only","value":"c","is_correct":false},{"label":"Guaranteed on-premises latency","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000003',
+   'd3000000-0000-0000-000a-000000000001',
+   'Which cloud model combines on-premises infrastructure with public cloud resources?',
+   '[{"label":"Private cloud","value":"a","is_correct":false},{"label":"Community cloud","value":"b","is_correct":false},{"label":"Multi-cloud","value":"c","is_correct":false},{"label":"Hybrid cloud","value":"d","is_correct":true}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000a-000000000002 : Cloud Fundamentals Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000004',
+   'd3000000-0000-0000-000a-000000000002',
+   'A company wants to run a web application without managing servers. Which service model is most appropriate?',
+   '[{"label":"IaaS","value":"a","is_correct":false},{"label":"PaaS","value":"b","is_correct":true},{"label":"On-premises","value":"c","is_correct":false},{"label":"Private cloud","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000005',
+   'd3000000-0000-0000-000a-000000000002',
+   'What does the cloud computing term "elasticity" mean?',
+   '[{"label":"Data is always encrypted","value":"a","is_correct":false},{"label":"Resources can be scaled up or down automatically based on demand","value":"b","is_correct":true},{"label":"Backups are taken automatically","value":"c","is_correct":false},{"label":"Services are available 24/7","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000006',
+   'd3000000-0000-0000-000a-000000000002',
+   'Which cloud service model is Microsoft 365 an example of?',
+   '[{"label":"IaaS","value":"a","is_correct":false},{"label":"PaaS","value":"b","is_correct":false},{"label":"SaaS","value":"c","is_correct":true},{"label":"DaaS","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000a-000000000003 : Azure Core Services Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000007',
+   'd3000000-0000-0000-000a-000000000003',
+   'What is an Azure Resource Group?',
+   '[{"label":"A type of virtual machine","value":"a","is_correct":false},{"label":"A container that holds related Azure resources","value":"b","is_correct":true},{"label":"A network security tool","value":"c","is_correct":false},{"label":"An Azure pricing tier","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000008',
+   'd3000000-0000-0000-000a-000000000003',
+   'Which Azure service provides managed relational database hosting?',
+   '[{"label":"Azure Blob Storage","value":"a","is_correct":false},{"label":"Azure Queue Storage","value":"b","is_correct":false},{"label":"Azure SQL Database","value":"c","is_correct":true},{"label":"Azure File Sync","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000009',
+   'd3000000-0000-0000-000a-000000000003',
+   'What is the purpose of an Azure Virtual Network (VNet)?',
+   '[{"label":"To store backups in the cloud","value":"a","is_correct":false},{"label":"To provide isolated private networking for Azure resources","value":"b","is_correct":true},{"label":"To manage user identities","value":"c","is_correct":false},{"label":"To deploy containerised applications","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000a-000000000004 : Azure Core Services Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000010',
+   'd3000000-0000-0000-000a-000000000004',
+   'Which Azure storage service is best suited for storing large unstructured files such as images and videos?',
+   '[{"label":"Azure Table Storage","value":"a","is_correct":false},{"label":"Azure Blob Storage","value":"b","is_correct":true},{"label":"Azure Queue Storage","value":"c","is_correct":false},{"label":"Azure File Storage","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000011',
+   'd3000000-0000-0000-000a-000000000004',
+   'What is a Network Security Group (NSG) in Azure?',
+   '[{"label":"A type of Azure subscription","value":"a","is_correct":false},{"label":"A firewall rule set controlling inbound and outbound traffic to Azure resources","value":"b","is_correct":true},{"label":"A managed identity service","value":"c","is_correct":false},{"label":"An Azure load balancer","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000012',
+   'd3000000-0000-0000-000a-000000000004',
+   'Which VM size category is optimised for memory-intensive workloads in Azure?',
+   '[{"label":"A-series","value":"a","is_correct":false},{"label":"B-series","value":"b","is_correct":false},{"label":"E-series","value":"c","is_correct":true},{"label":"F-series","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000a-000000000005 : Managing Cloud Resources Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000013',
+   'd3000000-0000-0000-000a-000000000005',
+   'What does RBAC stand for in Azure?',
+   '[{"label":"Resource-Based Access Control","value":"a","is_correct":false},{"label":"Role-Based Access Control","value":"b","is_correct":true},{"label":"Remote Backup and Cloud","value":"c","is_correct":false},{"label":"Redundant Bandwidth and Capacity","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000014',
+   'd3000000-0000-0000-000a-000000000005',
+   'Which Azure built-in role grants read-only access to all resources?',
+   '[{"label":"Owner","value":"a","is_correct":false},{"label":"Contributor","value":"b","is_correct":false},{"label":"Reader","value":"c","is_correct":true},{"label":"User Access Administrator","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000015',
+   'd3000000-0000-0000-000a-000000000005',
+   'What is the purpose of Azure tags?',
+   '[{"label":"To set firewall rules on resources","value":"a","is_correct":false},{"label":"To organise and track resources for billing and management purposes","value":"b","is_correct":true},{"label":"To enable replication across regions","value":"c","is_correct":false},{"label":"To assign IP addresses to VMs","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000a-000000000006 : Managing Cloud Resources Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000a-000000000016',
+   'd3000000-0000-0000-000a-000000000006',
+   'What Azure feature helps you estimate and control cloud spending?',
+   '[{"label":"Azure Monitor","value":"a","is_correct":false},{"label":"Azure Cost Management + Billing","value":"b","is_correct":true},{"label":"Azure Advisor","value":"c","is_correct":false},{"label":"Azure Policy","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000a-000000000017',
+   'd3000000-0000-0000-000a-000000000006',
+   'Which RBAC scope is the most granular in Azure?',
+   '[{"label":"Management Group","value":"a","is_correct":false},{"label":"Subscription","value":"b","is_correct":false},{"label":"Resource Group","value":"c","is_correct":false},{"label":"Resource","value":"d","is_correct":true}]',
+   2, 1),
+  ('d4000000-0000-0000-000a-000000000018',
+   'd3000000-0000-0000-000a-000000000006',
+   'What does the principle of least privilege mean in cloud access management?',
+   '[{"label":"Grant admin access to all team members for efficiency","value":"a","is_correct":false},{"label":"Only grant the minimum permissions needed to perform a specific task","value":"b","is_correct":true},{"label":"Remove all access after 90 days","value":"c","is_correct":false},{"label":"Use shared accounts for common tasks","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000001 : Threat Landscape Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000001',
+   'd3000000-0000-0000-000b-000000000001',
+   'What is ransomware?',
+   '[{"label":"A type of firewall","value":"a","is_correct":false},{"label":"Malware that encrypts victim files and demands payment for the decryption key","value":"b","is_correct":true},{"label":"A phishing email technique","value":"c","is_correct":false},{"label":"A backup tool","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000002',
+   'd3000000-0000-0000-000b-000000000001',
+   'What is the most common initial attack vector for ransomware in SMBs?',
+   '[{"label":"USB drive","value":"a","is_correct":false},{"label":"Physical server theft","value":"b","is_correct":false},{"label":"Phishing email with a malicious link or attachment","value":"c","is_correct":true},{"label":"Brute-force attack on the website","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000003',
+   'd3000000-0000-0000-000b-000000000001',
+   'What is a supply chain attack?',
+   '[{"label":"An attack targeting inventory management systems","value":"a","is_correct":false},{"label":"An attack that compromises a trusted vendor or software update to reach target organisations","value":"b","is_correct":true},{"label":"A denial-of-service attack against logistics companies","value":"c","is_correct":false},{"label":"An attack on physical delivery infrastructure","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000002 : Threat Landscape Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000004',
+   'd3000000-0000-0000-000b-000000000002',
+   'Which technique involves attackers moving from one compromised system to others within the same network?',
+   '[{"label":"Phishing","value":"a","is_correct":false},{"label":"Lateral movement","value":"b","is_correct":true},{"label":"SQL injection","value":"c","is_correct":false},{"label":"Credential stuffing","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000005',
+   'd3000000-0000-0000-000b-000000000002',
+   'What is pretexting in the context of social engineering?',
+   '[{"label":"A type of network scan","value":"a","is_correct":false},{"label":"Creating a fabricated scenario to manipulate someone into disclosing information","value":"b","is_correct":true},{"label":"A firewall bypass technique","value":"c","is_correct":false},{"label":"Encrypting communications to avoid detection","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000006',
+   'd3000000-0000-0000-000b-000000000002',
+   'What is the best defence against insider threats?',
+   '[{"label":"Block all external email","value":"a","is_correct":false},{"label":"Disable USB ports","value":"b","is_correct":false},{"label":"Apply least-privilege access and monitor user activity with audit logs","value":"c","is_correct":true},{"label":"Require staff to use personal devices","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000003 : Identity & Access Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000007',
+   'd3000000-0000-0000-000b-000000000003',
+   'What does MFA stand for?',
+   '[{"label":"Managed Firewall Architecture","value":"a","is_correct":false},{"label":"Multi-Factor Authentication","value":"b","is_correct":true},{"label":"Malware Filtering Application","value":"c","is_correct":false},{"label":"Microsoft Federation Agent","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000008',
+   'd3000000-0000-0000-000b-000000000003',
+   'Which MFA method is considered most secure?',
+   '[{"label":"SMS one-time password","value":"a","is_correct":false},{"label":"Email magic link","value":"b","is_correct":false},{"label":"Authenticator app TOTP code","value":"c","is_correct":true},{"label":"Security question","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000009',
+   'd3000000-0000-0000-000b-000000000003',
+   'What is the principle of least privilege?',
+   '[{"label":"Giving all users admin rights for efficiency","value":"a","is_correct":false},{"label":"Granting only the minimum access rights required for a user to perform their job","value":"b","is_correct":true},{"label":"Limiting users to a single device","value":"c","is_correct":false},{"label":"Requiring all passwords to be at least 8 characters","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000004 : Identity & Access Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000010',
+   'd3000000-0000-0000-000b-000000000004',
+   'What does conditional access allow an organisation to do?',
+   '[{"label":"Block all remote access","value":"a","is_correct":false},{"label":"Grant or deny access based on conditions like user location, device compliance, or risk level","value":"b","is_correct":true},{"label":"Automatically rotate passwords","value":"c","is_correct":false},{"label":"Encrypt email attachments","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000011',
+   'd3000000-0000-0000-000b-000000000004',
+   'Which Entra ID feature helps enforce MFA when a user signs in from an unfamiliar location?',
+   '[{"label":"Azure Backup","value":"a","is_correct":false},{"label":"Identity Protection with risk-based conditional access","value":"b","is_correct":true},{"label":"Azure Monitor","value":"c","is_correct":false},{"label":"Microsoft Defender for Cloud","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000012',
+   'd3000000-0000-0000-000b-000000000004',
+   'What is Single Sign-On (SSO)?',
+   '[{"label":"A backup authentication method used when MFA fails","value":"a","is_correct":false},{"label":"A method allowing users to authenticate once and access multiple applications without re-entering credentials","value":"b","is_correct":true},{"label":"A technique for encrypting passwords in transit","value":"c","is_correct":false},{"label":"A password sharing protocol","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000005 : Endpoint & Network Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000013',
+   'd3000000-0000-0000-000b-000000000005',
+   'What does EDR stand for?',
+   '[{"label":"Encrypted Data Repository","value":"a","is_correct":false},{"label":"Endpoint Detection and Response","value":"b","is_correct":true},{"label":"External Device Restriction","value":"c","is_correct":false},{"label":"Email Delivery Rule","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000014',
+   'd3000000-0000-0000-000b-000000000005',
+   'What is the purpose of network segmentation?',
+   '[{"label":"To increase internet speed","value":"a","is_correct":false},{"label":"To isolate different parts of the network to limit the spread of a breach","value":"b","is_correct":true},{"label":"To combine multiple internet connections","value":"c","is_correct":false},{"label":"To assign static IP addresses","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000015',
+   'd3000000-0000-0000-000b-000000000005',
+   'How often should security patches be applied to endpoints in a managed environment?',
+   '[{"label":"Once a year","value":"a","is_correct":false},{"label":"Only when there is a known attack","value":"b","is_correct":false},{"label":"On a regular schedule — typically monthly or sooner for critical patches","value":"c","is_correct":true},{"label":"Patches are optional","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000b-000000000006 : Endpoint & Network Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000b-000000000016',
+   'd3000000-0000-0000-000b-000000000006',
+   'What is a key advantage of EDR over traditional antivirus?',
+   '[{"label":"EDR is cheaper","value":"a","is_correct":false},{"label":"EDR can detect and respond to threats that have never been seen before using behavioural analysis","value":"b","is_correct":true},{"label":"EDR does not require internet access","value":"c","is_correct":false},{"label":"EDR replaces firewalls entirely","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000b-000000000017',
+   'd3000000-0000-0000-000b-000000000006',
+   'What is a VLAN?',
+   '[{"label":"A type of VPN","value":"a","is_correct":false},{"label":"A virtual local area network that segments devices into separate logical broadcast domains","value":"b","is_correct":true},{"label":"A virus scanner tool","value":"c","is_correct":false},{"label":"A cloud storage protocol","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000b-000000000018',
+   'd3000000-0000-0000-000b-000000000006',
+   'What does CIS Benchmarks provide for system hardening?',
+   '[{"label":"A set of prescriptive configuration guidelines to securely configure operating systems and applications","value":"a","is_correct":true},{"label":"A cloud pricing comparison tool","value":"b","is_correct":false},{"label":"A type of firewall hardware","value":"c","is_correct":false},{"label":"A penetration testing framework","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000c-000000000001 : Identifying Automations Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000c-000000000001',
+   'd3000000-0000-0000-000c-000000000001',
+   'Which characteristic makes a process a good candidate for automation?',
+   '[{"label":"It involves complex human judgment","value":"a","is_correct":false},{"label":"It is repetitive, rule-based, and high-volume","value":"b","is_correct":true},{"label":"It happens once a year","value":"c","is_correct":false},{"label":"It requires creativity and intuition","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000c-000000000002',
+   'd3000000-0000-0000-000c-000000000001',
+   'What is a swimlane diagram used for in process mapping?',
+   '[{"label":"To diagram server infrastructure","value":"a","is_correct":false},{"label":"To show which person or team is responsible for each step in a process","value":"b","is_correct":true},{"label":"To visualise network traffic","value":"c","is_correct":false},{"label":"To plan software sprints","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000c-000000000003',
+   'd3000000-0000-0000-000c-000000000001',
+   'What does ROI stand for in the context of automation investment?',
+   '[{"label":"Rate of Infrastructure","value":"a","is_correct":false},{"label":"Return on Investment","value":"b","is_correct":true},{"label":"Risk of Implementation","value":"c","is_correct":false},{"label":"Ratio of Integration","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000c-000000000002 : Identifying Automations Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000c-000000000004',
+   'd3000000-0000-0000-000c-000000000002',
+   'When scoring automation candidates, which factor is most important to consider first?',
+   '[{"label":"The cost of the automation tool","value":"a","is_correct":false},{"label":"Business impact — how much value the automation will deliver","value":"b","is_correct":true},{"label":"The number of connectors available","value":"c","is_correct":false},{"label":"Whether a template already exists","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000c-000000000005',
+   'd3000000-0000-0000-000c-000000000002',
+   'What is a value stream map?',
+   '[{"label":"A list of software vendors","value":"a","is_correct":false},{"label":"A diagram showing the flow of materials and information from start to finish for a process","value":"b","is_correct":true},{"label":"A type of Gantt chart for project timelines","value":"c","is_correct":false},{"label":"A financial model for IT spend","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000c-000000000006',
+   'd3000000-0000-0000-000c-000000000002',
+   'What is "shadow IT" and why is it relevant to process automation?',
+   '[{"label":"IT systems used only at night","value":"a","is_correct":false},{"label":"Unofficial tools and workarounds staff create to fill gaps — identifying these helps uncover automation opportunities","value":"b","is_correct":true},{"label":"Backup systems that run in parallel","value":"c","is_correct":false},{"label":"IT systems managed by an external provider","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000c-000000000003 : Building Automations Pre
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000c-000000000007',
+   'd3000000-0000-0000-000c-000000000003',
+   'What is Power Automate primarily used for?',
+   '[{"label":"Creating Power BI dashboards","value":"a","is_correct":false},{"label":"Building automated workflows that connect apps and services","value":"b","is_correct":true},{"label":"Managing Azure virtual machines","value":"c","is_correct":false},{"label":"Writing PowerShell scripts","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000c-000000000008',
+   'd3000000-0000-0000-000c-000000000003',
+   'Which Power Automate flow type is triggered by a schedule (e.g. every day at 9am)?',
+   '[{"label":"Instant flow","value":"a","is_correct":false},{"label":"Automated flow","value":"b","is_correct":false},{"label":"Scheduled flow","value":"c","is_correct":true},{"label":"Desktop flow","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000c-000000000009',
+   'd3000000-0000-0000-000c-000000000003',
+   'What Microsoft 365 licence is required to use Power Automate with premium connectors?',
+   '[{"label":"Microsoft 365 Business Basic","value":"a","is_correct":false},{"label":"Power Automate Premium or per-flow plan","value":"b","is_correct":true},{"label":"Azure Free tier","value":"c","is_correct":false},{"label":"Microsoft 365 Apps for Business","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- d3000000-0000-0000-000c-000000000004 : Building Automations Post
+INSERT INTO public.assessment_questions (id, assessment_id, question_text, options, sort_order, points) VALUES
+  ('d4000000-0000-0000-000c-000000000010',
+   'd3000000-0000-0000-000c-000000000004',
+   'What is the purpose of a "Run after" configuration in Power Automate?',
+   '[{"label":"To delay the start of a flow","value":"a","is_correct":false},{"label":"To control what happens after a step succeeds, fails, is skipped, or times out","value":"b","is_correct":true},{"label":"To schedule flows for a later date","value":"c","is_correct":false},{"label":"To chain two separate flows together","value":"d","is_correct":false}]',
+   1, 1),
+  ('d4000000-0000-0000-000c-000000000011',
+   'd3000000-0000-0000-000c-000000000004',
+   'Which Power Automate connector allows you to post a message to a Teams channel?',
+   '[{"label":"SharePoint connector","value":"a","is_correct":false},{"label":"Microsoft Teams connector","value":"b","is_correct":true},{"label":"Office 365 Outlook connector","value":"c","is_correct":false},{"label":"Azure Service Bus connector","value":"d","is_correct":false}]',
+   2, 1),
+  ('d4000000-0000-0000-000c-000000000012',
+   'd3000000-0000-0000-000c-000000000004',
+   'What should you review in Power Automate to diagnose why a flow failed?',
+   '[{"label":"The SharePoint list settings","value":"a","is_correct":false},{"label":"The flow run history, which shows each step''s input, output, and error details","value":"b","is_correct":true},{"label":"The Azure Activity Log","value":"c","is_correct":false},{"label":"The Microsoft 365 admin centre","value":"d","is_correct":false}]',
+   3, 1)
+ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- ENROLLMENT: Customer user enrolled in Cloud Infrastructure Basics
+-- ---------------------------------------------------------------------------
+INSERT INTO public.user_course_enrollments (id, user_id, course_id, enrolled_at, last_active_at, last_module_id) VALUES
+  ('d5000000-0000-0000-000a-000000000001',
+   'c0000000-0000-0000-0000-000000000002',   -- customer@acmesolutions.co.za
+   'd0000000-0000-0000-000a-000000000001',   -- Cloud Infrastructure Basics
+   now() - interval '5 days',
+   now() - interval '1 day',
+   'd2000000-0000-0000-000a-000000000004'    -- last viewed: Azure Virtual Machines (section 2, module 1)
+  )
+ON CONFLICT (user_id, course_id) DO NOTHING;
+
+-- Section progress: Section 1 completed, Section 2 in progress
+INSERT INTO public.user_section_progress (id, user_id, section_id, required, modules_completed, pre_assessment_passed, post_assessment_passed) VALUES
+  -- Section 1: fully completed
+  ('d6000000-0000-0000-000a-000000000001',
+   'c0000000-0000-0000-0000-000000000002',
+   'd1000000-0000-0000-000a-000000000001',
+   true,
+   '["d2000000-0000-0000-000a-000000000001","d2000000-0000-0000-000a-000000000002","d2000000-0000-0000-000a-000000000003"]',
+   true,
+   true),
+  -- Section 2: in progress (1 of 3 modules watched, pre-assessment passed, post not yet)
+  ('d6000000-0000-0000-000a-000000000002',
+   'c0000000-0000-0000-0000-000000000002',
+   'd1000000-0000-0000-000a-000000000002',
+   true,
+   '["d2000000-0000-0000-000a-000000000004"]',
+   true,
+   false)
+ON CONFLICT (user_id, section_id) DO NOTHING;
