@@ -257,6 +257,19 @@ export interface UserSectionProgress {
   updated_at: string
 }
 
+export interface UserCourseEnrollment {
+  id: string
+  user_id: string
+  course_id: string
+  enrolled_at: string
+  completed_at: string | null
+  last_active_at: string
+  last_module_id: string | null
+  created_at: string
+  updated_at: string
+  course?: Course
+}
+
 export type ServiceStatus = 'draft' | 'active' | 'archived'
 export type CostingCategory = 'setup' | 'maintenance'
 export type PricingType = 'tiered' | 'formula'
