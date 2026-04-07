@@ -2,7 +2,7 @@
 
 -- L2: Growth > Ads (parent = Growth L1)
 INSERT INTO public.menu_items (id, parent_id, label, icon, route, sort_order, level) VALUES
-  ('20000000-0000-0000-0000-000000000301', '10000000-0000-0000-0000-000000000002', 'Ads', 'campaign', '/growth/ads', 3, 2)
+  ('20000000-0000-0000-0000-000000000401', '10000000-0000-0000-0000-000000000002', 'Ads', 'campaign', '/growth/ads', 3, 2)
 ON CONFLICT (id) DO NOTHING;
 
 -- L2: Settings > Integrations (parent = Settings L1)
@@ -19,7 +19,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO public.role_menu_access (role, menu_item_id)
 SELECT 'admin', id FROM public.menu_items
 WHERE id IN (
-  '20000000-0000-0000-0000-000000000301',
+  '20000000-0000-0000-0000-000000000401',
   '20000000-0000-0000-0000-000000000302',
   '30000000-0000-0000-0000-000000000301'
 )
