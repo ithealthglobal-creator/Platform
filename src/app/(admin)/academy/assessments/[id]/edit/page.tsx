@@ -58,6 +58,7 @@ export default function EditAssessmentPage() {
   const [formName, setFormName] = useState('')
   const [formDescription, setFormDescription] = useState('')
   const [formPassThreshold, setFormPassThreshold] = useState('80')
+  const [formJourneyThreshold, setFormJourneyThreshold] = useState('80')
   const [formActive, setFormActive] = useState(true)
   const [formOnboarding, setFormOnboarding] = useState(false)
   const [formWelcomeHeading, setFormWelcomeHeading] = useState('')
@@ -118,6 +119,7 @@ export default function EditAssessmentPage() {
       setFormName(a.name)
       setFormDescription(a.description ?? '')
       setFormPassThreshold(String(a.pass_threshold))
+      setFormJourneyThreshold(String(a.journey_threshold ?? 80))
       setFormActive(a.is_active)
       setFormOnboarding(a.is_onboarding ?? false)
       setFormWelcomeHeading(a.welcome_heading ?? '')
@@ -154,6 +156,7 @@ export default function EditAssessmentPage() {
         name: formName.trim(),
         description: formDescription.trim() || null,
         pass_threshold: Number(formPassThreshold) || 80,
+        journey_threshold: Number(formJourneyThreshold),
         is_active: formActive,
         scope: formScope,
         phase_id: formScope === 'phase' ? formPhaseId : null,
@@ -451,6 +454,21 @@ export default function EditAssessmentPage() {
             max={100}
             className="w-28"
           />
+        </div>
+
+        <div>
+          <Label htmlFor="journeyThreshold">Journey Threshold (%)</Label>
+          <Input
+            id="journeyThreshold"
+            type="number"
+            min={0}
+            max={100}
+            value={formJourneyThreshold}
+            onChange={(e) => setFormJourneyThreshold(e.target.value)}
+          />
+          <p className="mt-1 text-xs text-slate-500">
+            Services scoring below this % appear in the customer journey
+          </p>
         </div>
 
         <div className="flex items-center gap-2">
