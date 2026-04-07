@@ -1,7 +1,7 @@
 // src/app/api/services/checkout/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { buildPayFastFormData } from '@/lib/payfast'
+import { buildPayFastFormData, getPayFastCredentials } from '@/lib/payfast'
 import { createClient } from '@supabase/supabase-js'
 
 interface CheckoutItem {
@@ -95,12 +95,18 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin
     const itemName = items.length === 1 ? 'IThealth Service' : `IThealth Services (${items.length})`
 
+    const credentials = await getPayFastCredentials()
+    if (!credentials) {
+      return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 503 })
+    }
+
     const payfast = buildPayFastFormData({
       orderId: order.id,
       total,
       itemName,
       billingEmail: billing_email,
       baseUrl,
+      credentials,
     })
 
     return NextResponse.json({

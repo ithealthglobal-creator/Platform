@@ -574,6 +574,18 @@ export interface MetaIntegration {
   updated_at: string
 }
 
+export interface PayfastIntegration {
+  id: string
+  company_id: string
+  merchant_id: string | null
+  merchant_key_encrypted: string | null
+  passphrase_encrypted: string | null
+  is_sandbox: boolean
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface MetaCampaign {
   id: string
   integration_id: string

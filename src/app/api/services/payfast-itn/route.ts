@@ -1,7 +1,7 @@
 // src/app/api/services/payfast-itn/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { validatePayFastSignature } from '@/lib/payfast'
+import { validatePayFastSignature, getPayFastCredentials } from '@/lib/payfast'
 
 // PayFast valid IP ranges (sandbox + production)
 const PAYFAST_IPS = [
@@ -12,9 +12,9 @@ const PAYFAST_IPS = [
   '197.97.145.144/28',
 ]
 
-function isPayFastIP(ip: string): boolean {
+function isPayFastIP(ip: string, isSandbox: boolean): boolean {
   // In sandbox mode, skip IP check
-  if (process.env.PAYFAST_SANDBOX === 'true') return true
+  if (isSandbox) return true
   // Simple check — in production, use a proper CIDR matching library
   return PAYFAST_IPS.some(range => ip.startsWith(range.split('/')[0].split('.').slice(0, 3).join('.')))
 }
@@ -35,17 +35,23 @@ export async function POST(req: NextRequest) {
     const postData: Record<string, string> = {}
     formData.forEach((value, key) => { postData[key] = value.toString() })
 
+    // Load credentials
+    const credentials = await getPayFastCredentials()
+    if (!credentials) {
+      console.error('PayFast ITN: no credentials configured')
+      return NextResponse.json({ error: 'Payment gateway not configured' }, { status: 503 })
+    }
+
     // Validate source IP
     const forwardedFor = req.headers.get('x-forwarded-for')
     const sourceIP = forwardedFor?.split(',')[0]?.trim() || '0.0.0.0'
-    if (!isPayFastIP(sourceIP)) {
+    if (!isPayFastIP(sourceIP, credentials.isSandbox)) {
       console.error('PayFast ITN: invalid source IP', sourceIP)
       return NextResponse.json({ error: 'Invalid source' }, { status: 403 })
     }
 
     // Validate signature
-    const passphrase = process.env.PAYFAST_PASSPHRASE!
-    if (!validatePayFastSignature(postData, passphrase)) {
+    if (!validatePayFastSignature(postData, credentials.passphrase)) {
       console.error('PayFast ITN: invalid signature')
       return NextResponse.json({ error: 'Invalid signature' }, { status: 403 })
     }

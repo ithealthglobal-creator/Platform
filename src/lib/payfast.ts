@@ -1,5 +1,6 @@
 // src/lib/payfast.ts
 import crypto from 'crypto'
+import { createClient } from '@supabase/supabase-js'
 
 const PAYFAST_SANDBOX_URL = 'https://sandbox.payfast.co.za/eng/process'
 const PAYFAST_LIVE_URL = 'https://www.payfast.co.za/eng/process'
@@ -14,21 +15,68 @@ export function generatePayFastSignature(data: Record<string, string>, passphras
   return crypto.createHash('md5').update(withPassphrase).digest('hex')
 }
 
+export interface PayFastCredentials {
+  merchantId: string
+  merchantKey: string
+  passphrase: string
+  isSandbox: boolean
+}
+
+/**
+ * Load PayFast credentials from the database (payfast_integrations table),
+ * falling back to environment variables.
+ *
+ * NOTE: This function is server-only — it uses the service role key.
+ */
+export async function getPayFastCredentials(): Promise<PayFastCredentials | null> {
+  // Try database first (payfast_integrations table)
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data } = await supabaseAdmin
+    .from('payfast_integrations')
+    .select('*')
+    .eq('is_active', true)
+    .limit(1)
+    .single()
+
+  if (data?.merchant_id && data?.merchant_key_encrypted && data?.passphrase_encrypted) {
+    return {
+      merchantId: data.merchant_id,
+      merchantKey: data.merchant_key_encrypted,
+      passphrase: data.passphrase_encrypted,
+      isSandbox: data.is_sandbox,
+    }
+  }
+
+  // Fall back to environment variables
+  if (process.env.PAYFAST_MERCHANT_ID && process.env.PAYFAST_MERCHANT_KEY && process.env.PAYFAST_PASSPHRASE) {
+    return {
+      merchantId: process.env.PAYFAST_MERCHANT_ID,
+      merchantKey: process.env.PAYFAST_MERCHANT_KEY,
+      passphrase: process.env.PAYFAST_PASSPHRASE,
+      isSandbox: process.env.PAYFAST_SANDBOX === 'true',
+    }
+  }
+
+  return null
+}
+
 export function buildPayFastFormData(options: {
   orderId: string
   total: number
   itemName: string
   billingEmail?: string
   baseUrl: string
+  credentials: PayFastCredentials
 }): { url: string; data: Record<string, string> } {
-  const merchantId = process.env.PAYFAST_MERCHANT_ID!
-  const merchantKey = process.env.PAYFAST_MERCHANT_KEY!
-  const passphrase = process.env.PAYFAST_PASSPHRASE!
-  const isSandbox = process.env.PAYFAST_SANDBOX === 'true'
+  const { credentials } = options
 
   const data: Record<string, string> = {
-    merchant_id: merchantId,
-    merchant_key: merchantKey,
+    merchant_id: credentials.merchantId,
+    merchant_key: credentials.merchantKey,
     return_url: `${options.baseUrl}/portal/checkout/success?order_id=${options.orderId}`,
     cancel_url: `${options.baseUrl}/portal/checkout/cancel`,
     notify_url: `${options.baseUrl}/api/services/payfast-itn`,
@@ -41,10 +89,10 @@ export function buildPayFastFormData(options: {
     data.email_address = options.billingEmail
   }
 
-  data.signature = generatePayFastSignature(data, passphrase)
+  data.signature = generatePayFastSignature(data, credentials.passphrase)
 
   return {
-    url: isSandbox ? PAYFAST_SANDBOX_URL : PAYFAST_LIVE_URL,
+    url: credentials.isSandbox ? PAYFAST_SANDBOX_URL : PAYFAST_LIVE_URL,
     data,
   }
 }
