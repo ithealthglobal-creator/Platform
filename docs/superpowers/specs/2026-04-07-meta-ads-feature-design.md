@@ -17,6 +17,8 @@ Add a Meta (Facebook) Ads management feature to the IThealth.ai admin platform. 
 | L2 | Integrations | /settings/integrations | connect | 20 | Settings |
 | L3 | Meta | /settings/integrations/meta | logo--facebook | 10 | Integrations |
 
+**Role access:** All three new menu items get `role_menu_access` entries for the `admin` role only. No customer or partner access.
+
 ## Database Schema
 
 ### meta_integrations
@@ -119,7 +121,7 @@ Synced individual ad data including creative assets and all performance metrics.
 | impressions | bigint | |
 | clicks | bigint | |
 | conversions | bigint | |
-| emq_score | numeric | Estimated Meta Quality score (from quality_ranking, engagement_rate_ranking, conversion_rate_ranking) |
+| emq_score | numeric | Computed from Meta's quality_ranking, engagement_rate_ranking, and conversion_rate_ranking. Each ranking maps to a numeric value: ABOVE_AVERAGE = 3, AVERAGE = 2, BELOW_AVERAGE_10/20/35 = 1. EMQ = sum of all three (range 3–9). |
 | synced_at | timestamptz | |
 
 **Constraints:** Unique on (ad_set_id, meta_ad_id).
@@ -238,8 +240,10 @@ All under `/api/admin/ads/`. All require authenticated admin session. Use Supaba
 2. User grants permissions (ads_read, ads_management)
 3. Meta redirects to `/api/admin/ads/auth/meta/callback` with auth code
 4. Callback exchanges code for short-lived token, then exchanges for long-lived token (60-day expiry)
-5. Token stored encrypted in meta_integrations.access_token_encrypted
+5. Token encrypted at the application layer (Node.js) using AES-256-GCM with a key from the `META_ENCRYPTION_KEY` environment variable, then stored in meta_integrations.access_token_encrypted. The same approach applies to meta_app_secret_encrypted.
 6. Redirect back to `/settings/integrations/meta/` with success toast
+
+**Encryption:** All sensitive fields (access_token_encrypted, meta_app_secret_encrypted) are encrypted/decrypted at the application layer in the Route Handlers using Node.js `crypto` module (AES-256-GCM). The encryption key is stored in the `META_ENCRYPTION_KEY` environment variable (server-side only, never exposed to the client). A shared utility in `src/lib/encryption.ts` provides `encrypt(plaintext)` and `decrypt(ciphertext)` functions.
 
 ### Meta API Proxy (Live Data)
 
@@ -252,6 +256,8 @@ All under `/api/admin/ads/`. All require authenticated admin session. Use Supaba
 
 These endpoints read the access token from meta_integrations, call Meta's Marketing API, and return the response. No data is persisted — these are for real-time detail/comparison views.
 
+**Compare ID mapping:** The `ids` parameter in the compare endpoint accepts internal UUIDs (from the Supabase `meta_ads` table). The Route Handler looks up the corresponding `meta_ad_id` for each UUID, then calls Meta's API using those Meta IDs. This keeps the frontend working entirely with internal UUIDs while the server handles the translation.
+
 ### Sync
 
 | Method | Route | Purpose |
@@ -263,10 +269,10 @@ These endpoints read the access token from meta_integrations, call Meta's Market
 
 ### Flow
 
-1. **Trigger**: pg_cron job (based on sync_frequency) OR manual "Sync Now" from UI
+1. **Trigger**: pg_cron + pg_net (Supabase's HTTP extension) calls `POST /api/admin/ads/sync` on schedule, OR manual "Sync Now" from UI. pg_cron executes a SQL statement that uses `net.http_post()` to invoke the Route Handler.
 2. **Start**: Set sync_status = 'syncing' on meta_integrations row
-3. **Fetch from Meta**: Using the stored access token:
-   - GET `/act_{ad_account_id}/campaigns` with fields and insights
+3. **Fetch from Meta**: Using the stored access token, call Meta Marketing API **v21.0**:
+   - GET `https://graph.facebook.com/v21.0/act_{ad_account_id}/campaigns` with fields and insights
    - For each campaign: GET `/{campaign_id}/adsets` with fields and insights
    - For each ad set: GET `/{adset_id}/ads` with fields, insights, and creative data
 4. **Upsert to Supabase**: Upsert each entity using the meta_*_id as the conflict key. Update synced_at on each row.
@@ -284,9 +290,22 @@ Long-lived tokens expire after 60 days. If Meta returns an auth error during syn
 2. Set sync_error = 'Access token expired. Please reconnect your Meta account.'
 3. The UI shows this error on the settings page with a re-connect prompt
 
-### pg_cron Scheduling
+### pg_cron + pg_net Scheduling
 
-A single pg_cron entry calls the sync endpoint. The Route Handler checks the sync_frequency value and compares against last_synced_at to decide whether to actually execute. This means the cron runs frequently (e.g., every 15 minutes) but the sync only executes when the configured interval has elapsed.
+A single pg_cron entry runs every 15 minutes and uses Supabase's `pg_net` extension (`net.http_post()`) to call `POST /api/admin/ads/sync`. The Route Handler checks the sync_frequency value and compares against last_synced_at to decide whether to actually execute. This means the cron runs frequently but the sync only executes when the configured interval has elapsed.
+
+```sql
+-- Example pg_cron + pg_net setup
+SELECT cron.schedule(
+  'meta-ads-sync',
+  '*/15 * * * *',
+  $$SELECT net.http_post(
+    url := current_setting('app.site_url') || '/api/admin/ads/sync',
+    headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
+    body := '{}'::jsonb
+  )$$
+);
+```
 
 ## Benchmark Thresholds
 
