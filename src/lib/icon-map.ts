@@ -17,6 +17,9 @@ import {
   Home,
   Roadmap,
   Help,
+  Campaign,
+  Connect,
+  LogoFacebook,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -39,4 +42,7 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'home': Home,
   'roadmap': Roadmap,
   'help': Help,
+  'campaign': Campaign,
+  'connect': Connect,
+  'logo--facebook': LogoFacebook,
 }
