@@ -30,15 +30,17 @@ Add `journey_threshold` (integer, default 80) to the `assessments` table. This c
 
 Admins edit this value in the existing assessment editor UI.
 
+**Note:** This is distinct from the existing `pass_threshold` column (which determines pass/fail for the assessment itself). `journey_threshold` controls which services appear in the journey Gantt chart — a service-level inclusion filter, not an assessment-level pass/fail gate.
+
 ## Data Flow
 
-1. Page loads → fetch the customer's latest `assessment_attempt` for the onboarding assessment (scope = 'journey', is_onboarding = true)
+1. Page loads → fetch the customer's latest `assessment_attempt` for the onboarding assessment (`is_onboarding = true` — there is a unique index enforcing only one onboarding assessment exists)
 2. Read the `journey_threshold` from the associated `assessments` record
 3. Extract `service_scores` from the attempt → filter services where `pct < journey_threshold`
 4. Fetch those services with their `phase`, `service_runbook_steps` (ordered by sort_order), and `service_academy_links` joined with `courses`
 5. Build the timeline model:
    - Group services by phase, ordered by `phases.sort_order`
-   - Within each phase, order services by `services.sort_order` (TBD — may need a sort_order column on services, or use name alphabetically)
+   - Within each phase, order services by `services.name` alphabetically (the `services` table has no `sort_order` column; alphabetical is sufficient for 2 services per phase)
    - Each service's duration = sum of its runbook steps' `estimated_minutes`
    - Each service starts where the previous service ends (sequential)
    - Each phase's duration = sum of its services' durations
