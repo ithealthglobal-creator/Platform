@@ -312,7 +312,7 @@ export default function CourseDetailPage() {
               <button
                 className="px-6 py-2.5 text-sm font-semibold text-white"
                 style={{ background: phaseColor, borderRadius: '10px 0 10px 10px' }}
-                onClick={() => router.push(`/portal/academy/courses/${courseId}/certificate`)}
+                onClick={() => router.push(`/portal/academy/certificates/${certificate.id}`)}
               >
                 <span className="flex items-center gap-2">
                   <Certificate size={16} />

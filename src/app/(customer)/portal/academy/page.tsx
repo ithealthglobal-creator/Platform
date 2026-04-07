@@ -169,7 +169,7 @@ export default function AcademyPage() {
             onClick={() => setFilter(f)}
             className="px-4 py-1.5 text-xs font-semibold transition-colors"
             style={{
-              borderRadius: '16px 0 16px 16px',
+              borderRadius: '20px 0 20px 20px',
               background: filter === f ? '#133258' : '#e2e8f0',
               color: filter === f ? '#fff' : '#475569',
             }}

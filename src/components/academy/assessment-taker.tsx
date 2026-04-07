@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { CheckmarkFilled, CloseOutline, ArrowRight } from '@carbon/icons-react'
+import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase-client'
 import type { Assessment, AssessmentQuestion } from '@/lib/types'
 
@@ -56,7 +57,7 @@ export function AssessmentTaker({
     const passed = score >= assessment.pass_threshold
     const completedAt = new Date().toISOString()
 
-    await supabase.from('assessment_attempts').insert({
+    const { error: insertError } = await supabase.from('assessment_attempts').insert({
       assessment_id: assessment.id,
       user_id: userId,
       score,
@@ -65,6 +66,12 @@ export function AssessmentTaker({
       started_at: startedAt,
       completed_at: completedAt,
     })
+
+    if (insertError) {
+      toast.error('Failed to submit assessment. Please try again.')
+      setSubmitting(false)
+      return
+    }
 
     setResult({ score, passed })
     setView('results')

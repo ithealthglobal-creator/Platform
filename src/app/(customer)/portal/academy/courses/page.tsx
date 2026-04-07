@@ -88,8 +88,7 @@ export default function CoursesPage() {
     const completed = sectionProgress.filter(
       (sp) =>
         sectionIds.includes(sp.section_id) &&
-        sp.pre_assessment_passed &&
-        sp.post_assessment_passed,
+        sp.post_assessment_passed === true,
     ).length
     const total = sectionIds.length
     return total === 0 ? 0 : Math.round((completed / total) * 100)
@@ -162,7 +161,9 @@ export default function CoursesPage() {
             className="bg-white border border-slate-200 p-12 text-center text-slate-500 text-sm"
             style={{ borderRadius: '16px 0 16px 16px' }}
           >
-            No courses available yet. Check back soon.
+            {activePhase !== 'All'
+              ? 'No courses found for this phase.'
+              : 'No courses available yet. Check back soon.'}
           </div>
         ) : (
           <div className="grid grid-cols-3 gap-4">
