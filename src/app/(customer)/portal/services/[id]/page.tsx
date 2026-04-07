@@ -11,7 +11,7 @@ import { formatPrice, deriveDisplayPrice } from '@/lib/pricing'
 import { Button } from '@/components/ui/button'
 import type { Service, CustomerContract, ServiceSla, SlaTemplate, ServiceCostingItem, ServiceRunbookStep } from '@/lib/types'
 
-interface ServiceDetail extends Service {
+type ServiceDetail = Omit<Service, 'phase'> & {
   phase_name: string
   phase?: { name: string }
   service_products: { notes: string | null; product: { name: string; vendor: string | null; category: string | null } }[]
