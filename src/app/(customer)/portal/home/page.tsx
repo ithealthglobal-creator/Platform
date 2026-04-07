@@ -31,7 +31,7 @@ export default function HomePage() {
   const { profile } = useAuth()
   const [attempt, setAttempt] = useState<AssessmentAttempt | null | undefined>(undefined)
   const [phases, setPhases] = useState<Phase[]>([])
-  const [services, setServices] = useState<Service[]>([])
+  const [services, setServices] = useState<Pick<Service, 'id' | 'name' | 'description' | 'phase_id' | 'status'>[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -252,7 +252,7 @@ function RecommendedServices({
 }: {
   attempt: AssessmentAttempt
   phases: Phase[]
-  services: Service[]
+  services: Pick<Service, 'id' | 'name' | 'description' | 'phase_id' | 'status'>[]
 }) {
   const serviceScores = attempt.service_scores
   if (!serviceScores) return null
