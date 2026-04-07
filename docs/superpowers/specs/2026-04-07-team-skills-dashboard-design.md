@@ -20,10 +20,12 @@ A team skills dashboard in the customer portal (`/portal/team`) that lets compan
 
 ## User Roles
 
+**Company admin distinction:** Add `is_company_admin boolean DEFAULT false` column to `profiles`. The user who creates the company (original onboarding signup) gets `is_company_admin = true`. Admins can also promote other members. All are `role = 'customer'` — the boolean distinguishes who gets the full dashboard vs member view. API auth checks: `profile.role === 'customer' && profile.is_company_admin`.
+
 | Role | Capabilities |
 |------|-------------|
-| Company admin/owner | Full team dashboard: radar, heatmap, trends, member list. Invite/revoke members. |
-| Team member | Own skill profile with anonymized team averages. Access academy. Complete assessments. |
+| Company admin (`is_company_admin = true`) | Full team dashboard: radar, heatmap, trends, member list. Invite/revoke members. |
+| Team member (`is_company_admin = false`) | Own skill profile with anonymized team averages. Access academy. Complete assessments. |
 
 ## UI Design
 
@@ -153,9 +155,11 @@ A team skills dashboard in the customer portal (`/portal/team`) that lets compan
 - Users can SELECT their own snapshots
 - Company admins can SELECT all snapshots for their company
 
-### Existing Tables — No Schema Changes
+### Modified Tables
 
-- `profiles` — Already has `company_id` and `role`. Members are `role = 'customer'` with matching `company_id`.
+- `profiles` — Add `is_company_admin boolean DEFAULT false`. Already has `company_id` and `role`. Members are `role = 'customer'` with matching `company_id`. The boolean distinguishes admins from regular members.
+
+### Existing Tables — No Other Schema Changes
 - `assessment_attempts` — Already stores `service_scores` and `phase_scores` as jsonb.
 - `user_course_enrollments` — Already tracks `completed_at`.
 - `service_academy_links` — Already links services to courses.
@@ -164,14 +168,16 @@ A team skills dashboard in the customer portal (`/portal/team`) that lets compan
 
 ### Live Composite Score (Current State)
 
-Calculated server-side via API route, reusing `scoring.ts`:
+Calculated server-side via API route. New function `calculateCompositeScore()` in `src/lib/scoring.ts` (extends the existing module):
 
 1. Fetch all `assessment_attempts` for the user (onboarding + post-course)
 2. For each service, take the **best** `pct` score across all attempts
 3. Fetch completed courses linked to services (via `service_academy_links`)
-4. For each service with a completed linked course, apply a **completion bonus**: `min(best_score + 5, 100)` — a 5-point boost per completed course, capped at 100
-5. Recalculate phase scores as weighted average of service scores within each phase
-6. Overall score = average of phase percentages
+4. For each service with completed linked courses, apply a **completion bonus**: `min(best_score + (5 * completed_course_count), 100)` — a 5-point boost per completed course that links to that service, stacking and capped at 100
+5. Recalculate phase scores using existing `calculatePhaseScores()` with the updated service scores
+6. Overall score via existing `calculateOverallScore()`
+
+This keeps all scoring logic in one module. The existing `calculateServiceScores()` and `calculatePhaseScores()` are unchanged — the new function composes them with the "best across attempts" and "course bonus" logic on top.
 
 ### Snapshot (Historical)
 
@@ -192,12 +198,15 @@ Each snapshot captures the user's full composite score at that moment using the 
 
 ### `POST /api/team/invite`
 
-**Auth:** Company admin only (check `profile.role` and `profile.company_id`)
+**Auth:** Company admin only (check `profile.is_company_admin === true` and `profile.company_id`)
 
 **Body:**
 ```json
 {
-  "emails": ["john@acme.com", "jane@acme.com"],
+  "invitees": [
+    { "email": "john@acme.com", "display_name": "John Smith" },
+    { "email": "jane@acme.com" }
+  ],
   "message": "Welcome to the team!"
 }
 ```
@@ -241,9 +250,21 @@ Each snapshot captures the user's full composite score at that moment using the 
 3. Fetch recommended courses based on weakest services
 4. Return `{ myScores: {...}, teamAverages: {...}, recommendedCourses: [...] }`
 
+### `POST /api/team/accept-invite`
+
+**Auth:** Authenticated user (just set their password)
+
+**Body:** `{ token: "uuid" }`
+
+**Logic:**
+1. Look up `team_invitations` by token where status = `pending` and `expires_at > now()`
+2. Set `profiles.company_id` to the invitation's `company_id`, set `profiles.is_company_admin = false`
+3. Mark invitation as `accepted`, set `accepted_at`
+4. Return `{ companyId, companyName }`
+
 ### `POST /api/team/snapshot`
 
-**Auth:** Internal (called by assessment/course completion handlers)
+**Auth:** Service-role only (called server-side from assessment/course completion handlers, not exposed to client). Uses `supabase-server.ts` service-role client.
 
 **Body:** `{ userId, source, sourceId }`
 
@@ -257,7 +278,7 @@ Each snapshot captures the user's full composite score at that moment using the 
 2. Admin enters emails (single, paste, or CSV upload) + optional message
 3. `POST /api/team/invite` → creates invitations + sends Supabase auth invite emails
 4. Invitee clicks email link → redirected to `/set-password?invite={token}`
-5. Set-password page: creates account, API marks invitation as `accepted`, links profile to company via `company_id`
+5. Set-password page: creates account. **Modification needed:** after password is set, check URL for `invite` token param. If present, call a new API route `POST /api/team/accept-invite` which validates the token, sets `company_id` on the profile, and marks the invitation as `accepted`
 6. User logs in → customer guard checks for completed onboarding assessment
 7. If no assessment: redirect to onboarding assessment (existing flow)
 8. User completes assessment → `POST /api/team/snapshot` writes initial snapshot
@@ -296,9 +317,10 @@ src/components/team/
 Single migration file: `supabase/migrations/YYYYMMDDHHMMSS_team_skills.sql`
 
 Contents:
-1. Create `team_invitations` table with indexes and RLS
-2. Create `skill_snapshots` table with indexes and RLS
-3. RLS policies for both tables
+1. Add `is_company_admin boolean DEFAULT false` to `profiles`
+2. Create `team_invitations` table with indexes and RLS
+3. Create `skill_snapshots` table with indexes and RLS
+4. RLS policies for all affected tables
 
 ## Edge Cases
 
