@@ -606,7 +606,41 @@ INSERT INTO public.service_academy_links (service_id, course_id, is_required) VA
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- NOTE: profiles, assessment_attempts, sales_leads, certificates, and
--- user_section_progress depend on auth.users and cannot be seeded via SQL.
--- Create test users via the admin UI or Supabase dashboard.
+-- TEST USERS (auth + profiles)
 -- ---------------------------------------------------------------------------
+-- Admin: guy.duncan@futuvara.com / Roccolola2013!
+-- Customer: customer@acmesolutions.co.za / Customer2024!
+-- Partner: partner@cloudwave.co.za / Partner2024!
+
+INSERT INTO auth.users (
+  instance_id, id, aud, role, email, encrypted_password,
+  email_confirmed_at, created_at, updated_at, confirmation_token, raw_app_meta_data, raw_user_meta_data
+) VALUES
+  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated',
+   'guy.duncan@futuvara.com', crypt('Roccolola2013!', gen_salt('bf')),
+   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}'),
+  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated',
+   'customer@acmesolutions.co.za', crypt('Customer2024!', gen_salt('bf')),
+   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}'),
+  ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated',
+   'partner@cloudwave.co.za', crypt('Partner2024!', gen_salt('bf')),
+   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at) VALUES
+  (gen_random_uuid(), 'c0000000-0000-0000-0000-000000000001',
+   '{"sub":"c0000000-0000-0000-0000-000000000001","email":"guy.duncan@futuvara.com"}',
+   'email', 'c0000000-0000-0000-0000-000000000001', now(), now(), now()),
+  (gen_random_uuid(), 'c0000000-0000-0000-0000-000000000002',
+   '{"sub":"c0000000-0000-0000-0000-000000000002","email":"customer@acmesolutions.co.za"}',
+   'email', 'c0000000-0000-0000-0000-000000000002', now(), now(), now()),
+  (gen_random_uuid(), 'c0000000-0000-0000-0000-000000000003',
+   '{"sub":"c0000000-0000-0000-0000-000000000003","email":"partner@cloudwave.co.za"}',
+   'email', 'c0000000-0000-0000-0000-000000000003', now(), now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO public.profiles (id, email, display_name, role, company_id) VALUES
+  ('c0000000-0000-0000-0000-000000000001', 'guy.duncan@futuvara.com', 'Guy Duncan', 'admin', '00000000-0000-0000-0000-000000000001'),
+  ('c0000000-0000-0000-0000-000000000002', 'customer@acmesolutions.co.za', 'Acme Customer', 'customer', '00000000-0000-0000-0000-000000000002'),
+  ('c0000000-0000-0000-0000-000000000003', 'partner@cloudwave.co.za', 'CloudWave Partner', 'partner', '00000000-0000-0000-0000-000000000006')
+ON CONFLICT (id) DO NOTHING;
