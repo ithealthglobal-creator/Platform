@@ -20,6 +20,7 @@ export interface Profile {
   email: string
   avatar_url: string | null
   is_active: boolean
+  is_company_admin: boolean
   created_at: string
   updated_at: string
   company?: Company
@@ -695,4 +696,80 @@ export interface JourneyTimeline {
   totalMinutes: number
   serviceCount: number
   phaseCount: number
+}
+
+// ---------------------------------------------------------------------------
+// Team Skills Dashboard
+// ---------------------------------------------------------------------------
+export type InvitationStatus = 'pending' | 'accepted' | 'expired' | 'revoked'
+
+export interface TeamInvitation {
+  id: string
+  company_id: string
+  invited_by: string
+  email: string
+  display_name: string | null
+  token: string
+  status: InvitationStatus
+  message: string | null
+  expires_at: string
+  accepted_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface SkillSnapshot {
+  id: string
+  user_id: string
+  company_id: string
+  overall_score: number
+  phase_scores: Record<string, number>
+  service_scores: Record<string, { earned: number; max: number; pct: number }>
+  source: 'onboarding' | 'assessment' | 'course_completion'
+  source_id: string | null
+  snapshot_at: string
+  created_at: string
+}
+
+export interface CompositeScore {
+  overall: number
+  phases: Record<string, number>
+  services: Record<string, { earned: number; max: number; pct: number }>
+}
+
+export interface TeamDashboardData {
+  members: {
+    id: string
+    display_name: string
+    email: string
+    is_company_admin: boolean
+    scores: CompositeScore | null
+    coursesCompleted: number
+  }[]
+  teamAverages: CompositeScore
+  stats: {
+    memberCount: number
+    avgMaturity: number
+    trend30d: number
+    coursesCompleted: number
+  }
+}
+
+export interface TeamTrendPoint {
+  week: string
+  overall: number
+  phases: Record<string, number>
+}
+
+export interface MemberProfile {
+  myScores: CompositeScore
+  teamAverages: CompositeScore
+  recommendedCourses: {
+    id: string
+    name: string
+    phase_name: string
+    phase_color: string
+    service_name: string
+    service_score: number
+  }[]
 }
