@@ -79,10 +79,10 @@ export default function ServicesPage() {
       <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Services</p>
       <h1 className="mt-1 text-2xl font-bold text-slate-900">Your Services</h1>
 
-      <Tabs defaultValue="my-services" className="mt-6">
+      <Tabs defaultValue="all-services" className="mt-6">
         <TabsList variant="line">
-          <TabsTrigger value="my-services">My Services</TabsTrigger>
           <TabsTrigger value="all-services">All Services</TabsTrigger>
+          <TabsTrigger value="my-services">My Services</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my-services" className="mt-6">
