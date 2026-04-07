@@ -46,3 +46,9 @@ next-env.d.ts
 .worktrees/
 docker-volumes/
 .firebase/
+
+# AI service
+ai-service/.env
+ai-service/__pycache__/
+ai-service/**/__pycache__/
+ai-service/*.pyc

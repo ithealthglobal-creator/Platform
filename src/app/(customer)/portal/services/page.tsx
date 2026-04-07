@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { CustomerServiceCard } from '@/components/services/customer-service-card'
 import { CartIndicator } from '@/components/cart/cart-indicator'
 import { deriveDisplayPrice } from '@/lib/pricing'
+import { getPhaseColor } from '@/lib/phase-colors'
 import type { Service, CustomerContract, ServiceCostingItem } from '@/lib/types'
 
 type ServiceWithPhase = Service & { phase_name: string; phase?: { name: string } }
@@ -78,10 +79,10 @@ export default function ServicesPage() {
       <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Services</p>
       <h1 className="mt-1 text-2xl font-bold text-slate-900">Your Services</h1>
 
-      <Tabs defaultValue="my-services" className="mt-6">
+      <Tabs defaultValue="all-services" className="mt-6">
         <TabsList variant="line">
-          <TabsTrigger value="my-services">My Services</TabsTrigger>
           <TabsTrigger value="all-services">All Services</TabsTrigger>
+          <TabsTrigger value="my-services">My Services</TabsTrigger>
         </TabsList>
 
         <TabsContent value="my-services" className="mt-6">
@@ -106,15 +107,25 @@ export default function ServicesPage() {
         <TabsContent value="all-services" className="mt-6">
           <div className="mb-5 flex items-center justify-between">
             <div className="flex gap-2">
-              {PHASE_FILTERS.map(f => (
-                <button
-                  key={f}
-                  onClick={() => setPhaseFilter(f)}
-                  className={`rounded-full px-3 py-1 text-xs ${phaseFilter === f ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
-                >
-                  {f}
-                </button>
-              ))}
+              {PHASE_FILTERS.map(f => {
+                const isActive = phaseFilter === f
+                const color = f === 'All' ? '#0f172a' : getPhaseColor(f)
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setPhaseFilter(f)}
+                    className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${isActive ? 'text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+                    style={isActive ? { backgroundColor: color } : undefined}
+                  >
+                    {f === 'All' ? 'All' : (
+                      <span className="flex items-center gap-1.5">
+                        <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                        {f}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
             <CartIndicator />
           </div>

@@ -20,6 +20,11 @@ import {
   Bullhorn,
   Connect,
   LogoFacebook,
+  AiGovernanceLifecycle,
+  Chat,
+  Bot,
+  NetworkEnterprise,
+  FlowStream,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -45,4 +50,9 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'campaign': Bullhorn,
   'connect': Connect,
   'logo--facebook': LogoFacebook,
+  'ai-governance-lifecycle': AiGovernanceLifecycle,
+  'chat': Chat,
+  'bot': Bot,
+  'network-enterprise': NetworkEnterprise,
+  'flow-stream': FlowStream,
 }

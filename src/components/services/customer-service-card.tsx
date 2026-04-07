@@ -37,27 +37,30 @@ export function CustomerServiceCard(props: Props) {
 
   return (
     <div
-      className="flex flex-col overflow-hidden bg-white"
+      className="group flex flex-col overflow-hidden bg-white transition-shadow hover:shadow-lg"
       style={{ borderRadius: '16px 0 16px 16px', border: cardBorder }}
     >
-      {/* Phase header */}
-      <div
-        className="px-5 py-3 text-xs font-semibold uppercase tracking-wider text-white"
-        style={{ backgroundColor: phaseColor }}
-      >
-        {service.phase_name}
-      </div>
+      {/* Phase accent strip — thin colored line at top */}
+      <div className="h-1" style={{ backgroundColor: phaseColor }} />
 
       <div className="flex flex-1 flex-col gap-3 p-5">
+        {/* Phase badge */}
+        <div>
+          <span
+            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white"
+            style={{ backgroundColor: phaseColor }}
+          >
+            {service.phase_name}
+          </span>
+        </div>
+
         {props.mode === 'my-service' ? (
           <>
-            {/* Service name + status */}
             <div className="flex items-start justify-between">
               <h3 className="text-base font-semibold text-slate-900">{service.name}</h3>
               <StatusBadge status={props.contract.status} />
             </div>
 
-            {/* Contract info grid */}
             <div className="grid grid-cols-2 gap-2 text-sm">
               <div><span className="text-slate-400">Price:</span> <span className="font-medium text-slate-900">{formatPrice(props.contract.contracted_price, props.contract.billing_period)}</span></div>
               <div><span className="text-slate-400">Billing:</span> <span className="text-slate-900">{props.contract.billing_period === 'once' ? 'One-off' : props.contract.billing_period.charAt(0).toUpperCase() + props.contract.billing_period.slice(1)}</span></div>
@@ -70,7 +73,6 @@ export function CustomerServiceCard(props: Props) {
               </div>
             </div>
 
-            {/* Progress section */}
             <div className="flex flex-col gap-2 border-t border-slate-100 pt-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500">Journey Progress</span>
@@ -87,33 +89,46 @@ export function CustomerServiceCard(props: Props) {
 
             <button
               onClick={() => router.push(`/portal/services/${service.id}`)}
-              className="mt-auto text-left text-sm font-medium text-blue-500 hover:underline"
+              className="mt-auto text-left text-sm font-medium transition-colors hover:underline"
+              style={{ color: phaseColor }}
             >
               View details →
             </button>
           </>
         ) : (
           <>
-            {/* Catalog mode */}
             <h3 className="text-[15px] font-semibold text-slate-900">{service.name}</h3>
             <p className="flex-1 text-sm leading-relaxed text-slate-500">{service.description || ''}</p>
-            <div className="text-sm text-slate-600">
-              <span className="text-slate-400">From</span>{' '}
-              <span className="font-semibold">{formatPrice(props.displayPrice, props.billingPeriod)}</span>
+
+            {/* Price */}
+            <div className="border-t border-slate-100 pt-3">
+              <div className="text-lg font-bold text-slate-900">
+                {formatPrice(props.displayPrice, props.billingPeriod)}
+              </div>
             </div>
+
+            {/* Actions */}
             <div className="flex items-center justify-between">
               <button
                 onClick={() => router.push(`/portal/services/${service.id}`)}
-                className="text-sm font-medium text-blue-500 hover:underline"
+                className="text-sm font-medium transition-colors hover:underline"
+                style={{ color: phaseColor }}
               >
                 View details →
               </button>
               {props.isSubscribed ? (
-                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">Subscribed</span>
+                <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-800">Subscribed</span>
               ) : inCart ? (
                 <Button variant="outline" size="sm" className="border-red-200 text-red-600 hover:bg-red-50" onClick={() => removeItem(service.id)}>Remove</Button>
               ) : (
-                <Button size="sm" onClick={() => addItem({ service_id: service.id, name: service.name, phase_name: service.phase_name, phase_color: phaseColor, price: props.displayPrice, billing_period: props.billingPeriod })}>Add to Cart</Button>
+                <Button
+                  size="sm"
+                  className="text-white"
+                  style={{ backgroundColor: phaseColor }}
+                  onClick={() => addItem({ service_id: service.id, name: service.name, phase_name: service.phase_name, phase_color: phaseColor, price: props.displayPrice, billing_period: props.billingPeriod })}
+                >
+                  Add to Cart
+                </Button>
               )}
             </div>
           </>
