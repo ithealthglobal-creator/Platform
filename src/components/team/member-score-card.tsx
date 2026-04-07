@@ -61,8 +61,8 @@ export function MemberScoreCard({ myScores, teamAverages, phases }: MemberScoreC
         {/* Donut chart — brand gold */}
         <div className="flex shrink-0 flex-col items-center gap-2">
           <svg
-            width="120"
-            height="120"
+            width="160"
+            height="160"
             viewBox="0 0 140 140"
             aria-label={`Composite score: ${score} out of 100`}
           >

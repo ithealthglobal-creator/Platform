@@ -130,21 +130,24 @@ export default function HomePage() {
                 <h2 className="text-lg font-semibold text-slate-900">Recommended for You</h2>
                 <p className="mt-1 text-sm text-slate-500">Courses to help you improve in your weakest areas</p>
                 <div className="mt-4 grid grid-cols-3 gap-4">
-                  {memberProfile.recommendedCourses.map(c => (
-                    <Link
-                      key={c.id}
-                      href={`/portal/academy/courses/${c.id}`}
-                      className="overflow-hidden rounded-lg border border-slate-200 transition-shadow hover:shadow-md"
-                    >
-                      <div className="h-16 bg-gradient-to-br from-slate-100 to-slate-200" />
-                      <div className="p-3">
-                        <div className="text-sm font-semibold text-slate-900">{c.name}</div>
-                        <div className="mt-0.5 text-xs" style={{ color: c.phase_color || '#64748b' }}>
-                          {c.phase_name} · Your score: {c.service_score}%
+                  {memberProfile.recommendedCourses.map(c => {
+                    const phaseColor = c.phase_color || getPhaseColor(c.phase_name)
+                    return (
+                      <Link
+                        key={c.id}
+                        href={`/portal/academy/courses/${c.id}`}
+                        className="overflow-hidden rounded-lg transition-shadow hover:shadow-lg"
+                        style={{ backgroundColor: phaseColor }}
+                      >
+                        <div className="p-4">
+                          <div className="text-sm font-semibold text-white">{c.name}</div>
+                          <div className="mt-1 text-xs text-white/80">
+                            {c.phase_name} · Your score: {c.service_score}%
+                          </div>
                         </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    )
+                  })}
                 </div>
               </div>
             )}
