@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { supabase } from '@/lib/supabase-client'
 import { getPhaseColor } from '@/lib/phase-colors'
@@ -9,6 +9,8 @@ import { PhaseRadar } from '@/components/team/phase-radar'
 import { ServiceBars } from '@/components/team/service-bars'
 import { MembersTab } from '@/components/team/members-tab'
 import { TrendsTab } from '@/components/team/trends-tab'
+import { InvitationsTab } from '@/components/team/invitations-tab'
+import { InviteDialog } from '@/components/team/invite-dialog'
 import type { TeamDashboardData, Phase, Service } from '@/lib/types'
 
 interface RadarPhase {
@@ -34,68 +36,67 @@ export default function TeamPage() {
   const [services, setServices] = useState<Pick<Service, 'id' | 'name' | 'phase_id'>[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'members' | 'trends' | 'invitations'>('members')
+  const [inviteOpen, setInviteOpen] = useState(false)
+
+  const refreshData = useCallback(async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) return
+
+    const authHeaders = { Authorization: `Bearer ${session.access_token}` }
+
+    const [dashRes, phasesRes, servicesRes] = await Promise.all([
+      fetch('/api/team/dashboard', { headers: authHeaders }),
+      supabase.from('phases').select('id, name, sort_order').eq('is_active', true).order('sort_order'),
+      supabase
+        .from('services')
+        .select('id, name, phase_id, phase:phases(id, name)')
+        .eq('is_active', true),
+    ])
+
+    if (!dashRes.ok) return
+
+    const dash: TeamDashboardData = await dashRes.json()
+    setDashData(dash)
+
+    const phases = (phasesRes.data ?? []) as Phase[]
+    const services = (servicesRes.data ?? []) as unknown as (Service & { phase?: Phase })[]
+    setPhases(phases)
+    setServices(services.map(s => ({ id: s.id, name: s.name, phase_id: s.phase_id })))
+
+    const built: RadarPhase[] = phases.map(p => ({
+      id: p.id,
+      name: p.name,
+      score: Math.round(dash.teamAverages.phases[p.id] ?? 0),
+      color: getPhaseColor(p.name),
+    }))
+    setRadarPhases(built)
+
+    const bars: ServiceBarItem[] = services
+      .filter(s => s.id in dash.teamAverages.services)
+      .map(s => ({
+        id: s.id,
+        name: s.name,
+        pct: Math.round(dash.teamAverages.services[s.id]?.pct ?? 0),
+        phaseColor: getPhaseColor(s.phase?.name),
+      }))
+    setServiceBars(bars)
+  }, [])
 
   useEffect(() => {
     async function load() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
+      const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         setLoading(false)
         return
       }
-
-      const authHeaders = { Authorization: `Bearer ${session.access_token}` }
-
-      const [dashRes, phasesRes, servicesRes] = await Promise.all([
-        fetch('/api/team/dashboard', { headers: authHeaders }),
-        supabase.from('phases').select('id, name, sort_order').eq('is_active', true).order('sort_order'),
-        supabase
-          .from('services')
-          .select('id, name, phase_id, phase:phases(id, name)')
-          .eq('is_active', true),
-      ])
-
-      if (!dashRes.ok) {
-        setLoading(false)
-        return
-      }
-
-      const dash: TeamDashboardData = await dashRes.json()
-      setDashData(dash)
-
-      // Store phases + services for tabs
-      const phases = (phasesRes.data ?? []) as Phase[]
-      const services = (servicesRes.data ?? []) as unknown as (Service & { phase?: Phase })[]
-      setPhases(phases)
-      setServices(services.map(s => ({ id: s.id, name: s.name, phase_id: s.phase_id })))
-
-      // Build radar phases
-      const built: RadarPhase[] = phases.map(p => ({
-        id: p.id,
-        name: p.name,
-        score: Math.round(dash.teamAverages.phases[p.id] ?? 0),
-        color: getPhaseColor(p.name),
-      }))
-      setRadarPhases(built)
-
-      // Build service bars
-      const bars: ServiceBarItem[] = services
-        .filter(s => s.id in dash.teamAverages.services)
-        .map(s => ({
-          id: s.id,
-          name: s.name,
-          pct: Math.round(dash.teamAverages.services[s.id]?.pct ?? 0),
-          phaseColor: getPhaseColor(s.phase?.name),
-        }))
-      setServiceBars(bars)
-
+      await refreshData()
       setLoading(false)
     }
-
     load()
-  }, [])
+  }, [refreshData])
 
   if (loading) {
     return (
@@ -147,7 +148,7 @@ export default function TeamPage() {
         <button
           className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
           style={{ backgroundColor: '#1175E4' }}
-          onClick={() => {}}
+          onClick={() => setInviteOpen(true)}
         >
           Invite Member
         </button>
@@ -210,11 +211,17 @@ export default function TeamPage() {
           {activeTab === 'trends' && (
             <TrendsTab phases={phases} />
           )}
-          {activeTab === 'invitations' && (
-            <div className="text-sm text-slate-500">Coming in next task</div>
+          {activeTab === 'invitations' && profile?.company_id && (
+            <InvitationsTab companyId={profile.company_id} />
           )}
         </div>
       </div>
+
+      <InviteDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        onInvitesSent={refreshData}
+      />
     </div>
   )
 }
