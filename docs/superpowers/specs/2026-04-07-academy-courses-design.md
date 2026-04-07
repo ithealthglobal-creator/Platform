@@ -207,13 +207,14 @@ Poppins font family throughout.
 
 ## PDF Generation
 
-Use `@react-pdf/renderer` to generate certificate PDFs on the client side:
+Use `@react-pdf/renderer` to generate certificate PDFs on-demand client-side:
 
 - Render certificate layout matching the on-screen design
 - Phase-colored header band
 - User name, company, course name, score, date, certificate number
 - IThealth.ai branding
-- Download triggers PDF generation and browser download
+- Download button triggers PDF generation in-browser and initiates download
+- No server-side storage — PDF is generated fresh each time (`pdf_url` field unused for now)
 
 ## Error Handling
 
