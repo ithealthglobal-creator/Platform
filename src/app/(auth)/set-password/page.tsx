@@ -29,7 +29,27 @@ export default function SetPasswordPage() {
     if (error) {
       toast.error(error.message)
     } else {
-      toast.success('Password set successfully. Please log in.')
+      // Check for invite token in URL
+      const params = new URLSearchParams(window.location.search)
+      const inviteToken = params.get('invite')
+      if (inviteToken) {
+        try {
+          const res = await fetch('/api/team/accept-invite', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: inviteToken }),
+          })
+          if (res.ok) {
+            toast.success('Welcome to the team! Please log in to continue.')
+          } else {
+            toast.success('Password set. Invite link may have expired — contact your admin.')
+          }
+        } catch {
+          toast.success('Password set successfully. Please log in.')
+        }
+      } else {
+        toast.success('Password set successfully. Please log in.')
+      }
       router.replace('/login')
     }
   }
