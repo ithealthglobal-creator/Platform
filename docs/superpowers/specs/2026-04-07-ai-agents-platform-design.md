@@ -14,6 +14,8 @@ A comprehensive AI agents system for IThealth.ai that allows admins to create, m
 
 - **Architecture:** Monorepo — Python FastAPI service at `ai-service/` alongside existing Next.js app
 - **AI Engine:** Google Gemini 2.5 (Flash default, Pro available) via `langchain-google-genai`
+- **Agent Framework:** LangGraph `StateGraph` for all agents — provides built-in checkpointing, streaming, human-in-the-loop, and error handling. LangChain primitives (tools, models, prompts) used as building blocks within LangGraph nodes.
+- **Persistence:** LangGraph `PostgresSaver` checkpointer using Supabase Postgres for conversation state. `ai_messages` table used as a queryable index for the UI (conversation list, search).
 - **Agent hierarchy:** Users can talk to any agent directly; agents can delegate up/down the hierarchy
 - **Permissions:** Per-agent tool configuration — each agent gets specific table access and operation permissions
 - **Chat UX:** Workspace layout — conversation list, chat messages, and live preview pane
@@ -21,6 +23,7 @@ A comprehensive AI agents system for IThealth.ai that allows admins to create, m
 - **Execution view:** Real-time live flowchart + historical browsing
 - **Default agents:** Pre-configured, always available, customizable but not deletable
 - **Search:** Google Search via Gemini's built-in grounding
+- **Human-in-the-loop:** LangGraph `interrupt()` / `Command(resume=...)` for destructive operations (create, update, delete)
 - **Infrastructure:** Docker Compose locally, GCP Cloud Run in production
 
 ---
@@ -181,51 +184,78 @@ ai-service/
 ├── config.py                   # Settings (Supabase URL, Gemini key, etc.)
 ├── api/
 │   ├── routes/
-│   │   ├── chat.py             # POST /chat (streaming SSE)
+│   │   ├── chat.py             # POST /chat (streaming SSE) + POST /chat/resume (HITL)
 │   │   ├── agents.py           # CRUD endpoints for agent management
 │   │   └── executions.py       # GET execution runs/steps
 │   └── middleware/
 │       └── auth.py             # Validates JWT from Next.js
 ├── agents/
-│   ├── factory.py              # Builds LangChain agent from DB config
-│   ├── orchestrator.py         # Orchestrator agent logic (delegation)
+│   ├── factory.py              # Builds LangGraph StateGraph from DB config
+│   ├── state.py                # AgentState TypedDict with reducers
+│   ├── nodes.py                # Graph nodes: call_model, execute_tools, approve_action
 │   ├── defaults/
-│   │   ├── service_builder.py  # Default Service Builder agent config
-│   │   └── blog_writer.py      # Default Blog Writer agent config
+│   │   ├── service_builder.py  # Default Service Builder system prompt + tools
+│   │   └── blog_writer.py      # Default Blog Writer system prompt + tools
 │   └── callbacks/
-│       └── execution_tracker.py # LangChain callback → writes execution steps
+│       └── execution_tracker.py # LangGraph callback → writes execution steps to DB
 ├── tools/
 │   ├── supabase_crud.py        # Dynamic CRUD tool generator per table
+│   ├── delegation.py           # delegate_to_agent tool with hierarchy validation
 │   ├── web_search.py           # Google Search via Gemini grounding
-│   └── registry.py             # Maps tool_name → LangChain Tool
+│   └── registry.py             # Maps tool_name → LangChain Tool instance
 └── services/
     ├── supabase_client.py      # Supabase Python client
-    └── streaming.py            # SSE response formatter
+    ├── checkpointer.py         # PostgresSaver setup (connects to Supabase Postgres)
+    └── streaming.py            # SSE response formatter from LangGraph stream
 ```
 
 ### 3.2 Key Dependencies
 
 ```
-langchain>=0.3
-langchain-google-genai>=2.0
+# Core LangChain/LangGraph (LTS 1.0)
+langchain>=1.0,<2.0
+langchain-core>=1.0,<2.0
+langgraph>=1.0,<2.0
+langsmith>=0.3.0
+
+# Model provider
+langchain-google-genai
+
+# LangGraph persistence (uses Supabase Postgres)
+langgraph-checkpoint-postgres
+
+# Web framework
 fastapi>=0.115
 uvicorn>=0.34
+gunicorn
+sse-starlette>=2.0
+
+# Database & validation
 supabase>=2.0
 pydantic>=2.0
-sse-starlette>=2.0
 ```
+
+**Version policy:** `langchain`, `langchain-core`, and `langgraph` follow strict semver — allow minor updates within 1.x. `langchain-google-genai` is independently versioned — use latest.
 
 ### 3.3 Chat Flow
 
 1. Next.js sends `POST /chat` with `{conversation_id, message, auth_token}`
 2. Auth middleware validates JWT via Supabase `auth.getUser(token)`
 3. Factory loads agent config from `ai_agents` + `ai_agent_tools`
-4. Builds LangChain agent with only permitted tools
+4. Builds LangGraph `StateGraph` with only permitted tools, compiles with `PostgresSaver` checkpointer
 5. Creates `ai_execution_runs` record with status `running`
-6. Executes agent with `ExecutionTracker` callback that writes `ai_execution_steps` in real-time
-7. Streams response back via SSE
+6. Invokes graph via `graph.stream()` with `stream_mode=["messages", "updates", "custom"]`
+7. Streams response back via SSE, writing `ai_execution_steps` and `ai_messages` summary rows as side effects
+8. On `interrupt()` (HITL), returns interrupt payload to frontend; frontend resumes via `POST /chat/resume` with `Command(resume=...)`
+
+**Resume flow (HITL):**
+1. Frontend sends `POST /chat/resume` with `{conversation_id, resume_value, auth_token}`
+2. Service calls `graph.invoke(Command(resume=resume_value), config)` with same `thread_id`
+3. Graph resumes from the interrupt point, continues streaming
 
 ### 3.4 SSE Streaming Format
+
+Uses LangGraph's native streaming, translated to SSE events:
 
 ```
 event: token
@@ -240,29 +270,114 @@ data: {"tool": "blog_posts_create", "output": {...}}
 event: delegation
 data: {"from_agent": "King", "to_agent": "Blog Writer", "reason": "..."}
 
+event: interrupt
+data: {"type": "approval_required", "tool": "services_create", "args": {...}, "message": "Create this service?"}
+
 event: done
 data: {"message_id": "...", "run_id": "..."}
 ```
 
-### 3.5 Agent Factory
+The `interrupt` event is new — tells the frontend to show an approval dialog. The user's response is sent back via `POST /chat/resume`.
 
-The factory (`agents/factory.py`) is the core component:
+### 3.5 Agent Factory (LangGraph StateGraph)
 
-1. Queries `ai_agents` for agent config (model, system_prompt, temperature)
-2. Queries `ai_agent_tools` for permitted tools
-3. For each `supabase_crud` tool: generates a LangChain tool with only the allowed operations (read/create/update/delete)
-4. For `web_search`: enables Gemini's built-in Google Search grounding
-5. For orchestrator agents: adds a `delegate_to_agent` tool that can invoke sub-agents in the hierarchy
-6. Returns a configured LangChain agent ready for execution
+The factory (`agents/factory.py`) builds a compiled LangGraph graph per agent:
+
+```python
+from typing import Annotated, TypedDict
+import operator
+from langgraph.graph import StateGraph, START, END
+from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.prebuilt import ToolNode
+from langgraph.types import RetryPolicy, interrupt, Command
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+class AgentState(TypedDict):
+    messages: Annotated[list, operator.add]
+    agent_id: str
+    delegation_depth: int
+
+def build_agent_graph(agent_config, tools, checkpointer):
+    """Build a compiled LangGraph StateGraph for an agent."""
+    model = ChatGoogleGenerativeAI(
+        model=agent_config.model,
+        temperature=agent_config.temperature,
+    ).bind_tools(tools)
+
+    def call_model(state: AgentState):
+        system = {"role": "system", "content": agent_config.system_prompt}
+        response = model.invoke([system] + state["messages"])
+        return {"messages": [response]}
+
+    def route_after_model(state: AgentState):
+        last = state["messages"][-1]
+        if hasattr(last, "tool_calls") and last.tool_calls:
+            # Check if any tool call is destructive → route to approval
+            destructive = any(
+                tc["name"].endswith(("_create", "_update", "_delete"))
+                for tc in last.tool_calls
+            )
+            return "approve" if destructive else "tools"
+        return END
+
+    def approve_action(state: AgentState):
+        """HITL node: interrupt for user approval on destructive ops."""
+        last = state["messages"][-1]
+        decision = interrupt({
+            "tool_calls": last.tool_calls,
+            "message": "Approve these changes?"
+        })
+        if decision.get("approved"):
+            return {}  # Proceed to tools node
+        # Rejected — add rejection message
+        from langchain_core.messages import ToolMessage
+        rejections = [
+            ToolMessage(content="Rejected by user.", tool_call_id=tc["id"])
+            for tc in last.tool_calls
+        ]
+        return {"messages": rejections}
+
+    def route_after_approval(state: AgentState):
+        last = state["messages"][-1]
+        if hasattr(last, "content") and "Rejected" in last.content:
+            return "model"  # Let LLM respond to rejection
+        return "tools"
+
+    tool_node = ToolNode(tools, handle_tool_errors=True)
+
+    graph = (
+        StateGraph(AgentState)
+        .add_node("model", call_model, retry=RetryPolicy(max_attempts=3))
+        .add_node("tools", tool_node)
+        .add_node("approve", approve_action)
+        .add_edge(START, "model")
+        .add_conditional_edges("model", route_after_model, ["tools", "approve", END])
+        .add_conditional_edges("approve", route_after_approval, ["tools", "model"])
+        .add_edge("tools", "model")
+        .compile(checkpointer=checkpointer)
+    )
+    return graph
+```
+
+**Key design points:**
+- Each agent is a compiled `StateGraph`, not a raw LangChain agent
+- `PostgresSaver` checkpointer connects to Supabase Postgres — conversation state persists across requests
+- `thread_id` = `conversation_id` from `ai_conversations` table
+- `RetryPolicy(max_attempts=3)` on the model node handles transient Gemini API failures
+- `ToolNode(handle_tool_errors=True)` returns errors as `ToolMessage` so the LLM can recover
+- `recursion_limit` set in invoke config to prevent runaway loops (default: 25)
+- `interrupt()` in the `approve` node pauses for HITL on destructive operations
 
 ### 3.6 Supabase CRUD Tool Generator
 
-`tools/supabase_crud.py` dynamically creates LangChain tools per table:
+`tools/supabase_crud.py` dynamically creates LangChain `@tool` functions per table:
 
-- Reads table column metadata from Supabase to generate tool descriptions
+- Validates table name against the hardcoded allowlist (Section 7.5) before generating any tool
+- Reads table column metadata from Supabase to auto-generate clear tool descriptions with `Args:` docstrings
 - Creates separate tools per operation: `{table}_read`, `{table}_create`, `{table}_update`, `{table}_delete`
 - Only generates tools for operations listed in `ai_agent_tools.operations`
 - Uses Supabase service_role key for data access (bypasses RLS — agents are admin-scoped)
+- **Idempotency:** All create/update tools use upsert semantics where possible, to be safe when used before `interrupt()` nodes (LangGraph re-runs code before interrupts on resume)
 
 ### 3.7 Orchestrator Delegation
 
@@ -270,12 +385,51 @@ When an orchestrator agent needs to delegate:
 
 1. It calls the `delegate_to_agent` tool with a target agent name and task description
 2. The tool validates: (a) target is a direct report in `ai_agent_hierarchy`, (b) target has not already been invoked in this execution chain (cycle prevention), (c) current delegation depth < 4
-3. Builds the target agent via the factory
-4. Executes it as a sub-chain, passing the current depth + 1
+3. Builds the target agent's `StateGraph` via the factory
+4. Invokes the sub-graph with a child `thread_id` (`{parent_thread}-{agent_name}`) and `recursion_limit=25`
 5. Records delegation as an `ai_execution_steps` entry with `step_type = 'delegation'`
-6. Returns the sub-agent's response to the orchestrator
+6. Returns the sub-agent's final message content to the orchestrator
 
 If validation fails in step 2, the tool returns an error message to the orchestrator instead of executing — the orchestrator can then try a different agent or handle the task itself.
+
+**Sub-graph checkpointer mode:** Sub-agent graphs use `checkpointer=None` (default) — they support `interrupt()` for HITL but don't persist multi-turn state independently. Each delegation is a fresh invocation.
+
+### 3.8 Persistence Architecture
+
+Two persistence layers work together:
+
+**LangGraph `PostgresSaver` (authoritative conversation state):**
+- Stores full message history, tool calls, and checkpoint state per thread
+- Thread ID = conversation ID from `ai_conversations`
+- Enables time travel: replay or fork from any checkpoint
+- Handles `interrupt()` / `Command(resume=...)` state preservation
+- Connects to Supabase Postgres via `PostgresSaver.from_conn_string()`
+- `checkpointer.setup()` called once on service startup to create required tables
+
+**`ai_messages` table (queryable index for UI):**
+- After each completed turn, the service writes summary rows to `ai_messages`
+- Used for: conversation list (last message preview), search, token usage tracking
+- Not the source of truth for conversation state — that's the checkpointer
+- Includes `token_count` for cost tracking
+
+### 3.9 Observability (LangSmith)
+
+Optional but recommended — provides tracing for debugging agent chains:
+
+```
+LANGSMITH_API_KEY=<optional>
+LANGSMITH_PROJECT=ithealth-ai-agents
+LANGSMITH_TRACING=true
+```
+
+When enabled, all LangGraph invocations are traced in LangSmith with full visibility into:
+- Token usage per step
+- Tool call inputs/outputs
+- Delegation chains
+- Latency per node
+- Error traces
+
+No code changes needed — LangChain auto-instruments when env vars are set.
 
 ---
 
@@ -328,6 +482,7 @@ Three-panel layout:
 - Agent avatar + name shown on each message (important when delegation happens — different agents respond)
 - Inline tool call cards: collapsible cards showing tool name, input, output
 - "Thinking..." indicator when agent is processing
+- **Approval dialogs:** When an agent triggers a destructive operation (create/update/delete), an inline approval card appears showing what the agent wants to do. User can Approve, Edit (modify args), or Reject. Sends `Command(resume=...)` to the Python service via `POST /chat/resume`
 
 **Right panel — Preview Pane:**
 - Renders structured output contextually:
@@ -402,6 +557,7 @@ src/components/ai/
 │   ├── message-input.tsx        # Input bar with send button
 │   ├── agent-selector.tsx       # Dropdown to pick agent
 │   ├── tool-call-card.tsx       # Inline display of tool invocations
+│   ├── approval-card.tsx        # HITL approve/edit/reject dialog for destructive ops
 │   └── preview-pane.tsx         # Right panel live preview
 ├── agents/
 │   ├── agent-table.tsx          # Agent list table
@@ -422,6 +578,7 @@ src/components/ai/
 ```
 src/app/api/admin/ai/
 ├── chat/route.ts               # Proxies POST to Python /chat, streams SSE back
+├── chat/resume/route.ts        # Proxies POST to Python /chat/resume (HITL Command resume)
 ├── agents/route.ts             # CRUD via Supabase directly (same pattern as existing admin)
 ├── agents/[id]/route.ts        # Single agent GET/PUT/DELETE
 └── executions/route.ts         # Proxies to Python /executions
@@ -489,7 +646,8 @@ services:
     environment:
       - SUPABASE_URL=http://host.docker.internal:54321
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SUPABASE_DB_URL=postgresql://postgres:postgres@host.docker.internal:54322/postgres
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - ENVIRONMENT=local
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -534,7 +692,7 @@ Note: Uses gunicorn with 4 uvicorn workers for production concurrency. `gunicorn
 - Max instances: 10
 - Concurrency: 80
 - Request timeout: 300s
-- Secrets via Secret Manager: `GEMINI_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+- Secrets via Secret Manager: `GOOGLE_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
 
 **Service-to-service auth:** Next.js calls AI service via Cloud Run internal URL, authenticated with GCP IAM (service account with `roles/run.invoker`). No public access to the AI service.
 
@@ -549,11 +707,19 @@ Note: No `NEXT_PUBLIC_` prefix — the AI service URL is server-side only. All b
 
 **AI service (.env):**
 ```
-GEMINI_API_KEY=<key>
+GOOGLE_API_KEY=<key>
 SUPABASE_URL=http://localhost:54321
 SUPABASE_SERVICE_ROLE_KEY=<from supabase start>
+SUPABASE_DB_URL=postgresql://postgres:postgres@localhost:54322/postgres
 ENVIRONMENT=local
+
+# Optional: LangSmith observability
+LANGSMITH_API_KEY=<optional>
+LANGSMITH_PROJECT=ithealth-ai-agents
+LANGSMITH_TRACING=true
 ```
+
+`SUPABASE_DB_URL` is the direct Postgres connection string used by `PostgresSaver` for LangGraph checkpointing. Port 54322 is the default Supabase local Postgres port.
 
 Production env vars set via Cloud Run environment/secrets, never committed.
 
@@ -576,9 +742,11 @@ Browser → Next.js API Route → Python AI Service
 
 ### 7.2 Agent Permission Enforcement
 
-- Factory queries `ai_agent_tools` and only instantiates permitted tools
+- Factory queries `ai_agent_tools` and only instantiates permitted tools in the LangGraph `StateGraph`
 - CRUD operations filtered: read-only agents can't get insert/update/delete tools
+- `ToolNode(handle_tool_errors=True)` ensures tool failures are returned to the LLM as `ToolMessage` instead of crashing the graph
 - Python service uses Supabase service_role key (bypasses RLS — agents are admin-scoped for now)
+- All destructive tool calls (create/update/delete) route through the `approve` node which calls `interrupt()` for HITL approval
 
 ### 7.3 Default Agent Protection
 
@@ -609,8 +777,18 @@ The Python service enforces a hardcoded allowlist of tables that agents can ever
 
 - **Maximum delegation depth:** 4 (King → Department → Manager → Worker). Factory refuses to build a sub-agent if the current depth exceeds this.
 - **Maximum tool calls per execution run:** 50. ExecutionTracker counts tool calls and raises a circuit breaker error if exceeded.
-- **Maximum tokens per conversation turn:** 32,000 (configurable via environment variable). Enforced in the LangChain agent's `max_tokens` parameter.
+- **Maximum tokens per conversation turn:** 32,000 (configurable via environment variable). Enforced in the model's `max_tokens` parameter.
+- **LangGraph recursion limit:** `recursion_limit=25` passed in invoke config for all graph invocations. Prevents infinite tool-call loops.
 - **Delegation cycle prevention:** The `delegate_to_agent` tool validates that the target agent is a direct report in the hierarchy and that the same agent has not already been invoked in the current execution chain. Prevents A → B → A loops.
+
+### 7.8 Idempotency Requirements
+
+LangGraph re-runs all code before an `interrupt()` when the graph resumes via `Command(resume=...)`. This means:
+
+- **Database writes before `interrupt()`** must use **upsert** semantics, not plain insert — otherwise duplicate records are created on resume
+- **The execution tracker** must use upsert when recording steps (keyed on step ID)
+- **Tool calls that create records** should check for existence first or use `ON CONFLICT DO UPDATE`
+- **Side effects** (notifications, external API calls) should be placed **after** `interrupt()` in the graph flow, or in a separate node that runs after approval
 
 ### 7.7 SSE Error Handling
 
