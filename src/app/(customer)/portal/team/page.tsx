@@ -7,6 +7,8 @@ import { getPhaseColor } from '@/lib/phase-colors'
 import { StatsRow } from '@/components/team/stats-row'
 import { PhaseRadar } from '@/components/team/phase-radar'
 import { ServiceBars } from '@/components/team/service-bars'
+import { MembersTab } from '@/components/team/members-tab'
+import { TrendsTab } from '@/components/team/trends-tab'
 import type { TeamDashboardData, Phase, Service } from '@/lib/types'
 
 interface RadarPhase {
@@ -28,6 +30,8 @@ export default function TeamPage() {
   const [dashData, setDashData] = useState<TeamDashboardData | null>(null)
   const [radarPhases, setRadarPhases] = useState<RadarPhase[]>([])
   const [serviceBars, setServiceBars] = useState<ServiceBarItem[]>([])
+  const [phases, setPhases] = useState<Phase[]>([])
+  const [services, setServices] = useState<Pick<Service, 'id' | 'name' | 'phase_id'>[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'members' | 'trends' | 'invitations'>('members')
 
@@ -61,8 +65,13 @@ export default function TeamPage() {
       const dash: TeamDashboardData = await dashRes.json()
       setDashData(dash)
 
-      // Build radar phases
+      // Store phases + services for tabs
       const phases = (phasesRes.data ?? []) as Phase[]
+      const services = (servicesRes.data ?? []) as unknown as (Service & { phase?: Phase })[]
+      setPhases(phases)
+      setServices(services.map(s => ({ id: s.id, name: s.name, phase_id: s.phase_id })))
+
+      // Build radar phases
       const built: RadarPhase[] = phases.map(p => ({
         id: p.id,
         name: p.name,
@@ -72,7 +81,6 @@ export default function TeamPage() {
       setRadarPhases(built)
 
       // Build service bars
-      const services = (servicesRes.data ?? []) as unknown as (Service & { phase?: Phase })[]
       const bars: ServiceBarItem[] = services
         .filter(s => s.id in dash.teamAverages.services)
         .map(s => ({
@@ -191,11 +199,16 @@ export default function TeamPage() {
 
         {/* Tab content */}
         <div className="p-6">
-          {activeTab === 'members' && (
-            <div className="text-sm text-slate-500">Coming in next task</div>
+          {activeTab === 'members' && dashData && (
+            <MembersTab
+              members={dashData.members}
+              phases={phases}
+              services={services}
+              teamAverages={dashData.teamAverages}
+            />
           )}
           {activeTab === 'trends' && (
-            <div className="text-sm text-slate-500">Coming in next task</div>
+            <TrendsTab phases={phases} />
           )}
           {activeTab === 'invitations' && (
             <div className="text-sm text-slate-500">Coming in next task</div>
