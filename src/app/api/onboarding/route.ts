@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
-import { calculatePhaseScores, calculateOverallScore } from '@/lib/scoring'
+import { calculateServiceScores, calculatePhaseScores, calculateOverallScore } from '@/lib/scoring'
 import type { AssessmentQuestion } from '@/lib/types'
 
 export async function POST(request: NextRequest) {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     // 7. Fetch assessment questions and calculate scores
     const { data: questions, error: questionsError } = await supabaseAdmin
       .from('assessment_questions')
-      .select('*')
+      .select('*, service:services(id, phase_id)')
       .eq('assessment_id', assessment_id)
       .eq('is_active', true)
       .order('sort_order')
@@ -128,13 +128,20 @@ export async function POST(request: NextRequest) {
     }
 
     const typedQuestions = (questions ?? []) as AssessmentQuestion[]
-    const phaseScores = calculatePhaseScores(typedQuestions, answers)
+    const serviceScores = calculateServiceScores(typedQuestions, answers)
+    const phaseScores = calculatePhaseScores(serviceScores)
     const overallScore = calculateOverallScore(phaseScores)
 
     // Build phase_scores map: { [phase_id]: score }
     const phaseScoresMap: Record<string, number> = {}
     for (const ps of phaseScores) {
       phaseScoresMap[ps.phase_id] = ps.score
+    }
+
+    // Build service_scores map: { [service_id]: { earned, max, pct } }
+    const serviceScoresMap: Record<string, { earned: number; max: number; pct: number }> = {}
+    for (const ss of serviceScores) {
+      serviceScoresMap[ss.service_id] = { earned: ss.earned, max: ss.max, pct: ss.pct }
     }
 
     // 8. Insert assessment attempt
@@ -148,6 +155,7 @@ export async function POST(request: NextRequest) {
         passed: false, // onboarding attempts are not pass/fail
         answers,
         phase_scores: phaseScoresMap,
+        service_scores: serviceScoresMap,
         started_at: now,
         completed_at: now,
       })

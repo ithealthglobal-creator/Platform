@@ -31,7 +31,7 @@ interface QuestionForm {
   options: QuestionOption[]
   points: string
   weight: string
-  phase_id: string
+  service_id: string
   sort_order: string
 }
 
@@ -40,7 +40,7 @@ const emptyQuestionForm: QuestionForm = {
   options: defaultOptions,
   points: '1',
   weight: '1',
-  phase_id: '',
+  service_id: '',
   sort_order: '',
 }
 
@@ -77,7 +77,7 @@ export default function EditAssessmentPage() {
   const fetchOptions = useCallback(async () => {
     const [pRes, sRes] = await Promise.all([
       supabase.from('phases').select('*').eq('is_active', true).order('sort_order'),
-      supabase.from('services').select('*, phase:phases(name)').eq('is_active', true).order('name'),
+      supabase.from('services').select('*, phase:phases(id, name)').eq('status', 'active').order('name'),
     ])
     if (pRes.data) setPhases(pRes.data as Phase[])
     if (sRes.data) setServices(sRes.data as Service[])
@@ -86,7 +86,7 @@ export default function EditAssessmentPage() {
   const fetchQuestions = useCallback(async () => {
     const { data, error } = await supabase
       .from('assessment_questions')
-      .select('*')
+      .select('*, service:services(id, name, phase:phases(id, name))')
       .eq('assessment_id', id)
       .order('sort_order')
 
@@ -191,7 +191,7 @@ export default function EditAssessmentPage() {
       options: q.options.length === 4 ? q.options : defaultOptions,
       points: String(q.points),
       weight: String(q.weight),
-      phase_id: q.phase_id ?? '',
+      service_id: q.service_id ?? '',
       sort_order: String(q.sort_order),
     })
   }
@@ -223,6 +223,10 @@ export default function EditAssessmentPage() {
       toast.error('All options must have text')
       return
     }
+    if (!questionForm.service_id) {
+      toast.error('A service must be selected')
+      return
+    }
 
     setSavingQuestion(true)
 
@@ -232,7 +236,7 @@ export default function EditAssessmentPage() {
       options: questionForm.options.map((o) => ({ ...o, value: o.value.trim() })),
       points: Number(questionForm.points) || 1,
       weight: Number(questionForm.weight) || 1,
-      phase_id: questionForm.phase_id || null,
+      service_id: questionForm.service_id,
       sort_order: Number(questionForm.sort_order) || 0,
     }
 
@@ -295,18 +299,20 @@ export default function EditAssessmentPage() {
         </div>
         <div className="flex gap-4">
           <div className="grid gap-2">
-            <Label>Phase Tag</Label>
+            <Label>Service</Label>
             <Select
-              value={questionForm.phase_id || 'none'}
-              onValueChange={(v) => setQuestionForm({ ...questionForm, phase_id: v === 'none' ? '' : v ?? '' })}
+              value={questionForm.service_id || 'none'}
+              onValueChange={(v) => setQuestionForm({ ...questionForm, service_id: v === 'none' ? '' : v ?? '' })}
             >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue />
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Select a service" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No phase</SelectItem>
-                {phases.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                <SelectItem value="none">No service</SelectItem>
+                {services.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.phase?.name ? `${s.phase.name} > ` : ''}{s.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -528,7 +534,7 @@ export default function EditAssessmentPage() {
                         ))}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Phase: {phases.find((p) => p.id === q.phase_id)?.name ?? 'None'}
+                        Service: {q.service?.name ?? 'None'}
                         {' | '}Weight: {q.weight}
                         {' | '}Points: {q.points}
                         {' | '}Order: {q.sort_order}
