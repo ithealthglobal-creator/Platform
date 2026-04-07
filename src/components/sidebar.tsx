@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useMenu } from '@/contexts/menu-context'
 import { useAuth } from '@/contexts/auth-context'
 import { usePathname, useRouter } from 'next/navigation'
@@ -29,9 +30,15 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-slate-900 py-4">
-        <div className="mb-6 flex h-10 w-10 items-center justify-center rounded-lg bg-white/10 text-white font-bold text-sm">
-          IT
+      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] py-4">
+        <div className="mb-6 flex h-10 w-10 items-center justify-center">
+          <Image
+            src="/logos/ithealth-icon-white.svg"
+            alt="IThealth"
+            width={32}
+            height={32}
+            className="h-8 w-8"
+          />
         </div>
 
         <nav className="flex flex-1 flex-col items-center gap-1">
@@ -48,7 +55,7 @@ export function Sidebar() {
                   className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
                     isActive
                       ? 'bg-white/20 text-white'
-                      : 'text-slate-400 hover:bg-white/10 hover:text-white'
+                      : 'text-white/70 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {getIcon(item.icon)}
@@ -65,7 +72,7 @@ export function Sidebar() {
           <TooltipTrigger
             delay={0}
             onClick={signOut}
-            className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-white/70 hover:bg-white/10 hover:text-white transition-colors"
           >
             {(() => { const LogoutIcon = iconMap['logout']; return <LogoutIcon size={20} /> })()}
           </TooltipTrigger>

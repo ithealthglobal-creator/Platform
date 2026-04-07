@@ -81,7 +81,7 @@ export function AnimatedHero() {
       <div className="relative z-10 max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16">
         {/* Badge */}
         <div className="hero-badge mb-8" style={{ opacity: 0 }}>
-          <span className="inline-block text-sm text-white/80 bg-white/10 px-4 py-2 rounded-full">
+          <span className="inline-block text-sm font-light text-white/70">
             Designed for small and medium size businesses
           </span>
         </div>
@@ -105,10 +105,10 @@ export function AnimatedHero() {
         {/* CTA button */}
         <div className="hero-cta" style={{ opacity: 0 }}>
           <Button
-            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-6 py-3 text-base gap-2"
+            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-8 py-4 text-lg gap-2"
             size="lg"
             nativeButton={false}
-            render={<Link href="/login" />}
+            render={<Link href="/get-started" />}
           >
             Get started
             <ChevronRight size={20} />

@@ -30,23 +30,23 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[var(--brand-primary)]">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-12 lg:px-16">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-12 lg:px-16">
         {/* Logo */}
         <Link href="/">
           <Image
             src="/logos/ithealth-logo-white.svg"
             alt="IThealth"
-            width={120}
-            height={32}
-            className="h-8 w-auto"
+            width={96}
+            height={24}
+            className="h-6 w-auto"
             priority
           />
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden items-center gap-4 md:flex">
+        <nav className="hidden items-center gap-6 md:flex">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-medium text-white hover:text-white/80">
+            <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-light text-white hover:text-white/80">
               Resources
               <ChevronDown size={16} />
             </DropdownMenuTrigger>
@@ -61,13 +61,6 @@ export function PublicHeader() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <Link
-            href="/get-started"
-            className="rounded-lg bg-[#1175E4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d5fc2] transition-colors"
-          >
-            Get Started
-          </Link>
-
           <Button
             className="bg-white/15 text-white hover:bg-white/25"
             nativeButton={false}
@@ -77,11 +70,12 @@ export function PublicHeader() {
           </Button>
 
           <Button
-            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
+            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-6 py-3 text-base"
+            size="lg"
             nativeButton={false}
-            render={<Link href="/login" />}
+            render={<Link href="/get-started" />}
           >
-            Start Now
+            Get Started
           </Button>
         </nav>
 
@@ -120,6 +114,13 @@ export function PublicHeader() {
                 </nav>
 
                 <div className="flex flex-col gap-3 pt-4">
+                  <Link
+                    href="/get-started"
+                    className="text-sm font-light text-white hover:text-white/80"
+                    onClick={() => setSheetOpen(false)}
+                  >
+                    Get Started
+                  </Link>
                   <Button
                     className="w-full bg-white/15 text-white hover:bg-white/25"
                     nativeButton={false}
@@ -127,14 +128,6 @@ export function PublicHeader() {
                     onClick={() => setSheetOpen(false)}
                   >
                     Login
-                  </Button>
-                  <Button
-                    className="w-full bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
-                    nativeButton={false}
-                    render={<Link href="/login" />}
-                    onClick={() => setSheetOpen(false)}
-                  >
-                    Start Now
                   </Button>
                 </div>
               </div>

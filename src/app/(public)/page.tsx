@@ -34,6 +34,16 @@ export default async function HomePage() {
     <>
       <AnimatedHero />
 
+      {/* Mission statement */}
+      <section className="py-16 bg-white">
+        <p className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 text-3xl md:text-4xl font-light text-[var(--brand-dark)] leading-relaxed text-left">
+          In today&apos;s world, modern IT isn&apos;t optional — we guide
+          you through IT modernisation with simplicity,
+          clarity and security, keeping your business
+          resilient and future ready.
+        </p>
+      </section>
+
       <div className="flex justify-center py-12">
         <Link
           href="/get-started"
