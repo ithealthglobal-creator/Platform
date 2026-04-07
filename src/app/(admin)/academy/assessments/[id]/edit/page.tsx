@@ -309,7 +309,7 @@ export default function EditAssessmentPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No service</SelectItem>
-                {services.map((s: any) => (
+                {services.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
                     {s.phase?.name ? `${s.phase.name} > ` : ''}{s.name}
                   </SelectItem>
@@ -534,7 +534,7 @@ export default function EditAssessmentPage() {
                         ))}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Service: {(q as any).service?.name ?? 'None'}
+                        Service: {q.service?.name ?? 'None'}
                         {' | '}Weight: {q.weight}
                         {' | '}Points: {q.points}
                         {' | '}Order: {q.sort_order}
