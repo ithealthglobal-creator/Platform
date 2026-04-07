@@ -209,11 +209,11 @@ export interface AssessmentQuestion {
   sort_order: number
   points: number
   weight: number
-  phase_id: string | null
+  service_id: string
   is_active: boolean
   created_at: string
   updated_at: string
-  phase?: Phase
+  service?: Service & { phase?: Phase }
 }
 
 export interface AssessmentAttempt {
@@ -224,6 +224,7 @@ export interface AssessmentAttempt {
   passed: boolean
   answers: { question_id: string; selected_option: string; correct: boolean }[]
   phase_scores: Record<string, number> | null
+  service_scores: Record<string, { earned: number; max: number; pct: number }> | null
   started_at: string
   completed_at: string | null
   created_at: string
