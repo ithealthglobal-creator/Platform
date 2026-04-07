@@ -1,6 +1,6 @@
 -- Bump admin L1 items to make room for AI after Dashboard (sort_order 2)
 UPDATE public.menu_items SET sort_order = sort_order + 1
-  WHERE level = 1 AND sort_order >= 2 AND id LIKE '10000000%' AND id != '10000000-0000-0000-0000-000000000009';
+  WHERE level = 1 AND sort_order >= 2 AND id::text LIKE '10000000%' AND id != '10000000-0000-0000-0000-000000000009';
 
 -- L1: AI (right after Dashboard)
 INSERT INTO public.menu_items (id, parent_id, label, icon, route, sort_order, level) VALUES

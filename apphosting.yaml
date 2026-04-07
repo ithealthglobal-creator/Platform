@@ -12,3 +12,5 @@ env:
     value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmdnRmc213amViZ2hpcG1tcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0NzU3NjcsImV4cCI6MjA5MTA1MTc2N30.PIe4glMW5EC0epa7zXBbYzyG3fncZj2-AGohgYlyizU
   - variable: SUPABASE_SERVICE_ROLE_KEY
     secret: SUPABASE_SERVICE_ROLE_KEY
+  - variable: AI_SERVICE_URL
+    value: https://ithealth-ai-774063635465.europe-west4.run.app
