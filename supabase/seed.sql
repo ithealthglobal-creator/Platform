@@ -574,7 +574,53 @@ INSERT INTO public.service_runbook_steps (service_id, title, description, estima
   ('b0000000-0000-0000-0000-000000000001', 'Configure Alerting', 'Set up alert thresholds for CPU, disk, memory, and service status. Configure escalation paths.', 30, 'Engineer', 3),
   ('b0000000-0000-0000-0000-000000000001', 'Documentation Setup', 'Create IT Glue documentation — passwords, configurations, SOPs, and network diagrams.', 90, 'Engineer', 4),
   ('b0000000-0000-0000-0000-000000000001', 'Client Onboarding Call', 'Walk client through helpdesk process, introduce account manager, review SLAs.', 30, 'Account Manager', 5),
-  ('b0000000-0000-0000-0000-000000000001', '30-Day Health Check', 'Review first month of monitoring data, address any recurring issues, present report to client.', 60, 'Engineer', 6)
+  ('b0000000-0000-0000-0000-000000000001', '30-Day Health Check', 'Review first month of monitoring data, address any recurring issues, present report to client.', 60, 'Engineer', 6),
+
+  -- Backup & Disaster Recovery (b...002) — Operate phase
+  ('b0000000-0000-0000-0000-000000000002', 'Backup Audit', 'Audit existing backup solutions, identify unprotected data, document RPO/RTO requirements.', 90, 'Engineer', 1),
+  ('b0000000-0000-0000-0000-000000000002', 'Deploy Backup Agents', 'Install Datto SIRIS or ALTO appliance, configure backup schedules for all servers and critical workstations.', 120, 'Engineer', 2),
+  ('b0000000-0000-0000-0000-000000000002', 'Configure Offsite Replication', 'Set up cloud replication to Datto Cloud, verify offsite copies, configure retention policies.', 60, 'Engineer', 3),
+  ('b0000000-0000-0000-0000-000000000002', 'Test Restore Procedure', 'Perform full test restore of critical server, document restore time, validate data integrity.', 90, 'Engineer', 4),
+  ('b0000000-0000-0000-0000-000000000002', 'DR Plan Documentation', 'Write disaster recovery plan with escalation contacts, restore priorities, and communication templates.', 60, 'Account Manager', 5),
+
+  -- Cyber Security Essentials (b...003) — Secure phase
+  ('b0000000-0000-0000-0000-000000000003', 'Security Assessment', 'Run vulnerability scan, review current security posture, identify critical gaps and quick wins.', 120, 'Security Analyst', 1),
+  ('b0000000-0000-0000-0000-000000000003', 'Deploy Endpoint Protection', 'Install SentinelOne EDR on all endpoints, configure threat policies and automated response.', 90, 'Engineer', 2),
+  ('b0000000-0000-0000-0000-000000000003', 'Configure Email Security', 'Set up email filtering, anti-phishing rules, DMARC/DKIM/SPF records, and quarantine policies.', 60, 'Engineer', 3),
+  ('b0000000-0000-0000-0000-000000000003', 'Enable MFA', 'Roll out multi-factor authentication across Microsoft 365, VPN, and critical business applications.', 45, 'Engineer', 4),
+  ('b0000000-0000-0000-0000-000000000003', 'Security Awareness Training', 'Launch first phishing simulation, enrol all staff in security awareness programme, schedule monthly tests.', 60, 'Security Analyst', 5),
+
+  -- Compliance & Governance (b...004) — Secure phase
+  ('b0000000-0000-0000-0000-000000000004', 'Gap Analysis', 'Assess current compliance posture against Cyber Essentials framework, document gaps and remediation priorities.', 120, 'Security Analyst', 1),
+  ('b0000000-0000-0000-0000-000000000004', 'Policy Framework Setup', 'Draft and implement IT security policies: acceptable use, data classification, incident response, BYOD.', 180, 'Security Analyst', 2),
+  ('b0000000-0000-0000-0000-000000000004', 'Technical Remediation', 'Address technical gaps identified in gap analysis: patching, firewall rules, access controls, encryption.', 240, 'Engineer', 3),
+  ('b0000000-0000-0000-0000-000000000004', 'Certification Submission', 'Complete Cyber Essentials self-assessment questionnaire, submit to certifying body, address any queries.', 90, 'Security Analyst', 4),
+
+  -- Cloud Migration (b...005) — Streamline phase
+  ('b0000000-0000-0000-0000-000000000005', 'Cloud Readiness Assessment', 'Inventory all workloads, assess cloud suitability, identify dependencies and migration blockers.', 120, 'Cloud Architect', 1),
+  ('b0000000-0000-0000-0000-000000000005', 'Azure Tenant & Networking', 'Provision Azure tenant, configure virtual networks, set up VPN or ExpressRoute connectivity.', 90, 'Engineer', 2),
+  ('b0000000-0000-0000-0000-000000000005', 'Email Migration to Exchange Online', 'Migrate mailboxes to Exchange Online in batches, verify calendar/contact sync, update DNS MX records.', 180, 'Engineer', 3),
+  ('b0000000-0000-0000-0000-000000000005', 'File Migration to SharePoint/OneDrive', 'Migrate file shares to SharePoint Online and OneDrive, configure permissions, redirect mapped drives.', 150, 'Engineer', 4),
+  ('b0000000-0000-0000-0000-000000000005', 'Server Migration to Azure', 'Migrate on-premises servers to Azure VMs using Azure Migrate, validate applications, cutover.', 240, 'Engineer', 5),
+  ('b0000000-0000-0000-0000-000000000005', 'Post-Migration Validation', 'Verify all services operational, performance testing, update documentation, decommission old hardware.', 90, 'Engineer', 6),
+
+  -- Process Automation (b...006) — Streamline phase
+  ('b0000000-0000-0000-0000-000000000006', 'Process Discovery Workshop', 'Interview key staff, map existing manual processes, score by automation potential and business impact.', 120, 'Consultant', 1),
+  ('b0000000-0000-0000-0000-000000000006', 'Design Automation Workflows', 'Design Power Automate flows for top 3 priority processes, create approval chains and error handling.', 180, 'Engineer', 2),
+  ('b0000000-0000-0000-0000-000000000006', 'Build & Test Automations', 'Implement workflows in Power Automate, integrate with Microsoft 365 and LOB apps, run UAT with users.', 240, 'Engineer', 3),
+  ('b0000000-0000-0000-0000-000000000006', 'Training & Handover', 'Train power users on managing and modifying flows, document all automations, handover to internal team.', 60, 'Consultant', 4),
+
+  -- AI & Analytics (b...007) — Accelerate phase
+  ('b0000000-0000-0000-0000-000000000007', 'Data Source Audit', 'Identify all business data sources, assess data quality, map key metrics and KPIs for dashboards.', 90, 'Data Analyst', 1),
+  ('b0000000-0000-0000-0000-000000000007', 'Power BI Workspace Setup', 'Provision Power BI workspace, configure data gateway, connect to data sources, set up refresh schedules.', 60, 'Engineer', 2),
+  ('b0000000-0000-0000-0000-000000000007', 'Build Executive Dashboard', 'Create interactive Power BI dashboard with key business metrics, drill-downs, and automated alerts.', 180, 'Data Analyst', 3),
+  ('b0000000-0000-0000-0000-000000000007', 'Copilot Integration', 'Enable Microsoft Copilot across M365 apps, configure data permissions, run pilot with leadership team.', 120, 'Engineer', 4),
+
+  -- Digital Transformation Strategy (b...008) — Accelerate phase
+  ('b0000000-0000-0000-0000-000000000008', 'Stakeholder Interviews', 'Interview leadership team, department heads, and key users to understand business goals and pain points.', 120, 'Consultant', 1),
+  ('b0000000-0000-0000-0000-000000000008', 'Technology Maturity Assessment', 'Score current technology across all domains, benchmark against industry peers, identify priority gaps.', 90, 'Consultant', 2),
+  ('b0000000-0000-0000-0000-000000000008', 'Roadmap Development', 'Create prioritised 12-24 month technology roadmap with budget estimates, dependencies, and milestones.', 180, 'Consultant', 3),
+  ('b0000000-0000-0000-0000-000000000008', 'Business Case & Presentation', 'Prepare executive business case document, present to board/leadership, agree on investment priorities.', 120, 'Consultant', 4)
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
@@ -599,10 +645,22 @@ WHERE NOT EXISTS (SELECT 1 FROM public.service_costing_items WHERE service_id = 
 -- 21. SERVICE-ACADEMY LINKS
 -- ---------------------------------------------------------------------------
 INSERT INTO public.service_academy_links (service_id, course_id, is_required) VALUES
+  -- Cyber Security Essentials → IT Security Fundamentals (required)
   ('b0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000001', true),
+  -- Compliance & Governance → IT Security Fundamentals (required)
+  ('b0000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000001', true),
+  -- Cloud Migration → Cloud Readiness (required)
   ('b0000000-0000-0000-0000-000000000005', 'd0000000-0000-0000-0000-000000000002', true),
+  -- Managed IT Support → Microsoft 365 for Business (optional)
   ('b0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000003', false),
-  ('b0000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000004', false)
+  -- Backup & DR → Microsoft 365 for Business (optional)
+  ('b0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000003', false),
+  -- Process Automation → Microsoft 365 for Business (required)
+  ('b0000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000003', true),
+  -- AI & Analytics → Data-Driven Decision Making (required)
+  ('b0000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000004', true),
+  -- Digital Transformation Strategy → Data-Driven Decision Making (optional)
+  ('b0000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-000000000004', false)
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
