@@ -10,8 +10,12 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { ChevronRight } from '@carbon/icons-react'
+import { ChevronRight, Add, Pause, Play, Edit, TrashCan } from '@carbon/icons-react'
 
 function MetricBadge({ metric, value, format }: { metric: string; value: number | null; format: (v: number) => string }) {
   if (value === null || value === undefined) return <span className="text-muted-foreground">—</span>
@@ -32,6 +36,8 @@ export default function AdSetsPage() {
   const [adSets, setAdSets] = useState<MetaAdSet[]>([])
   const [campaign, setCampaign] = useState<MetaCampaign | null>(null)
   const [loading, setLoading] = useState(true)
+  const [deleteTarget, setDeleteTarget] = useState<MetaAdSet | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -56,6 +62,59 @@ export default function AdSetsPage() {
     fetchData()
   }, [fetchData])
 
+  const getAuthHeaders = async () => {
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+  }
+
+  const handleStatusChange = async (adSet: MetaAdSet, newStatus: string) => {
+    setActionLoading(adSet.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/ad-sets/${adSet.id}/status`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to update status')
+        return
+      }
+      toast.success(`Ad set ${newStatus === 'ACTIVE' ? 'resumed' : 'paused'}`)
+      fetchData()
+    } catch {
+      toast.error('Failed to update status')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setActionLoading(deleteTarget.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/ad-sets/${deleteTarget.id}/delete`, {
+        method: 'DELETE',
+        headers,
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to delete ad set')
+        return
+      }
+      toast.success('Ad set deleted')
+      setDeleteTarget(null)
+      fetchData()
+    } catch {
+      toast.error('Failed to delete ad set')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const summarizeTargeting = (targeting: Record<string, unknown> | null): string => {
     if (!targeting) return '—'
     if (targeting.geo_locations) return 'Geo-targeted'
@@ -66,10 +125,16 @@ export default function AdSetsPage() {
   return (
     <div>
       {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
-        <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/ads')}>Ads</span>
-        <ChevronRight size={14} />
-        <span className="text-foreground font-medium">{campaign?.name || '...'}</span>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/ads')}>Ads</span>
+          <ChevronRight size={14} />
+          <span className="text-foreground font-medium">{campaign?.name || '...'}</span>
+        </div>
+        <Button onClick={() => router.push(`/growth/ads/${campaignId}/create-ad-set`)}>
+          <Add size={16} />
+          Add Ad Set
+        </Button>
       </div>
 
       <div className="rounded-lg border">
@@ -84,18 +149,19 @@ export default function AdSetsPage() {
               <TableHead className="text-right">CPA</TableHead>
               <TableHead className="text-right">CPM</TableHead>
               <TableHead className="text-right">Conversions</TableHead>
+              <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : adSets.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   No ad sets found for this campaign.
                 </TableCell>
               </TableRow>
@@ -126,12 +192,68 @@ export default function AdSetsPage() {
                     {adSet.cpm !== null ? `$${adSet.cpm.toFixed(2)}` : '—'}
                   </TableCell>
                   <TableCell className="text-right">{adSet.conversions.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      {adSet.status === 'ACTIVE' ? (
+                        <button
+                          title="Pause"
+                          onClick={() => handleStatusChange(adSet, 'PAUSED')}
+                          disabled={actionLoading === adSet.id}
+                          className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                        >
+                          <Pause size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          title="Resume"
+                          onClick={() => handleStatusChange(adSet, 'ACTIVE')}
+                          disabled={actionLoading === adSet.id}
+                          className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                        >
+                          <Play size={16} />
+                        </button>
+                      )}
+                      <button
+                        title="Edit"
+                        onClick={() => router.push(`/growth/ads/${campaignId}/create-ad-set?edit=${adSet.id}`)}
+                        className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        title="Delete"
+                        onClick={() => setDeleteTarget(adSet)}
+                        disabled={actionLoading === adSet.id}
+                        className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-red-500 disabled:opacity-50"
+                      >
+                        <TrashCan size={16} />
+                      </button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleteTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove it from Meta and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={!!actionLoading}>
+              {actionLoading ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
