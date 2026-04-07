@@ -115,16 +115,16 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <ScoreCard attempt={attempt!} phases={phases} />
-            {memberProfile && (
-              <div className="mt-6">
+            <div className={memberProfile ? 'grid grid-cols-2 gap-4' : ''}>
+              <ScoreCard attempt={attempt!} phases={phases} />
+              {memberProfile && (
                 <MemberScoreCard
                   myScores={memberProfile.myScores}
                   teamAverages={memberProfile.teamAverages}
                   phases={phases}
                 />
-              </div>
-            )}
+              )}
+            </div>
             {memberProfile && memberProfile.recommendedCourses.length > 0 && (
               <div className="mt-6 rounded-xl border border-slate-200 bg-white p-7">
                 <h2 className="text-lg font-semibold text-slate-900">Recommended for You</h2>
