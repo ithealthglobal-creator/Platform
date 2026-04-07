@@ -10,6 +10,9 @@
 
 **Spec:** `docs/superpowers/specs/2026-04-07-meta-ads-management-design.md`
 
+**Required env vars (add to .env.local):**
+- `META_PAGE_ID` — Your Facebook Page ID (required for ad creative creation). Find in Facebook Page Settings > Page Transparency.
+
 ---
 
 ## File Structure
@@ -1180,16 +1183,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     let newCreativeId = existingAd.creative_id
 
     if (needsNewCreative) {
+      // Merge incoming fields with existing ad data so Meta gets a complete creative
       const creativeBody: Record<string, unknown> = {
-        name: `${name || 'Updated'} Creative`,
+        name: `${name || existingAd.name} Creative`,
         object_story_spec: JSON.stringify({
           page_id: process.env.META_PAGE_ID,
           link_data: {
-            image_hash: image_hash || undefined,
-            link: link_url || undefined,
-            message: primary_text || undefined,
-            name: headline || undefined,
-            call_to_action: call_to_action ? { type: call_to_action } : undefined,
+            image_hash: image_hash || existingAd.creative_id || undefined,
+            link: link_url || existingAd.creative_link_url || undefined,
+            message: primary_text || existingAd.creative_body || undefined,
+            name: headline || existingAd.creative_title || undefined,
+            call_to_action: { type: call_to_action || 'LEARN_MORE' },
             ...(description ? { description } : {}),
             ...(display_link ? { caption: display_link } : {}),
           },
