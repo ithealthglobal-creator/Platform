@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Edit, TrashCan, Lock } from '@carbon/icons-react'
+import { Edit, TrashCan, Locked } from '@carbon/icons-react'
 
 export interface AgentRow {
   id: string
@@ -100,7 +100,7 @@ export function AgentTable({ agents, loading, onDelete, onEdit }: AgentTableProp
                           disabled
                           title="Default agents cannot be deleted"
                         >
-                          <Lock size={16} />
+                          <Locked size={16} />
                         </Button>
                       ) : (
                         <Button
