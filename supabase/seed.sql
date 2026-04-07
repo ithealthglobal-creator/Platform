@@ -614,17 +614,27 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO auth.users (
   instance_id, id, aud, role, email, encrypted_password,
-  email_confirmed_at, created_at, updated_at, confirmation_token, raw_app_meta_data, raw_user_meta_data
+  email_confirmed_at, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new,
+  email_change_token_current, reauthentication_token,
+  phone_change, phone_change_token,
+  raw_app_meta_data, raw_user_meta_data
 ) VALUES
   ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000001', 'authenticated', 'authenticated',
    'guy.duncan@futuvara.com', crypt('Roccolola2013!', gen_salt('bf')),
-   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}'),
+   now(), now(), now(),
+   '', '', '', '', '', '', '', '',
+   '{"provider":"email","providers":["email"]}', '{}'),
   ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000002', 'authenticated', 'authenticated',
    'customer@acmesolutions.co.za', crypt('Customer2024!', gen_salt('bf')),
-   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}'),
+   now(), now(), now(),
+   '', '', '', '', '', '', '', '',
+   '{"provider":"email","providers":["email"]}', '{}'),
   ('00000000-0000-0000-0000-000000000000', 'c0000000-0000-0000-0000-000000000003', 'authenticated', 'authenticated',
    'partner@cloudwave.co.za', crypt('Partner2024!', gen_salt('bf')),
-   now(), now(), now(), '', '{"provider":"email","providers":["email"]}', '{}')
+   now(), now(), now(),
+   '', '', '', '', '', '', '', '',
+   '{"provider":"email","providers":["email"]}', '{}')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at) VALUES
