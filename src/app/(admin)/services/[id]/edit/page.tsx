@@ -19,6 +19,7 @@ import { RunbookTab } from '@/components/services/runbook-tab'
 import { GrowthTab } from '@/components/services/growth-tab'
 import { CostingTab } from '@/components/services/costing-tab'
 import { AcademyTab } from '@/components/services/academy-tab'
+import { SlaTab } from '@/components/services/sla-tab'
 
 export default function ServiceEditorPage() {
   const params = useParams()
@@ -99,6 +100,9 @@ export default function ServiceEditorPage() {
           <TabsTrigger value="academy" disabled={!serviceId}>
             Academy
           </TabsTrigger>
+          <TabsTrigger value="sla" disabled={!serviceId}>
+            SLA
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="description">
@@ -135,6 +139,10 @@ export default function ServiceEditorPage() {
 
         <TabsContent value="academy">
           <AcademyTab serviceId={serviceId!} />
+        </TabsContent>
+
+        <TabsContent value="sla">
+          <SlaTab serviceId={serviceId!} />
         </TabsContent>
       </Tabs>
     </div>
