@@ -1,15 +1,18 @@
 from langgraph.checkpoint.postgres import PostgresSaver
 from config import settings
 
-_checkpointer = None
+_checkpointer: PostgresSaver | None = None
+
+def init_checkpointer() -> PostgresSaver:
+    """Create and set up the PostgresSaver checkpointer."""
+    global _checkpointer
+    cm = PostgresSaver.from_conn_string(settings.supabase_db_url)
+    _checkpointer = cm.__enter__()
+    _checkpointer.setup()
+    return _checkpointer
 
 def get_checkpointer() -> PostgresSaver:
-    """Get or create the PostgresSaver checkpointer instance.
-
-    Connects to Supabase Postgres via the direct connection string.
-    Call .setup() once on startup to create checkpoint tables.
-    """
-    global _checkpointer
+    """Get the initialized checkpointer instance."""
     if _checkpointer is None:
-        _checkpointer = PostgresSaver.from_conn_string(settings.supabase_db_url)
+        raise RuntimeError("Checkpointer not initialized. Call init_checkpointer() first.")
     return _checkpointer

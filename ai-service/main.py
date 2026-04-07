@@ -2,12 +2,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.routes import chat, executions
-from services.checkpointer import get_checkpointer
+from services.checkpointer import init_checkpointer
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    checkpointer = get_checkpointer()
-    checkpointer.setup()
+    init_checkpointer()
     yield
 
 app = FastAPI(title="IThealth AI Service", lifespan=lifespan)
