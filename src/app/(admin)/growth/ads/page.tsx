@@ -11,8 +11,11 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { Time } from '@carbon/icons-react'
+import { Time, Add, Pause, Play, Edit, TrashCan } from '@carbon/icons-react'
 
 const statusColors: Record<string, 'default' | 'secondary' | 'destructive'> = {
   ACTIVE: 'default',
@@ -39,6 +42,8 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true)
   const [lastSynced, setLastSynced] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [deleteTarget, setDeleteTarget] = useState<MetaCampaign | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchCampaigns = useCallback(async () => {
     setLoading(true)
@@ -70,6 +75,59 @@ export default function CampaignsPage() {
     fetchSyncStatus()
   }, [fetchCampaigns, fetchSyncStatus])
 
+  const getAuthHeaders = async () => {
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+  }
+
+  const handleStatusChange = async (campaign: MetaCampaign, newStatus: string) => {
+    setActionLoading(campaign.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/campaigns/${campaign.id}/status`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to update status')
+        return
+      }
+      toast.success(`Campaign ${newStatus === 'ACTIVE' ? 'resumed' : 'paused'}`)
+      fetchCampaigns()
+    } catch {
+      toast.error('Failed to update status')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setActionLoading(deleteTarget.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/campaigns/${deleteTarget.id}/delete`, {
+        method: 'DELETE',
+        headers,
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to delete campaign')
+        return
+      }
+      toast.success('Campaign deleted')
+      setDeleteTarget(null)
+      fetchCampaigns()
+    } catch {
+      toast.error('Failed to delete campaign')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const filtered = statusFilter === 'all'
     ? campaigns
     : campaigns.filter(c => c.status === statusFilter)
@@ -95,12 +153,18 @@ export default function CampaignsPage() {
             <option value="PAUSED">Paused</option>
           </select>
         </div>
-        {lastSynced && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Time size={14} />
-            Last synced {timeAgo(lastSynced)}
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {lastSynced && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Time size={14} />
+              Last synced {timeAgo(lastSynced)}
+            </div>
+          )}
+          <Button onClick={() => router.push('/growth/ads/create')}>
+            <Add size={16} />
+            Create Campaign
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-lg border">
@@ -115,18 +179,19 @@ export default function CampaignsPage() {
               <TableHead className="text-right">CTR</TableHead>
               <TableHead className="text-right">CPA</TableHead>
               <TableHead className="text-right">Conversions</TableHead>
+              <TableHead className="w-[120px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                   {campaigns.length === 0
                     ? 'No campaigns synced. Connect your Meta account in Settings > Integrations.'
                     : 'No campaigns match the selected filter.'}
@@ -155,12 +220,68 @@ export default function CampaignsPage() {
                     <MetricBadge metric="cpa" value={campaign.cpa} format={(v) => `$${v.toFixed(2)}`} />
                   </TableCell>
                   <TableCell className="text-right">{campaign.conversions.toLocaleString()}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      {campaign.status === 'ACTIVE' ? (
+                        <button
+                          title="Pause"
+                          onClick={() => handleStatusChange(campaign, 'PAUSED')}
+                          disabled={actionLoading === campaign.id}
+                          className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                        >
+                          <Pause size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          title="Resume"
+                          onClick={() => handleStatusChange(campaign, 'ACTIVE')}
+                          disabled={actionLoading === campaign.id}
+                          className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                        >
+                          <Play size={16} />
+                        </button>
+                      )}
+                      <button
+                        title="Edit"
+                        onClick={() => router.push(`/growth/ads/create?edit=${campaign.id}`)}
+                        className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        title="Delete"
+                        onClick={() => setDeleteTarget(campaign)}
+                        disabled={actionLoading === campaign.id}
+                        className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-red-500 disabled:opacity-50"
+                      >
+                        <TrashCan size={16} />
+                      </button>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleteTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove it from Meta and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={!!actionLoading}>
+              {actionLoading ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

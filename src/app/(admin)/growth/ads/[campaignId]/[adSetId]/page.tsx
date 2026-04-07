@@ -8,8 +8,11 @@ import { MetaAd, MetaAdSet, MetaCampaign } from '@/lib/types'
 import { getBenchmarkColor } from '@/lib/ads-benchmarks'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog'
 import { toast } from 'sonner'
-import { ChevronRight, Compare } from '@carbon/icons-react'
+import { ChevronRight, Compare, Add, Pause, Play, Edit, TrashCan } from '@carbon/icons-react'
 
 function MetricBadge({ metric, value, format }: { metric: string; value: number | null; format: (v: number) => string }) {
   if (value === null || value === undefined) return <span className="text-muted-foreground text-xs">—</span>
@@ -33,6 +36,8 @@ export default function AdsPage() {
   const [campaign, setCampaign] = useState<MetaCampaign | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [deleteTarget, setDeleteTarget] = useState<MetaAd | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -58,6 +63,59 @@ export default function AdsPage() {
     fetchData()
   }, [fetchData])
 
+  const getAuthHeaders = async () => {
+    const session = await supabase.auth.getSession()
+    const token = session.data.session?.access_token
+    return { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
+  }
+
+  const handleStatusChange = async (ad: MetaAd, newStatus: string) => {
+    setActionLoading(ad.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/ads/${ad.id}/status`, {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to update status')
+        return
+      }
+      toast.success(`Ad ${newStatus === 'ACTIVE' ? 'resumed' : 'paused'}`)
+      fetchData()
+    } catch {
+      toast.error('Failed to update status')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setActionLoading(deleteTarget.id)
+    try {
+      const headers = await getAuthHeaders()
+      const res = await fetch(`/api/admin/ads/meta/ads/${deleteTarget.id}/delete`, {
+        method: 'DELETE',
+        headers,
+      })
+      if (!res.ok) {
+        const { error } = await res.json()
+        toast.error(error || 'Failed to delete ad')
+        return
+      }
+      toast.success('Ad deleted')
+      setDeleteTarget(null)
+      fetchData()
+    } catch {
+      toast.error('Failed to delete ad')
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
   const toggleSelect = (id: string) => {
     setSelectedIds(prev => {
       const next = new Set(prev)
@@ -79,26 +137,31 @@ export default function AdsPage() {
 
   return (
     <div>
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
-        <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/ads')}>Ads</span>
-        <ChevronRight size={14} />
-        <span className="cursor-pointer hover:text-foreground" onClick={() => router.push(`/growth/ads/${campaignId}`)}>
-          {campaign?.name || '...'}
-        </span>
-        <ChevronRight size={14} />
-        <span className="text-foreground font-medium">{adSet?.name || '...'}</span>
-      </div>
-
-      {/* Compare bar */}
-      <div className="flex justify-end mb-4">
-        <Button
-          onClick={handleCompare}
-          disabled={selectedIds.size < 2}
-        >
-          <Compare size={16} />
-          Compare Selected ({selectedIds.size}/4)
-        </Button>
+      {/* Breadcrumb + actions */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+          <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/ads')}>Ads</span>
+          <ChevronRight size={14} />
+          <span className="cursor-pointer hover:text-foreground" onClick={() => router.push(`/growth/ads/${campaignId}`)}>
+            {campaign?.name || '...'}
+          </span>
+          <ChevronRight size={14} />
+          <span className="text-foreground font-medium">{adSet?.name || '...'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleCompare}
+            disabled={selectedIds.size < 2}
+          >
+            <Compare size={16} />
+            Compare Selected ({selectedIds.size}/4)
+          </Button>
+          <Button onClick={() => router.push(`/growth/ads/${campaignId}/${adSetId}/create-ad`)}>
+            <Add size={16} />
+            Add Ad
+          </Button>
+        </div>
       </div>
 
       {/* Card grid */}
@@ -126,7 +189,12 @@ export default function AdsPage() {
 
               {/* Ad info */}
               <div>
-                <div className="font-medium text-sm">{ad.name}</div>
+                <div className="flex items-center justify-between">
+                  <div className="font-medium text-sm">{ad.name}</div>
+                  <Badge variant={ad.status === 'ACTIVE' ? 'default' : 'secondary'} className="text-[10px]">
+                    {ad.status || '—'}
+                  </Badge>
+                </div>
                 {ad.creative_title && (
                   <div className="text-xs text-muted-foreground mt-0.5">{ad.creative_title}</div>
                 )}
@@ -144,25 +212,78 @@ export default function AdsPage() {
                 <MetricBadge metric="emq_score" value={ad.emq_score} format={(v) => `EMQ ${v.toFixed(1)}`} />
               </div>
 
-              {/* Stats + select */}
+              {/* Stats + actions */}
               <div className="flex items-center justify-between mt-auto pt-2 border-t">
                 <div className="text-xs text-muted-foreground">
                   ${ad.spend.toLocaleString()} · {ad.conversions} conv.
                 </div>
-                <label className="flex items-center gap-1.5 text-xs cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.has(ad.id)}
-                    onChange={() => toggleSelect(ad.id)}
-                    className="accent-primary"
-                  />
-                  Compare
-                </label>
+                <div className="flex items-center gap-0.5">
+                  {ad.status === 'ACTIVE' ? (
+                    <button
+                      title="Pause"
+                      onClick={() => handleStatusChange(ad, 'PAUSED')}
+                      disabled={actionLoading === ad.id}
+                      className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                    >
+                      <Pause size={14} />
+                    </button>
+                  ) : (
+                    <button
+                      title="Resume"
+                      onClick={() => handleStatusChange(ad, 'ACTIVE')}
+                      disabled={actionLoading === ad.id}
+                      className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground disabled:opacity-50"
+                    >
+                      <Play size={14} />
+                    </button>
+                  )}
+                  <button
+                    title="Edit"
+                    onClick={() => router.push(`/growth/ads/${campaignId}/${adSetId}/create-ad?edit=${ad.id}`)}
+                    className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit size={14} />
+                  </button>
+                  <button
+                    title="Delete"
+                    onClick={() => setDeleteTarget(ad)}
+                    disabled={actionLoading === ad.id}
+                    className="p-1 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-red-500 disabled:opacity-50"
+                  >
+                    <TrashCan size={14} />
+                  </button>
+                  <label className="flex items-center gap-1 text-xs cursor-pointer ml-1">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.has(ad.id)}
+                      onChange={() => toggleSelect(ad.id)}
+                      className="accent-primary"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTarget} onOpenChange={() => setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deleteTarget?.name}?</DialogTitle>
+            <DialogDescription>
+              This will permanently remove it from Meta and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={!!actionLoading}>
+              {actionLoading ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
