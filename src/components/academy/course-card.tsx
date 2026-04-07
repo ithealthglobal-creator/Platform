@@ -30,48 +30,56 @@ export function CourseCard({ course, enrollment, progress }: CourseCardProps) {
 
   return (
     <div
-      className="bg-white overflow-hidden shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+      className="group flex flex-col overflow-hidden bg-white border border-slate-200 cursor-pointer transition-all hover:shadow-lg hover:border-slate-300"
       style={{ borderRadius: '16px 0 16px 16px' }}
       onClick={handleClick}
     >
-      {/* Phase-colored header */}
+      {/* Gradient header with phase color */}
       <div
-        className="h-24 flex items-center justify-center relative"
-        style={{ background: phaseColor, borderRadius: '16px 0 0 0' }}
+        className="relative h-28 flex items-end p-4"
+        style={{
+          background: `linear-gradient(135deg, ${phaseColor}18 0%, ${phaseColor}40 100%)`,
+        }}
       >
-        <Education size={40} className="text-white" />
+        {/* Large faded icon */}
+        <Education
+          size={64}
+          className="absolute right-3 top-3 opacity-10"
+          style={{ color: phaseColor }}
+        />
+
+        {/* Status badge */}
         {isEnrolled && !isCompleted && (
           <span
-            className="absolute top-2 right-2 bg-white/90 text-[10px] font-semibold px-2.5 py-0.5 flex items-center gap-1"
-            style={{ borderRadius: '8px 0 8px 8px', color: phaseColor }}
+            className="absolute top-3 right-3 flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-semibold"
+            style={{ backgroundColor: `${phaseColor}20`, color: phaseColor }}
           >
             <Time size={12} />
             In Progress
           </span>
         )}
         {isCompleted && (
-          <span
-            className="absolute top-2 right-2 bg-white/90 text-[10px] font-semibold px-2.5 py-0.5 flex items-center gap-1 text-green-700"
-            style={{ borderRadius: '8px 0 8px 8px' }}
-          >
-            <CheckmarkFilled size={12} className="text-green-600" />
+          <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-green-100 px-2.5 py-0.5 text-[10px] font-semibold text-green-700">
+            <CheckmarkFilled size={12} />
             Completed
           </span>
         )}
+
+        {/* Phase pill at bottom-left of header */}
+        <span
+          className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white"
+          style={{ backgroundColor: phaseColor }}
+        >
+          {phaseName}
+        </span>
       </div>
 
       {/* Card body */}
-      <div className="p-3.5">
-        <div
-          className="text-[11px] font-semibold uppercase tracking-wide mb-1"
-          style={{ color: phaseColor }}
-        >
-          {phaseName}
-        </div>
-        <div className="text-[15px] font-semibold text-slate-900 mb-1.5">
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="text-[15px] font-semibold text-slate-900 group-hover:text-slate-700">
           {course.name}
-        </div>
-        <div className="text-xs text-slate-500 mb-3 flex items-center gap-2">
+        </h3>
+        <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-400">
           <span>{course.section_count} sections</span>
           <span>·</span>
           <span>{course.module_count} videos</span>
@@ -79,45 +87,51 @@ export function CourseCard({ course, enrollment, progress }: CourseCardProps) {
 
         {/* Progress bar for in-progress */}
         {isEnrolled && !isCompleted && progress != null && (
-          <>
-            <div className="bg-slate-100 rounded h-1.5 mb-1">
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-[10px] text-slate-400">Progress</span>
+              <span className="text-[10px] font-semibold" style={{ color: phaseColor }}>{progress}%</span>
+            </div>
+            <div className="h-1.5 rounded-full bg-slate-100">
               <div
-                className="rounded h-1.5"
-                style={{ width: `${progress}%`, background: phaseColor }}
+                className="h-1.5 rounded-full transition-all duration-500"
+                style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${phaseColor}99, ${phaseColor})` }}
               />
             </div>
-            <div className="text-[10px] text-slate-400 text-right mb-2">
-              {progress}% complete
-            </div>
-          </>
+          </div>
         )}
 
+        {/* Spacer to push button to bottom */}
+        <div className="flex-1" />
+
         {/* Action button */}
-        {isCompleted ? (
-          <button
-            className="w-full py-2 text-xs font-semibold border border-slate-200 bg-white text-slate-900"
-            style={{ borderRadius: '10px 0 10px 10px' }}
-            onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}`) }}
-          >
-            View Certificate
-          </button>
-        ) : isEnrolled ? (
-          <button
-            className="w-full py-2 text-xs font-semibold text-white border-0"
-            style={{ background: phaseColor, borderRadius: '10px 0 10px 10px' }}
-            onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}/learn`) }}
-          >
-            Continue
-          </button>
-        ) : (
-          <button
-            className="w-full py-2 text-xs font-semibold text-white border-0"
-            style={{ background: phaseColor, borderRadius: '10px 0 10px 10px' }}
-            onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}`) }}
-          >
-            Start Course
-          </button>
-        )}
+        <div className="mt-4">
+          {isCompleted ? (
+            <button
+              className="w-full py-2.5 text-xs font-semibold border border-slate-200 bg-white text-slate-700 transition-colors hover:bg-slate-50"
+              style={{ borderRadius: '10px 0 10px 10px' }}
+              onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}`) }}
+            >
+              View Certificate
+            </button>
+          ) : isEnrolled ? (
+            <button
+              className="w-full py-2.5 text-xs font-semibold text-white border-0 transition-opacity hover:opacity-90"
+              style={{ background: phaseColor, borderRadius: '10px 0 10px 10px' }}
+              onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}/learn`) }}
+            >
+              Continue Learning
+            </button>
+          ) : (
+            <button
+              className="w-full py-2.5 text-xs font-semibold text-white border-0 transition-opacity hover:opacity-90"
+              style={{ background: phaseColor, borderRadius: '10px 0 10px 10px' }}
+              onClick={(e) => { e.stopPropagation(); router.push(`/portal/academy/courses/${course.id}`) }}
+            >
+              Start Course
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -125,12 +125,7 @@ export default function CoursesPage() {
       <div className="mt-5 flex items-center gap-2 flex-wrap">
         <button
           onClick={() => setActivePhase('All')}
-          className="px-4 py-1.5 text-xs font-semibold transition-colors"
-          style={{
-            borderRadius: '20px 0 20px 20px',
-            background: activePhase === 'All' ? '#133258' : '#e2e8f0',
-            color: activePhase === 'All' ? '#fff' : '#475569',
-          }}
+          className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${activePhase === 'All' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
         >
           All
         </button>
@@ -141,14 +136,13 @@ export default function CoursesPage() {
             <button
               key={phase}
               onClick={() => setActivePhase(phase)}
-              className="px-4 py-1.5 text-xs font-semibold transition-colors"
-              style={{
-                borderRadius: '20px 0 20px 20px',
-                background: isActive ? color : '#e2e8f0',
-                color: isActive ? '#fff' : '#475569',
-              }}
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${isActive ? 'text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              style={isActive ? { backgroundColor: color } : undefined}
             >
-              {phase}
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                {phase}
+              </span>
             </button>
           )
         })}
