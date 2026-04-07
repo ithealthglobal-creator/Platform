@@ -25,9 +25,6 @@ export function GanttSummaryFooter({
       <div className="flex flex-1 items-center gap-4 px-4 py-3">
         <span className="text-sm font-semibold text-slate-900">
           {formatDuration(timeline.totalMinutes, timeUnit)}
-          {timeUnit === 'days' && ' business days'}
-          {timeUnit === 'weeks' && ' weeks'}
-          {timeUnit === 'hours' && ' hours'}
         </span>
         <span className="text-xs text-slate-500">
           {timeline.serviceCount} service{timeline.serviceCount !== 1 ? 's' : ''} across{' '}

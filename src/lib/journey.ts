@@ -115,7 +115,7 @@ export async function fetchJourneyTimeline(
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single()
+    .maybeSingle()
 
   if (attemptErr || !attempt) {
     return { timeline: null, allAboveThreshold: false }
@@ -149,7 +149,8 @@ export async function fetchJourneyTimeline(
       .select(
         'id, name, description, phase_id, phase:phases(id, name, sort_order)',
       )
-      .in('id', serviceIds),
+      .in('id', serviceIds)
+      .eq('is_active', true),
     supabase
       .from('service_runbook_steps')
       .select(
