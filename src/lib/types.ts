@@ -350,6 +350,121 @@ export interface ServiceAcademyLink {
   course?: Course
 }
 
+// === Customer Services Types ===
+
+export type BillingPeriod = 'once' | 'monthly' | 'quarterly' | 'annually'
+export type ContractStatus = 'pending' | 'active' | 'paused' | 'completed' | 'cancelled'
+export type OrderStatus = 'pending' | 'paid' | 'failed' | 'cancelled'
+export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'na'
+
+export interface SlaTemplate {
+  id: string
+  name: string
+  description: string | null
+  response_critical: string | null
+  response_high: string | null
+  response_medium: string | null
+  response_low: string | null
+  resolution_critical: string | null
+  resolution_high: string | null
+  resolution_medium: string | null
+  resolution_low: string | null
+  uptime_guarantee: string | null
+  support_hours: string | null
+  support_channels: string[] | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ServiceSla {
+  id: string
+  service_id: string
+  sla_template_id: string
+  override_response_critical: string | null
+  override_response_high: string | null
+  override_response_medium: string | null
+  override_response_low: string | null
+  override_resolution_critical: string | null
+  override_resolution_high: string | null
+  override_resolution_medium: string | null
+  override_resolution_low: string | null
+  override_uptime_guarantee: string | null
+  override_support_hours: string | null
+  override_support_channels: string[] | null
+  created_at: string
+  updated_at: string
+  sla_template?: SlaTemplate
+}
+
+export interface CustomerContract {
+  id: string
+  company_id: string
+  service_id: string
+  order_item_id: string | null
+  status: ContractStatus
+  contracted_price: number
+  billing_period: BillingPeriod
+  started_at: string | null
+  renewal_date: string | null
+  expires_at: string | null
+  payment_status: PaymentStatus
+  notes: string | null
+  created_at: string
+  updated_at: string
+  service?: Service
+}
+
+export interface ServiceRequest {
+  id: string
+  company_id: string
+  profile_id: string
+  service_id: string
+  status: 'new' | 'in_review' | 'approved' | 'declined'
+  message: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface Order {
+  id: string
+  company_id: string
+  profile_id: string
+  order_number: string
+  status: OrderStatus
+  subtotal: number
+  vat_amount: number
+  total: number
+  billing_email: string | null
+  po_number: string | null
+  notes: string | null
+  payfast_payment_id: string | null
+  payfast_status: string | null
+  paid_at: string | null
+  created_at: string
+  updated_at: string
+  order_items?: OrderItem[]
+}
+
+export interface OrderItem {
+  id: string
+  order_id: string
+  service_id: string
+  price: number
+  billing_period: BillingPeriod
+  created_at: string
+  service?: Service
+}
+
+export interface CartItem {
+  service_id: string
+  name: string
+  phase_name: string
+  phase_color: string
+  price: number
+  billing_period: BillingPeriod
+}
+
 export type BlogPostStatus = 'draft' | 'published'
 
 export interface BlogPost {
