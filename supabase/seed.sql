@@ -429,15 +429,15 @@ ON CONFLICT DO NOTHING;
 -- ---------------------------------------------------------------------------
 -- 14. SALES STAGES (Kanban pipeline)
 -- ---------------------------------------------------------------------------
-INSERT INTO public.sales_stages (name, sort_order, color) VALUES
-  ('New Lead', 1, '#1175E4'),
-  ('Contacted', 2, '#8B5CF6'),
-  ('Discovery', 3, '#F59E0B'),
-  ('Proposal', 4, '#FF246B'),
-  ('Negotiation', 5, '#133258'),
-  ('Won', 6, '#10B981'),
-  ('Lost', 7, '#6B7280')
-ON CONFLICT DO NOTHING;
+INSERT INTO public.sales_stages (id, name, sort_order, color) VALUES
+  ('e0000000-0000-0000-0000-000000000010', 'New Lead', 1, '#1175E4'),
+  ('e0000000-0000-0000-0000-000000000011', 'Contacted', 2, '#8B5CF6'),
+  ('e0000000-0000-0000-0000-000000000012', 'Discovery', 3, '#F59E0B'),
+  ('e0000000-0000-0000-0000-000000000013', 'Proposal', 4, '#FF246B'),
+  ('e0000000-0000-0000-0000-000000000014', 'Negotiation', 5, '#133258'),
+  ('e0000000-0000-0000-0000-000000000015', 'Won', 6, '#10B981'),
+  ('e0000000-0000-0000-0000-000000000016', 'Lost', 7, '#6B7280')
+ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
 -- 15. BLOG POSTS (public website)
@@ -654,3 +654,95 @@ INSERT INTO public.profiles (id, email, display_name, role, company_id) VALUES
   ('c0000000-0000-0000-0000-000000000002', 'customer@acmesolutions.co.za', 'Acme Customer', 'customer', '00000000-0000-0000-0000-000000000002'),
   ('c0000000-0000-0000-0000-000000000003', 'partner@cloudwave.co.za', 'CloudWave Partner', 'partner', '00000000-0000-0000-0000-000000000006')
 ON CONFLICT (id) DO NOTHING;
+
+-- ---------------------------------------------------------------------------
+-- CUSTOMER ASSESSMENT ATTEMPT (Acme Solutions)
+-- ---------------------------------------------------------------------------
+-- Scores: Operate=67%, Secure=25%, Streamline=50%, Accelerate=17%
+-- Service scores:
+--   Managed IT Support=83%, Backup & DR=50%          (Operate)
+--   Cyber Security=17%, Compliance & Gov=33%          (Secure)
+--   Cloud Migration=67%, Process Automation=33%       (Streamline)
+--   AI & Analytics=17%, Digital Transformation=17%    (Accelerate)
+
+-- Build answers JSON dynamically from question IDs
+DO $$
+DECLARE
+  q_ids uuid[];
+  answers_json jsonb;
+  attempt_id uuid := 'a0000000-0000-0000-0000-100000000001';
+BEGIN
+  -- Get question IDs in sort_order
+  SELECT array_agg(id ORDER BY sort_order)
+  INTO q_ids
+  FROM public.assessment_questions
+  WHERE assessment_id = 'f0000000-0000-0000-0000-000000000001';
+
+  -- Build answers: 16 questions, each scored 0-3
+  -- Operate (Q1-Q4):    3, 2, 2, 1  → Managed IT=83%, Backup&DR=50%
+  -- Secure (Q5-Q8):     1, 0, 1, 1  → CyberSec=17%, Compliance=33%
+  -- Streamline (Q9-12): 2, 2, 1, 1  → Cloud=67%, Automation=33%
+  -- Accelerate (Q13-16):0, 1, 1, 0  → AI=17%, DigitalTrans=17%
+  answers_json := jsonb_build_array(
+    jsonb_build_object('question_id', q_ids[1],  'selected_option', '3', 'correct', true),
+    jsonb_build_object('question_id', q_ids[2],  'selected_option', '2', 'correct', false),
+    jsonb_build_object('question_id', q_ids[3],  'selected_option', '2', 'correct', false),
+    jsonb_build_object('question_id', q_ids[4],  'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[5],  'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[6],  'selected_option', '0', 'correct', false),
+    jsonb_build_object('question_id', q_ids[7],  'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[8],  'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[9],  'selected_option', '2', 'correct', false),
+    jsonb_build_object('question_id', q_ids[10], 'selected_option', '2', 'correct', false),
+    jsonb_build_object('question_id', q_ids[11], 'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[12], 'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[13], 'selected_option', '0', 'correct', false),
+    jsonb_build_object('question_id', q_ids[14], 'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[15], 'selected_option', '1', 'correct', false),
+    jsonb_build_object('question_id', q_ids[16], 'selected_option', '0', 'correct', false)
+  );
+
+  INSERT INTO public.assessment_attempts (
+    id, assessment_id, user_id, score, passed, answers, phase_scores, service_scores,
+    started_at, completed_at
+  ) VALUES (
+    attempt_id,
+    'f0000000-0000-0000-0000-000000000001',
+    'c0000000-0000-0000-0000-000000000002',
+    40,   -- overall avg of phase scores: (67+25+50+17)/4 = ~40
+    false,
+    answers_json,
+    jsonb_build_object(
+      'a0000000-0000-0000-0000-000000000001', 67,
+      'a0000000-0000-0000-0000-000000000002', 25,
+      'a0000000-0000-0000-0000-000000000003', 50,
+      'a0000000-0000-0000-0000-000000000004', 17
+    ),
+    jsonb_build_object(
+      'b0000000-0000-0000-0000-000000000001', jsonb_build_object('earned', 5, 'max', 6, 'pct', 83),
+      'b0000000-0000-0000-0000-000000000002', jsonb_build_object('earned', 3, 'max', 6, 'pct', 50),
+      'b0000000-0000-0000-0000-000000000003', jsonb_build_object('earned', 1, 'max', 6, 'pct', 17),
+      'b0000000-0000-0000-0000-000000000004', jsonb_build_object('earned', 2, 'max', 6, 'pct', 33),
+      'b0000000-0000-0000-0000-000000000005', jsonb_build_object('earned', 4, 'max', 6, 'pct', 67),
+      'b0000000-0000-0000-0000-000000000006', jsonb_build_object('earned', 2, 'max', 6, 'pct', 33),
+      'b0000000-0000-0000-0000-000000000007', jsonb_build_object('earned', 1, 'max', 6, 'pct', 17),
+      'b0000000-0000-0000-0000-000000000008', jsonb_build_object('earned', 1, 'max', 6, 'pct', 17)
+    ),
+    now() - interval '3 days',
+    now() - interval '3 days'
+  ) ON CONFLICT (id) DO NOTHING;
+
+  -- Sales lead for the customer
+  INSERT INTO public.sales_leads (
+    id, company_id, stage_id, assessment_attempt_id,
+    contact_name, contact_email, notes
+  ) VALUES (
+    'a0000000-0000-0000-0000-200000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'e0000000-0000-0000-0000-000000000010',
+    attempt_id,
+    'Acme Customer',
+    'customer@acmesolutions.co.za',
+    'Onboarding assessment completed. Overall score 40% (Developing). Critical gaps in Secure and Accelerate phases.'
+  ) ON CONFLICT (id) DO NOTHING;
+END $$;
