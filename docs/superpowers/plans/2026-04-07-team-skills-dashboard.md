@@ -138,10 +138,8 @@ CREATE POLICY "Company admins can read team snapshots"
     )
   );
 
--- Service role can insert snapshots (for server-side snapshot writes)
-CREATE POLICY "Service role can insert snapshots"
-  ON skill_snapshots FOR INSERT
-  WITH CHECK (true);
+-- No INSERT policy for regular users — snapshots are written via service-role client
+-- (which bypasses RLS entirely). This keeps the table insert-protected for regular users.
 ```
 
 - [ ] **Step 2: Apply migration**
@@ -487,17 +485,19 @@ git commit -m "feat(scoring): add composite scoring — best-across-attempts + c
 Create `src/app/api/team/dashboard/route.ts`:
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { calculateCompositeScore, calculateTeamAverages } from '@/lib/composite-scoring'
 import type { TeamDashboardData } from '@/lib/types'
 
-export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const token = authHeader.replace('Bearer ', '')
+  const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Verify company admin
   const { data: profile } = await supabaseAdmin
@@ -585,15 +585,17 @@ Create `src/app/api/team/trends/route.ts`:
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import type { TeamTrendPoint } from '@/lib/types'
 
 export async function GET(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const token = authHeader.replace('Bearer ', '')
+  const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
@@ -666,17 +668,19 @@ export async function GET(request: NextRequest) {
 Create `src/app/api/team/my-profile/route.ts`:
 
 ```typescript
-import { NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { calculateCompositeScore, calculateTeamAverages } from '@/lib/composite-scoring'
 import type { MemberProfile } from '@/lib/types'
 
-export async function GET() {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const token = authHeader.replace('Bearer ', '')
+  const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
@@ -832,8 +836,7 @@ Create `src/app/api/team/invite/route.ts`:
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 interface Invitee {
@@ -842,9 +845,12 @@ interface Invitee {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const token = authHeader.replace('Bearer ', '')
+  const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { data: profile } = await supabaseAdmin
     .from('profiles')
@@ -944,14 +950,16 @@ Create `src/app/api/team/accept-invite/route.ts`:
 
 ```typescript
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { supabaseAdmin } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies })
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const token = authHeader.replace('Bearer ', '')
+  const supabaseAuth = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser(token)
+  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { token } = await request.json()
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 })
@@ -1328,8 +1336,11 @@ export default function TeamPage() {
 
     async function fetchData() {
       setLoading(true)
+      const { data: { session } } = await supabase.auth.getSession()
+      const authHeaders = { Authorization: `Bearer ${session?.access_token}` }
+
       const [dashRes, phasesRes, servicesRes] = await Promise.all([
-        fetch('/api/team/dashboard'),
+        fetch('/api/team/dashboard', { headers: authHeaders }),
         supabase.from('phases').select('*').eq('is_active', true).order('sort_order'),
         supabase.from('services').select('id, name, phase_id').eq('status', 'active'),
       ])
@@ -1609,6 +1620,7 @@ Create `src/components/team/trends-tab.tsx`:
 'use client'
 
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase-client'
 import type { TeamTrendPoint, Phase } from '@/lib/types'
 import { getPhaseColor } from '@/lib/phase-colors'
 
@@ -1624,7 +1636,10 @@ export function TrendsTab({ phases }: TrendsTabProps) {
   useEffect(() => {
     async function fetchTrends() {
       setLoading(true)
-      const res = await fetch(`/api/team/trends?period=${period}`)
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch(`/api/team/trends?period=${period}`, {
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
       if (res.ok) {
         const { dataPoints } = await res.json()
         setPoints(dataPoints)
@@ -1699,13 +1714,13 @@ export function TrendsTab({ phases }: TrendsTabProps) {
         ))}
         {/* Phase lines (dashed, lower opacity) */}
         {phases.map(phase => {
-          const line = points
-            .filter(p => p.phases[phase.id] !== undefined)
-            .map((p, i) => `${xPos(i)},${yPos(p.phases[phase.id])}`)
+          const linePoints = points
+            .map((p, i) => p.phases[phase.id] !== undefined ? `${xPos(i)},${yPos(p.phases[phase.id])}` : null)
+            .filter(Boolean)
             .join(' ')
-          if (!line) return null
+          if (!linePoints) return null
           return (
-            <polyline key={phase.id} points={line} fill="none" stroke={getPhaseColor(phase.name)} strokeWidth="1" strokeDasharray="4" opacity="0.5" />
+            <polyline key={phase.id} points={linePoints} fill="none" stroke={getPhaseColor(phase.name)} strokeWidth="1" strokeDasharray="4" opacity="0.5" />
           )
         })}
         {/* Overall line (bold) */}
@@ -1830,9 +1845,13 @@ export function InvitationsTab({ companyId }: InvitationsTabProps) {
       .update({ status: 'revoked' })
       .eq('id', invitation.id)
 
+    const { data: { session } } = await supabase.auth.getSession()
     const res = await fetch('/api/team/invite', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`,
+      },
       body: JSON.stringify({
         invitees: [{ email: invitation.email, display_name: invitation.display_name }],
       }),
@@ -1928,6 +1947,7 @@ Create `src/components/team/invite-dialog.tsx`:
 'use client'
 
 import { useState, useRef } from 'react'
+import { supabase } from '@/lib/supabase-client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -2032,9 +2052,13 @@ export function InviteDialog({ open, onOpenChange, onInvitesSent }: InviteDialog
     }
 
     setSending(true)
+    const { data: { session } } = await supabase.auth.getSession()
     const res = await fetch('/api/team/invite', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session?.access_token}`,
+      },
       body: JSON.stringify({
         invitees: validInvitees.map(i => ({ email: i.email, display_name: i.display_name })),
         message: message || undefined,
@@ -2338,7 +2362,10 @@ In the `useEffect` `fetchData` function, add after the existing `Promise.all`:
 ```typescript
 // Fetch team profile if user has a company
 if (profile!.company_id) {
-  const teamRes = await fetch('/api/team/my-profile')
+  const { data: { session } } = await supabase.auth.getSession()
+  const teamRes = await fetch('/api/team/my-profile', {
+    headers: { Authorization: `Bearer ${session?.access_token}` },
+  })
   if (teamRes.ok) {
     setMemberProfile(await teamRes.json())
   }
