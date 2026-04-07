@@ -187,6 +187,7 @@ export interface Assessment {
   name: string
   description: string | null
   pass_threshold: number
+  journey_threshold: number
   is_active: boolean
   is_onboarding: boolean
   welcome_heading: string | null
@@ -506,4 +507,52 @@ export interface MetaAd {
   conversions: number
   emq_score: number | null
   synced_at: string
+}
+
+// ---------------------------------------------------------------------------
+// Journey Gantt Chart
+// ---------------------------------------------------------------------------
+export type TimeUnit = 'hours' | 'days' | 'weeks'
+
+export interface JourneyTimelineStep {
+  id: string
+  title: string
+  description: string | null
+  durationMinutes: number
+  role: string | null
+  startMinute: number
+}
+
+export interface JourneyAcademyCourse {
+  courseId: string
+  courseName: string
+  isRequired: boolean
+}
+
+export interface JourneyTimelineService {
+  id: string
+  name: string
+  description: string | null
+  phaseId: string
+  score: number
+  durationMinutes: number
+  startMinute: number
+  academyCourses: JourneyAcademyCourse[]
+  steps: JourneyTimelineStep[]
+}
+
+export interface JourneyTimelinePhase {
+  id: string
+  name: string
+  sortOrder: number
+  durationMinutes: number
+  startMinute: number
+  services: JourneyTimelineService[]
+}
+
+export interface JourneyTimeline {
+  phases: JourneyTimelinePhase[]
+  totalMinutes: number
+  serviceCount: number
+  phaseCount: number
 }
