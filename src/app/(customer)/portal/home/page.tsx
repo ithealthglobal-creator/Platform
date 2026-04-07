@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase-client'
 import { useAuth } from '@/contexts/auth-context'
 import { getMaturityLabel } from '@/lib/scoring'
-import type { AssessmentAttempt, Phase, Service } from '@/lib/types'
+import type { AssessmentAttempt, Phase, Service, MemberProfile } from '@/lib/types'
+import { MemberScoreCard } from '@/components/team/member-score-card'
 
 const PHASE_COLORS: Record<string, string> = {
   Operate: '#1175E4',
@@ -33,6 +34,7 @@ export default function HomePage() {
   const [phases, setPhases] = useState<Phase[]>([])
   const [services, setServices] = useState<Pick<Service, 'id' | 'name' | 'description' | 'phase_id' | 'status'>[]>([])
   const [loading, setLoading] = useState(true)
+  const [memberProfile, setMemberProfile] = useState<MemberProfile | null>(null)
 
   useEffect(() => {
     if (!profile) return
@@ -61,6 +63,18 @@ export default function HomePage() {
       setAttempt(attemptData ?? null)
       setPhases(phasesData ?? [])
       setServices(servicesData ?? [])
+
+      // Fetch team profile if user has a company
+      if (profile!.company_id) {
+        const { data: { session } } = await supabase.auth.getSession()
+        const teamRes = await fetch('/api/team/my-profile', {
+          headers: { Authorization: `Bearer ${session?.access_token}` },
+        })
+        if (teamRes.ok) {
+          setMemberProfile(await teamRes.json())
+        }
+      }
+
       setLoading(false)
     }
 
@@ -102,6 +116,15 @@ export default function HomePage() {
         ) : (
           <>
             <ScoreCard attempt={attempt!} phases={phases} />
+            {memberProfile && (
+              <div className="mt-6">
+                <MemberScoreCard
+                  myScores={memberProfile.myScores}
+                  teamAverages={memberProfile.teamAverages}
+                  phases={phases}
+                />
+              </div>
+            )}
             <RecommendedServices attempt={attempt!} phases={phases} services={services} />
           </>
         )}
