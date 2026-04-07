@@ -57,7 +57,7 @@ export default function GetStartedPage() {
 
       const questionsRes = await supabase
         .from('assessment_questions')
-        .select('*, phase:phases(*)')
+        .select('*, service:services(*, phase:phases(*))')
         .eq('assessment_id', foundAssessment.id)
         .eq('is_active', true)
         .order('sort_order')
@@ -81,9 +81,10 @@ export default function GetStartedPage() {
     const phaseGroups = new Map<string, { earned: number; max: number; name: string }>()
 
     for (const q of questions) {
-      if (!q.phase_id) continue
-      const phaseName = (q as AssessmentQuestion & { phase?: Phase }).phase?.name ?? ''
-      const group = phaseGroups.get(q.phase_id) || { earned: 0, max: 0, name: phaseName }
+      const phaseId = q.service?.phase?.id ?? q.service?.phase_id
+      if (!phaseId) continue
+      const phaseName = q.service?.phase?.name ?? ''
+      const group = phaseGroups.get(phaseId) || { earned: 0, max: 0, name: phaseName }
       const maxPoints = q.points || 1
 
       group.max += maxPoints
@@ -96,7 +97,7 @@ export default function GetStartedPage() {
         }
       }
 
-      phaseGroups.set(q.phase_id, group)
+      phaseGroups.set(phaseId, group)
     }
 
     const phaseScores = Array.from(phaseGroups.entries()).map(([id, { earned, max, name: pName }]) => ({
@@ -117,7 +118,7 @@ export default function GetStartedPage() {
   const totalQuestions = questions.length
   const answeredCount = Object.keys(answers).length
   const progressPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0
-  const currentPhaseName = currentQuestion?.phase?.name
+  const currentPhaseName = currentQuestion?.service?.phase?.name
 
   function handleSelectOption(value: string) {
     if (!currentQuestion) return
