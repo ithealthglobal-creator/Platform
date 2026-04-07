@@ -8,7 +8,7 @@ import Image from 'next/image'
 
 export function CustomerSidebar() {
   const { signOut } = useAuth()
-  const { menuTree } = useMenu()
+  const { menuTree, flatMenu } = useMenu()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -36,18 +36,49 @@ export function CustomerSidebar() {
           const Icon = item.icon ? iconMap[item.icon] : null
 
           return (
-            <button
-              key={item.id}
-              onClick={() => router.push(item.route || '/')}
-              className={`flex w-full items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-[13px] transition-colors ${
-                isActive
-                  ? 'bg-white/[0.18] font-medium text-white'
-                  : 'text-white/75 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {Icon && <Icon size={18} />}
-              {item.label}
-            </button>
+            <div key={item.id}>
+              <button
+                onClick={() => router.push(item.route || '/')}
+                className={`flex w-full items-center gap-2.5 rounded-lg px-3.5 py-2.5 text-[13px] transition-colors ${
+                  isActive
+                    ? 'bg-white/[0.18] font-medium text-white'
+                    : 'text-white/75 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                {Icon && <Icon size={18} />}
+                {item.label}
+              </button>
+              {isActive && (() => {
+                const children = flatMenu.filter(
+                  (child) => child.parent_id === item.id && child.level === 2
+                )
+                if (children.length === 0) return null
+                return (
+                  <div className="ml-6 mt-0.5 space-y-0.5">
+                    {children.map((child) => {
+                      const childActive = child.route
+                        ? pathname === child.route
+                        : false
+                      const ChildIcon = child.icon ? iconMap[child.icon] : null
+                      return (
+                        <button
+                          key={child.id}
+                          onClick={() => router.push(child.route || '/')}
+                          className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-[12px] transition-colors ${
+                            childActive
+                              ? 'bg-white/[0.18] font-medium text-white'
+                              : 'text-white/60 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          {ChildIcon && <ChildIcon size={16} />}
+                          {child.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+            </div>
           )
         })}
       </nav>
