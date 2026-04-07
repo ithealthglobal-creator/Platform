@@ -2,7 +2,16 @@ import 'server-only'
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
-const KEY = Buffer.from(process.env.META_ENCRYPTION_KEY || '', 'hex')
+
+function getEncryptionKey(): Buffer {
+  const keyHex = process.env.META_ENCRYPTION_KEY
+  if (!keyHex || keyHex.length !== 64) {
+    throw new Error('META_ENCRYPTION_KEY must be a 64-character hex string (32 bytes). Generate with: openssl rand -hex 32')
+  }
+  return Buffer.from(keyHex, 'hex')
+}
+
+const KEY = getEncryptionKey()
 
 export function encrypt(plaintext: string): string {
   const iv = randomBytes(12)

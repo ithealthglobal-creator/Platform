@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   const { data: integration } = await supabaseAdmin
     .from('meta_integrations')
-    .select('sync_status, sync_error, last_synced_at')
+    .select('id, sync_status, sync_error, last_synced_at')
     .eq('company_id', admin.company_id)
     .single()
 
@@ -30,18 +30,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sync_status: null, message: 'No integration found' })
   }
 
-  // Get counts
   const { count: campaignCount } = await supabaseAdmin
     .from('meta_campaigns')
     .select('id', { count: 'exact', head: true })
-    .eq('integration_id', (await supabaseAdmin
-      .from('meta_integrations')
-      .select('id')
-      .eq('company_id', admin.company_id)
-      .single()).data?.id || '')
+    .eq('integration_id', integration.id)
 
   return NextResponse.json({
-    ...integration,
+    sync_status: integration.sync_status,
+    sync_error: integration.sync_error,
+    last_synced_at: integration.last_synced_at,
     campaign_count: campaignCount || 0,
   })
 }

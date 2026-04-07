@@ -74,15 +74,31 @@ export default function ComparePage() {
     }
 
     const { ads: liveAds } = await res.json()
-    // Map live Meta API response to MetaAd shape for display
-    // Fall back to synced data if live fetch has missing fields
+    // Use synced data as base, then overlay live metrics from Meta API
     const { data: syncedAds } = await supabase
       .from('meta_ads')
       .select('*')
       .in('id', ids)
 
-    // Use synced data as base, overlay with live metrics where available
-    setAds(syncedAds ?? [])
+    if (syncedAds && liveAds) {
+      // Merge live insights over synced base data
+      const merged = syncedAds.map((synced) => {
+        const live = liveAds.find((l: Record<string, unknown>) => l.internalId === synced.id)
+        if (!live?.insights?.data?.[0]) return synced
+        const insights = live.insights.data[0] as Record<string, unknown>
+        return {
+          ...synced,
+          ctr: insights.ctr ? parseFloat(insights.ctr as string) : synced.ctr,
+          cpm: insights.cpm ? parseFloat(insights.cpm as string) : synced.cpm,
+          spend: insights.spend ? parseFloat(insights.spend as string) : synced.spend,
+          impressions: insights.impressions ? parseInt(insights.impressions as string, 10) : synced.impressions,
+          clicks: insights.clicks ? parseInt(insights.clicks as string, 10) : synced.clicks,
+        }
+      })
+      setAds(merged)
+    } else {
+      setAds(syncedAds ?? [])
+    }
     setLoading(false)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
