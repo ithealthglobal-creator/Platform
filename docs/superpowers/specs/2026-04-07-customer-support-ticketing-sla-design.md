@@ -43,7 +43,7 @@ Single `support_tickets` table handles all categories. Auto-routing via a config
 | Column | Type | Notes |
 |--------|------|-------|
 | id | uuid PK | |
-| ticket_number | text UNIQUE | Auto-generated, e.g. TKT-0001 |
+| ticket_number | text UNIQUE | Auto-generated global sequence, e.g. TKT-0001 |
 | company_id | uuid FK → companies | Tenant isolation |
 | created_by | uuid FK → profiles | |
 | assigned_to | uuid FK → profiles (nullable) | Auto-set via routing rules |
@@ -89,7 +89,7 @@ Displayed chronologically with quoted context from previous message.
 | is_active | boolean DEFAULT true | |
 | created_at | timestamptz | |
 
-Maps category (+ optional service) → default assignee. Fallback: unassigned queue.
+Maps category (+ optional service) → default assignee. Fallback: unassigned queue. Intentionally global (not tenant-scoped) — IThealth admins manage routing for all companies.
 
 #### `ticket_email_log`
 
@@ -118,9 +118,13 @@ Audit trail for all ticket-related emails.
 
 ### SLA Computation Logic
 
+**SLA time format:** The existing `sla_templates` columns (`response_critical`, etc.) store durations as free-text strings (e.g., "4 hours", "24h", "2 hours"). The migration for this feature will add a `parse_sla_duration(text) RETURNS interval` SQL function that normalizes these text values into PostgreSQL intervals. This function is used at ticket creation time to compute deadlines. Supported formats: "Xh", "X hours", "X hour", "Xd", "X days" (case-insensitive). Unparseable values fall back to a 24h default and log a warning.
+
+**Default SLA template:** General and Billing tickets use a system-wide default SLA template identified by a row in `sla_templates` where `name = 'Default Support'`. The seed migration creates this row. If no default is found, tickets are created without SLA deadlines (response_due_at and resolution_due_at remain null).
+
 On ticket creation:
-- If `category = service` and the service has a `service_sla` record: auto-populate `sla_template_id`, `response_due_at` (now + response time for priority), and `resolution_due_at` (now + resolution time for priority). Override values from `service_sla` take precedence over template defaults.
-- General/Billing tickets use a system-wide default SLA template.
+- If `category = service` and the service has a `service_sla` record: auto-populate `sla_template_id`, `response_due_at` (now + parsed response time for priority), and `resolution_due_at` (now + parsed resolution time for priority). Override values from `service_sla` take precedence over template defaults.
+- If `category = general` or `category = billing`: look up the `Default Support` SLA template and compute deadlines from it.
 
 ## Admin UI
 
@@ -141,7 +145,7 @@ On ticket creation:
   - Internal notes displayed in yellow, hidden from customer view
   - Reply box with toggle between "Reply" (customer-visible) and "Internal Note"
   - "Send email notification" checkbox (default: checked)
-  - File attachment support
+  - File attachment button (disabled — "Coming soon", see Out of Scope)
   - Email sent indicator per reply
 - Right sidebar:
   - Status (with change dropdown)
@@ -163,7 +167,7 @@ On ticket creation:
 **Summary Dashboard:**
 - Time period filter + company filter
 - 4 KPI cards: Overall SLA Compliance %, Response SLA Met %, Resolution SLA Met %, Active Breaches count
-- Compliance by Company table: company name, total tickets, response SLA %, resolution SLA %, uptime %, breaches count, overall % with progress bar
+- Compliance by Company table: company name, total tickets, response SLA %, resolution SLA %, breaches count, overall % with progress bar
 - Compliance by Service table: service name, SLA template name, ticket count, avg response time vs target, avg resolution time vs target, compliance %
 - Click any row to drill down
 
@@ -190,7 +194,7 @@ On ticket creation:
   - Service name + SLA template name + active badge
   - Response compliance % + Resolution compliance % with progress bars
   - SLA targets (response/resolution times per priority)
-  - Uptime guarantee + support hours + ticket count this period
+  - Support hours + ticket count this period
 
 **Your Tickets (table):**
 - Columns: Ticket #, Subject, Category, Priority, Status, SLA status, Last Updated
@@ -232,7 +236,7 @@ On ticket creation:
 ### Technical Implementation
 
 - **Email sending:** Next.js API route calls email API (Resend or SendGrid) after reply/status change
-- **SLA monitoring:** Cron job (Supabase pg_cron or external) runs every 15 minutes, checks open tickets where SLA deadline is approaching (75%) or breached, sends warning/breach emails
+- **SLA monitoring:** Cron job (Supabase pg_cron or external) runs every 15 minutes, checks open tickets where SLA deadline is approaching (75%) or breached, sends warning/breach emails. Deduplication: check `ticket_email_log` for existing breach/warning emails for the same ticket before sending to avoid repeated notifications
 - **Audit:** Every email logged in `ticket_email_log` with delivery status
 - **Admin control:** Email toggle per reply — admin can choose not to email on specific replies
 
@@ -243,6 +247,12 @@ On ticket creation:
 2. If match found and rule is active → set `assigned_to` to rule's assignee
 3. If no match → ticket enters unassigned queue (assigned_to = null)
 4. Admin can reassign any ticket manually
+
+## Out of Scope (Deferred)
+
+- **File attachments** — mentioned in UI mockups but deferred to a follow-up. No `ticket_attachments` table or storage bucket in this iteration. The UI will show the attachment button as disabled with a "Coming soon" tooltip.
+- **Uptime tracking** — uptime guarantees exist in SLA templates but there is no mechanism to measure actual uptime. Uptime data is excluded from both the admin SLA dashboard and customer SLA cards. The static `uptime_guarantee` text field from sla_templates is not displayed. Can be added when uptime monitoring infrastructure exists.
+- **Email provider selection** — the spec uses Resend as the email provider. If Resend is not available, SendGrid is the fallback. The implementation will use a single `sendTicketEmail()` utility function that can be swapped.
 
 ## Testing Requirements
 
