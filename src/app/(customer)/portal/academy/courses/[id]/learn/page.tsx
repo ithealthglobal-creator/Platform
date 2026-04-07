@@ -128,10 +128,10 @@ export default function CoursePlayerPage() {
   const determineInitialState = useCallback(
     (
       enroll: UserCourseEnrollment,
-      sections: CourseWithSections['course_sections'][],
+      courseData: CourseWithSections,
       progress: UserSectionProgress[]
     ) => {
-      const sorted = [...(course?.course_sections ?? [])].sort(
+      const sorted = [...(courseData.course_sections ?? [])].sort(
         (a, b) => a.sort_order - b.sort_order
       )
 
@@ -189,7 +189,7 @@ export default function CoursePlayerPage() {
         }
       }
     },
-    [course]
+    []
   )
 
   // ── Fetch data ────────────────────────────────────────────────────────────
@@ -246,13 +246,14 @@ export default function CoursePlayerPage() {
       setSectionProgress(filteredProgress)
 
       // Determine initial view
-      determineInitialState(enrollData, [], filteredProgress)
+      determineInitialState(enrollData, courseData, filteredProgress)
 
       setLoading(false)
     }
 
     load()
-  }, [profile?.id, courseId, router, determineInitialState])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id, courseId, router])
 
   // ── Navigation helpers ────────────────────────────────────────────────────
   const navigateToNextSection = useCallback(
