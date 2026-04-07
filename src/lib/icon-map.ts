@@ -17,7 +17,7 @@ import {
   Home,
   Roadmap,
   Help,
-  Campaign,
+  Bullhorn,
   Connect,
   LogoFacebook,
 } from '@carbon/icons-react'
@@ -42,7 +42,7 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'home': Home,
   'roadmap': Roadmap,
   'help': Help,
-  'campaign': Campaign,
+  'campaign': Bullhorn,
   'connect': Connect,
   'logo--facebook': LogoFacebook,
 }
