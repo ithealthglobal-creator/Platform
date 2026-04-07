@@ -357,73 +357,73 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Assessment Questions (4 per phase = 16 total, maturity-style scoring 0-3)
 -- Operate Phase
-INSERT INTO public.assessment_questions (assessment_id, question_text, options, sort_order, points, weight, phase_id) VALUES
+INSERT INTO public.assessment_questions (assessment_id, question_text, options, sort_order, points, weight, service_id) VALUES
   ('f0000000-0000-0000-0000-000000000001', 'How would you describe your IT monitoring and alerting?',
    '[{"label":"We have no monitoring — we find out about issues when users complain","value":"0","is_correct":false},{"label":"Basic monitoring on some systems, mostly reactive","value":"1","is_correct":false},{"label":"Monitoring on all critical systems with email alerts","value":"2","is_correct":false},{"label":"Comprehensive 24/7 monitoring with automated alerting and escalation","value":"3","is_correct":true}]',
-   1, 3, 1, 'a0000000-0000-0000-0000-000000000001'),
+   1, 3, 1, 'b0000000-0000-0000-0000-000000000001'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How do you handle IT support requests?',
    '[{"label":"No formal process — staff ask whoever is available","value":"0","is_correct":false},{"label":"Shared inbox or chat channel, no tracking","value":"1","is_correct":false},{"label":"Ticketing system in place, basic SLAs defined","value":"2","is_correct":false},{"label":"Full ITSM with SLAs, escalation paths, and reporting","value":"3","is_correct":true}]',
-   2, 3, 1, 'a0000000-0000-0000-0000-000000000001'),
+   2, 3, 1, 'b0000000-0000-0000-0000-000000000001'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How current is your IT documentation?',
    '[{"label":"Little to no documentation exists","value":"0","is_correct":false},{"label":"Some documentation but mostly outdated","value":"1","is_correct":false},{"label":"Key systems documented and reviewed annually","value":"2","is_correct":false},{"label":"Comprehensive, living documentation updated with every change","value":"3","is_correct":true}]',
-   3, 3, 1, 'a0000000-0000-0000-0000-000000000001'),
+   3, 3, 1, 'b0000000-0000-0000-0000-000000000002'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How is patching and updates managed?',
    '[{"label":"Updates are applied ad-hoc when we remember","value":"0","is_correct":false},{"label":"Manual patching on a rough schedule","value":"1","is_correct":false},{"label":"Scheduled patching with a defined maintenance window","value":"2","is_correct":false},{"label":"Automated patch management with testing, rollback, and compliance reporting","value":"3","is_correct":true}]',
-   4, 3, 1, 'a0000000-0000-0000-0000-000000000001'),
+   4, 3, 1, 'b0000000-0000-0000-0000-000000000002'),
 
 -- Secure Phase
   ('f0000000-0000-0000-0000-000000000001', 'What endpoint protection do you have in place?',
    '[{"label":"Basic antivirus or nothing","value":"0","is_correct":false},{"label":"Antivirus on most devices, not centrally managed","value":"1","is_correct":false},{"label":"Managed antivirus across all devices","value":"2","is_correct":false},{"label":"EDR/XDR with 24/7 SOC monitoring and automated response","value":"3","is_correct":true}]',
-   5, 3, 1, 'a0000000-0000-0000-0000-000000000002'),
+   5, 3, 1, 'b0000000-0000-0000-0000-000000000003'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How do you handle user authentication?',
    '[{"label":"Username and password only","value":"0","is_correct":false},{"label":"Passwords with some complexity requirements","value":"1","is_correct":false},{"label":"MFA enabled for key systems (email, VPN)","value":"2","is_correct":false},{"label":"MFA everywhere with conditional access policies and SSO","value":"3","is_correct":true}]',
-   6, 3, 1, 'a0000000-0000-0000-0000-000000000002'),
+   6, 3, 1, 'b0000000-0000-0000-0000-000000000003'),
 
   ('f0000000-0000-0000-0000-000000000001', 'Do you have security awareness training for staff?',
    '[{"label":"No training in place","value":"0","is_correct":false},{"label":"Occasional reminders via email","value":"1","is_correct":false},{"label":"Annual training session for all staff","value":"2","is_correct":false},{"label":"Ongoing training with regular phishing simulations and reporting","value":"3","is_correct":true}]',
-   7, 3, 1, 'a0000000-0000-0000-0000-000000000002'),
+   7, 3, 1, 'b0000000-0000-0000-0000-000000000004'),
 
   ('f0000000-0000-0000-0000-000000000001', 'What is your backup and recovery capability?',
    '[{"label":"No reliable backups in place","value":"0","is_correct":false},{"label":"Backups exist but are untested","value":"1","is_correct":false},{"label":"Regular backups with occasional test restores","value":"2","is_correct":false},{"label":"Automated backups with documented DR plan and regular testing","value":"3","is_correct":true}]',
-   8, 3, 1, 'a0000000-0000-0000-0000-000000000002'),
+   8, 3, 1, 'b0000000-0000-0000-0000-000000000004'),
 
 -- Streamline Phase
   ('f0000000-0000-0000-0000-000000000001', 'How much of your infrastructure is in the cloud?',
    '[{"label":"Everything is on-premises","value":"0","is_correct":false},{"label":"Email in the cloud, everything else on-prem","value":"1","is_correct":false},{"label":"Mix of cloud and on-prem with a migration plan","value":"2","is_correct":false},{"label":"Cloud-first strategy — most workloads in Azure/AWS/M365","value":"3","is_correct":true}]',
-   9, 3, 1, 'a0000000-0000-0000-0000-000000000003'),
+   9, 3, 1, 'b0000000-0000-0000-0000-000000000005'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How do your teams collaborate on documents?',
    '[{"label":"Email attachments and local file shares","value":"0","is_correct":false},{"label":"Some use of cloud storage, inconsistent across teams","value":"1","is_correct":false},{"label":"SharePoint/OneDrive adopted, most teams co-authoring","value":"2","is_correct":false},{"label":"Fully modern workplace — Teams, SharePoint, real-time co-authoring, version control","value":"3","is_correct":true}]',
-   10, 3, 1, 'a0000000-0000-0000-0000-000000000003'),
+   10, 3, 1, 'b0000000-0000-0000-0000-000000000005'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How many manual/repetitive processes exist in your business?',
    '[{"label":"Most processes are manual and paper-based","value":"0","is_correct":false},{"label":"Some spreadsheet-based tracking, lots of manual steps","value":"1","is_correct":false},{"label":"Key processes use software, some automation in place","value":"2","is_correct":false},{"label":"Automated workflows for onboarding, approvals, reporting, and routine tasks","value":"3","is_correct":true}]',
-   11, 3, 1, 'a0000000-0000-0000-0000-000000000003'),
+   11, 3, 1, 'b0000000-0000-0000-0000-000000000006'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How do you manage line-of-business applications?',
    '[{"label":"Running legacy apps on old servers, no upgrade path","value":"0","is_correct":false},{"label":"Mix of legacy and modern apps, no integration","value":"1","is_correct":false},{"label":"Most apps are SaaS, some integration between them","value":"2","is_correct":false},{"label":"Integrated SaaS stack with APIs, SSO, and centralised management","value":"3","is_correct":true}]',
-   12, 3, 1, 'a0000000-0000-0000-0000-000000000003'),
+   12, 3, 1, 'b0000000-0000-0000-0000-000000000006'),
 
 -- Accelerate Phase
   ('f0000000-0000-0000-0000-000000000001', 'Do you use data analytics to inform business decisions?',
    '[{"label":"No — decisions are based on gut feeling","value":"0","is_correct":false},{"label":"Basic spreadsheet reports, reviewed occasionally","value":"1","is_correct":false},{"label":"Some dashboards in place, used by management","value":"2","is_correct":false},{"label":"Interactive BI dashboards with real-time data driving daily decisions","value":"3","is_correct":true}]',
-   13, 3, 1, 'a0000000-0000-0000-0000-000000000004'),
+   13, 3, 1, 'b0000000-0000-0000-0000-000000000007'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How are you using AI in your business?',
    '[{"label":"Not at all","value":"0","is_correct":false},{"label":"Individual staff experimenting with ChatGPT","value":"1","is_correct":false},{"label":"Exploring Copilot or other AI tools in specific areas","value":"2","is_correct":false},{"label":"AI integrated into workflows — Copilot, automation, and predictive analytics","value":"3","is_correct":true}]',
-   14, 3, 1, 'a0000000-0000-0000-0000-000000000004'),
+   14, 3, 1, 'b0000000-0000-0000-0000-000000000007'),
 
   ('f0000000-0000-0000-0000-000000000001', 'Do you have a technology roadmap?',
    '[{"label":"No roadmap — IT is purely reactive","value":"0","is_correct":false},{"label":"Vague plans discussed informally","value":"1","is_correct":false},{"label":"Annual IT budget and rough plan","value":"2","is_correct":false},{"label":"Documented 12-24 month roadmap reviewed quarterly, aligned with business strategy","value":"3","is_correct":true}]',
-   15, 3, 1, 'a0000000-0000-0000-0000-000000000004'),
+   15, 3, 1, 'b0000000-0000-0000-0000-000000000008'),
 
   ('f0000000-0000-0000-0000-000000000001', 'How does technology contribute to your competitive advantage?',
    '[{"label":"It doesn''t — IT is a cost centre","value":"0","is_correct":false},{"label":"IT supports basic operations but doesn''t differentiate us","value":"1","is_correct":false},{"label":"Technology enables some efficiencies our competitors lack","value":"2","is_correct":false},{"label":"Technology is a core differentiator — faster service, better insights, innovative products","value":"3","is_correct":true}]',
-   16, 3, 1, 'a0000000-0000-0000-0000-000000000004')
+   16, 3, 1, 'b0000000-0000-0000-0000-000000000008')
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------
