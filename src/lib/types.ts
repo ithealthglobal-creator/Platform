@@ -423,3 +423,87 @@ export interface SalesLead {
   company?: Company
   assessment_attempt?: AssessmentAttempt
 }
+
+// Meta Ads types
+
+export type SyncFrequency = '15min' | '30min' | '1hour' | '6hour' | '24hour'
+export type SyncStatus = 'idle' | 'syncing' | 'error'
+
+export interface MetaIntegration {
+  id: string
+  company_id: string
+  meta_app_id: string | null
+  ad_account_id: string | null
+  ad_account_name: string | null
+  sync_frequency: SyncFrequency
+  campaign_filter: { include: string[] } | null
+  last_synced_at: string | null
+  sync_status: SyncStatus
+  sync_error: string | null
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface MetaCampaign {
+  id: string
+  integration_id: string
+  meta_campaign_id: string
+  name: string
+  status: string | null
+  objective: string | null
+  daily_budget: number | null
+  lifetime_budget: number | null
+  spend: number
+  impressions: number
+  clicks: number
+  ctr: number | null
+  cpm: number | null
+  cpa: number | null
+  conversions: number
+  start_time: string | null
+  stop_time: string | null
+  synced_at: string
+}
+
+export interface MetaAdSet {
+  id: string
+  campaign_id: string
+  meta_ad_set_id: string
+  name: string
+  status: string | null
+  targeting: Record<string, unknown> | null
+  daily_budget: number | null
+  lifetime_budget: number | null
+  spend: number
+  impressions: number
+  clicks: number
+  ctr: number | null
+  cpm: number | null
+  cpa: number | null
+  conversions: number
+  synced_at: string
+}
+
+export interface MetaAd {
+  id: string
+  ad_set_id: string
+  meta_ad_id: string
+  name: string
+  status: string | null
+  creative_id: string | null
+  creative_thumbnail_url: string | null
+  creative_body: string | null
+  creative_title: string | null
+  creative_link_url: string | null
+  hook_rate: number | null
+  ctr: number | null
+  cpm: number | null
+  cpa: number | null
+  spend: number
+  impressions: number
+  clicks: number
+  conversions: number
+  emq_score: number | null
+  synced_at: string
+}
