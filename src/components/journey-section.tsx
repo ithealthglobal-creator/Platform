@@ -106,27 +106,27 @@ export function JourneySection() {
 
           {/* Right: ascending path with phase icons */}
           <div className="flex-1 flex justify-center">
-            <svg viewBox="0 0 340 280" width="340" height="280" className="overflow-visible">
+            <svg viewBox="0 0 460 380" width="460" height="380" className="overflow-visible">
               {/* Dotted path ascending from bottom-left to top-right */}
               <path
-                d="M 40 240 Q 100 230, 120 190 Q 140 150, 200 130 Q 230 120, 250 80 Q 270 40, 310 20"
+                d="M 100 310 Q 160 290, 190 230 Q 220 170, 280 150 Q 310 140, 340 90 Q 360 50, 400 30"
                 fill="none"
                 stroke="#cbd5e1"
                 strokeWidth="2"
                 strokeDasharray="6 6"
               />
 
-              {/* Operate — bottom-left */}
-              <image href="/phases/operate.svg" x="22" y="228" width="28" height="28" />
+              {/* Operate — bottom-left, well below the path start */}
+              <image href="/phases/operate.svg" x="30" y="300" width="60" height="60" />
 
-              {/* Secure — mid-left */}
-              <image href="/phases/secure.svg" x="112" y="172" width="26" height="26" />
+              {/* Secure — offset to the right of the path curve */}
+              <image href="/phases/secure.svg" x="220" y="200" width="60" height="60" />
 
-              {/* Streamline — mid-right */}
-              <image href="/phases/streamline.svg" x="240" y="68" width="26" height="26" />
+              {/* Streamline — offset to the right of the path */}
+              <image href="/phases/streamline.svg" x="350" y="60" width="60" height="60" />
 
-              {/* Accelerate — top-right */}
-              <image href="/phases/accelerate.svg" x="296" y="4" width="26" height="26" />
+              {/* Accelerate — top-right, above the path end */}
+              <image href="/phases/accelerate.svg" x="390" y="-30" width="60" height="60" />
             </svg>
           </div>
         </div>
