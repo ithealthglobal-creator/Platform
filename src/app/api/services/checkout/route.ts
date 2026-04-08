@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
 
     // Generate PayFast form data
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || req.nextUrl.origin
-    const itemName = items.length === 1 ? 'IThealth Service' : `IThealth Services (${items.length})`
+    const itemName = items.length === 1 ? 'IT Service' : `IT Services (${items.length})`
 
     const credentials = await getPayFastCredentials()
     if (!credentials) {

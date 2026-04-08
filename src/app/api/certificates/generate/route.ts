@@ -1,3 +1,4 @@
+import { isAdminOrAbove } from '@/lib/auth-utils'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { jsPDF } from 'jspdf'
@@ -16,7 +17,7 @@ async function verifyAdmin(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') return null
+  if (!profile || !isAdminOrAbove(profile.role)) return null
   return user
 }
 
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
   // Branding header
   doc.setFontSize(16)
   doc.setTextColor(0, 102, 153)
-  doc.text('IThealth', pageWidth / 2, 32, { align: 'center' })
+  doc.text(process.env.PLATFORM_NAME ?? 'IT Modernisation Platform', pageWidth / 2, 32, { align: 'center' })
 
   // Subtitle
   doc.setFontSize(10)

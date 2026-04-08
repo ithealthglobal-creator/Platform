@@ -45,6 +45,12 @@ export default function CompaniesPage() {
         name: c.name as string,
         type: c.type as CompanyType,
         status: c.status as CompanyStatus,
+        parent_company_id: (c.parent_company_id as string | null) ?? null,
+        domain: (c.domain as string | null) ?? null,
+        tagline: (c.tagline as string | null) ?? null,
+        support_email: (c.support_email as string | null) ?? null,
+        contact_email: (c.contact_email as string | null) ?? null,
+        slug: (c.slug as string | null) ?? null,
         created_at: c.created_at as string,
         updated_at: c.updated_at as string,
         user_count:

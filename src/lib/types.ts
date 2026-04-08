@@ -1,6 +1,6 @@
-export type UserRole = 'admin' | 'customer' | 'partner'
+export type UserRole = 'super_admin' | 'admin' | 'customer' | 'partner'
 
-export type CompanyType = 'admin' | 'customer' | 'partner'
+export type CompanyType = 'platform' | 'admin' | 'customer' | 'partner'
 export type CompanyStatus = 'prospect' | 'active' | 'churned' | 'pending' | 'approved' | 'inactive'
 
 export interface Company {
@@ -8,6 +8,27 @@ export interface Company {
   name: string
   type: CompanyType
   status: CompanyStatus
+  parent_company_id: string | null
+  domain: string | null
+  tagline: string | null
+  support_email: string | null
+  contact_email: string | null
+  slug: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface CompanyBranding {
+  id: string
+  company_id: string
+  logo_url: string | null
+  logo_light_url: string | null
+  icon_url: string | null
+  primary_colour: string
+  secondary_colour: string
+  accent_colour: string | null
+  font_heading: string
+  font_body: string
   created_at: string
   updated_at: string
 }
@@ -842,4 +863,61 @@ export interface TicketEmailLog {
   sent_at: string | null
   error: string | null
   created_at: string
+}
+
+// === Website CMS Types ===
+
+export interface WebsiteSection {
+  id: string
+  company_id: string
+  page: string
+  section: string
+  content: Record<string, unknown>
+  sort_order: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface HeroContent {
+  title: string
+  subtitle: string
+  cta_text?: string
+  cta_link?: string
+  background_image_url?: string | null
+}
+
+export interface HomeMissionContent {
+  body: string
+}
+
+export interface AboutMissionContent {
+  eyebrow?: string
+  heading: string
+  paragraphs: string[]
+  image_url?: string | null
+}
+
+export interface TestimonialsContent {
+  heading: string
+  items: {
+    quote: string
+    author: string
+    role: string
+    company: string
+    avatar_url?: string | null
+  }[]
+}
+
+export interface CTAContent {
+  heading: string
+  subheading: string
+  button_text: string
+  button_link: string
+}
+
+export interface ContactInfoContent {
+  email: string
+  phone?: string | null
+  address?: string | null
 }

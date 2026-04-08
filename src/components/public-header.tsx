@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Menu, ChevronDown } from '@carbon/icons-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,6 +17,7 @@ import {
   SheetContent,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { supabase } from '@/lib/supabase-client'
 
 const resourceLinks = [
   { label: 'Blog', href: '/blog' },
@@ -27,6 +28,18 @@ const resourceLinks = [
 
 export function PublicHeader() {
   const [sheetOpen, setSheetOpen] = useState(false)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    const companyId = process.env.NEXT_PUBLIC_DEFAULT_COMPANY_ID
+    if (!companyId) return
+    supabase
+      .from('company_branding')
+      .select('logo_light_url')
+      .eq('company_id', companyId)
+      .maybeSingle()
+      .then(({ data }: { data: { logo_light_url: string | null } | null }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
+  }, [])
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[var(--brand-primary)]">
@@ -34,8 +47,8 @@ export function PublicHeader() {
         {/* Logo */}
         <Link href="/">
           <Image
-            src="/logos/ithealth-logo-white.svg"
-            alt="IThealth"
+            src={logoUrl ?? '/logos/ithealth-logo-white.svg'}
+            alt="Logo"
             width={96}
             height={24}
             className="h-6"
@@ -97,8 +110,8 @@ export function PublicHeader() {
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <div className="flex flex-col gap-6 p-6">
                 <Image
-                  src="/logos/ithealth-logo-white.svg"
-                  alt="IThealth"
+                  src={logoUrl ?? '/logos/ithealth-logo-white.svg'}
+                  alt="Logo"
                   width={96}
                   height={24}
                   className="h-6 w-auto"

@@ -6,7 +6,7 @@ import { PageHero } from '@/components/page-hero'
 import { ScrollReveal } from '@/components/scroll-reveal'
 
 export const metadata = {
-  title: 'Blog | IThealth',
+  title: 'Blog',
   description: 'Expert insights on IT modernisation',
 }
 

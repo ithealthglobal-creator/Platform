@@ -43,8 +43,10 @@ export default function LoginPage() {
           .select('role')
           .eq('id', user.id)
           .single()
-        if (profileData?.role === 'customer') {
-          router.replace('/portal/home')
+        if (profileData?.role === 'super_admin') {
+          router.replace('/platform')
+        } else if (profileData?.role === 'customer') {
+          router.replace('/home')
         } else {
           router.replace('/dashboard')
         }
@@ -73,7 +75,7 @@ export default function LoginPage() {
         <div>
           <Image
             src="/logos/ithealth-logo-white.svg"
-            alt="IThealth"
+            alt="Logo"
             width={120}
             height={32}
             className="h-8 w-auto mb-16"
@@ -97,7 +99,7 @@ export default function LoginPage() {
           </ul>
         </div>
         <p className="text-white/40 text-sm">
-          &copy; {new Date().getFullYear()} IThealth. All rights reserved.
+          &copy; {new Date().getFullYear()} All rights reserved.
         </p>
       </div>
 
@@ -112,7 +114,7 @@ export default function LoginPage() {
           <div className="lg:hidden mb-8">
             <Image
               src="/logos/ithealth-logo.svg"
-              alt="IThealth"
+              alt="Logo"
               width={120}
               height={32}
               className="h-8 w-auto"

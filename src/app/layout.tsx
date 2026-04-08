@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/sonner'
 const poppins = Poppins({ subsets: ['latin'], weight: ['200', '300', '400', '500', '600', '700'] })
 
 export const metadata: Metadata = {
-  title: 'IThealth',
-  description: 'IThealth Platform',
+  title: 'Platform',
+  description: 'IT Modernisation Platform',
 }
 
 export default function RootLayout({

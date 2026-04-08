@@ -3,6 +3,7 @@
 import { AuthProvider } from '@/contexts/auth-context'
 import { AuthGuard } from '@/components/auth-guard'
 import { MenuProvider } from '@/contexts/menu-context'
+import { BrandingProvider } from '@/contexts/branding-context'
 import { Sidebar } from '@/components/sidebar'
 import { MegaMenu } from '@/components/mega-menu'
 
@@ -10,6 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <AuthProvider>
       <AuthGuard>
+        <BrandingProvider>
         <MenuProvider>
           <div className="flex h-screen">
             <Sidebar />
@@ -21,6 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
         </MenuProvider>
+        </BrandingProvider>
       </AuthGuard>
     </AuthProvider>
   )

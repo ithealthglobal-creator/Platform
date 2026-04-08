@@ -81,7 +81,7 @@ export function JourneySection() {
         <div className="mb-24">
           <AnimatedImage
             src="/images/partner-dashboard.png"
-            alt="IThealth partner dashboard showing IT maturity score, phase breakdown, skill profile, and recommended services"
+            alt="Partner dashboard showing IT maturity score, phase breakdown, skill profile, and recommended services"
             width={1400}
             height={900}
             rotate={-1}

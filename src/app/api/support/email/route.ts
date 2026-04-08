@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       const { Resend } = await import('resend')
       const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
-        from: 'IThealth Support <support@ithealth.ai>',
+        from: process.env.SUPPORT_FROM_EMAIL ?? 'Platform Support <support@platform.local>',
         to: recipient_email,
         subject,
         html: html_body,

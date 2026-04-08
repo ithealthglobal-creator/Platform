@@ -1,3 +1,4 @@
+import { isAdminOrAbove } from '@/lib/auth-utils'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { createTicketSchema } from '@/lib/validations/support'

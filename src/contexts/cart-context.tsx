@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { CartItem } from '@/lib/types'
 
-const CART_STORAGE_KEY = 'ithealth-cart'
+const CART_STORAGE_KEY = 'platform-cart'
 
 interface CartContextType {
   items: CartItem[]
