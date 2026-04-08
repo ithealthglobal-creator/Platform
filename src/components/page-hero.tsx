@@ -9,7 +9,7 @@ interface PageHeroProps {
 
 export function PageHero({ title, subtitle }: PageHeroProps) {
   return (
-    <section className="h-[50vh] flex items-end bg-[var(--brand-primary)] text-white">
+    <section className="h-[30vh] flex items-end bg-[var(--brand-primary)] text-white">
       <div className="max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 pb-16">
         <motion.h1
           className="text-4xl md:text-5xl font-light"

@@ -1,11 +1,9 @@
 'use client'
 
 import { useRef } from 'react'
-import Link from 'next/link'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
-import { Button } from '@/components/ui/button'
 import { AnimatedImage } from '@/components/animated-image'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -46,46 +44,16 @@ export function JourneySection() {
 
   useGSAP(
     () => {
-      // Animate phase nav bar
-      gsap.set('.phase-icon-grid', { y: 30, opacity: 0, scale: 0.95 })
-      gsap.to('.phase-icon-grid', {
+      // Animate journey path section
+      gsap.set('.phase-card-grid', { y: 40, opacity: 0 })
+      gsap.to('.phase-card-grid', {
         y: 0,
         opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.phase-icon-grid',
-          start: 'top 80%',
-          once: true,
-        },
-      })
-
-      // Animate phase cards with stagger
-      gsap.set('.phase-card', { y: 40, opacity: 0 })
-      gsap.to('.phase-card', {
-        y: 0,
-        opacity: 1,
-        stagger: 0.1,
-        duration: 0.6,
+        duration: 0.8,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: '.phase-card-grid',
           start: 'top 80%',
-          once: true,
-        },
-      })
-
-      // CTA button pulse
-      gsap.set('.journey-cta', { opacity: 0, y: 30 })
-      gsap.to('.journey-cta', {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.journey-cta',
-          start: 'top 85%',
           once: true,
         },
       })
@@ -121,58 +89,46 @@ export function JourneySection() {
           />
         </div>
 
-        {/* Phase navigation bar */}
-        <div className="phase-icon-grid mb-16">
-          <div className="mx-auto flex items-center justify-center gap-0 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm w-fit">
-            {phases.map((phase) => (
-              <div
-                key={`icon-${phase.name}`}
-                className="phase-icon flex items-center gap-2.5 rounded-full px-6 py-3 transition-colors hover:bg-slate-50"
-              >
-                <img src={phase.icon} alt="" className="h-6 w-6" />
-                <span className="text-sm font-medium text-slate-700">{phase.name}</span>
-              </div>
-            ))}
+        {/* Journey path section */}
+        <div className="phase-card-grid flex flex-col md:flex-row items-start gap-12 md:gap-16">
+          {/* Left: text */}
+          <div className="flex-1 max-w-lg">
+            <h3 className="text-2xl md:text-3xl font-extralight text-[var(--brand-dark)] mb-6">
+              Your journey to modernised IT
+            </h3>
+            <p className="text-base font-light leading-relaxed text-slate-500">
+              From Operate&apos;s stable foundations to Secure&apos;s robust protections,
+              Streamline&apos;s efficient workflows, and Accelerate&apos;s innovation, each
+              phase builds seamlessly guiding businesses toward complete IT
+              mastery and enduring digital confidence.
+            </p>
           </div>
-        </div>
 
-        {/* Phase descriptions grid */}
-        <div className="phase-card-grid grid grid-cols-1 md:grid-cols-4 gap-8">
-          {phases.map((phase) => (
-            <div
-              key={`card-${phase.name}`}
-              className="phase-card relative rounded-xl bg-white p-8 hover:shadow-lg transition-all duration-300 overflow-hidden border border-slate-100"
-            >
-              {/* Colored top accent */}
-              <div className="absolute top-0 left-0 right-0 h-1 rounded-t-xl" style={{ backgroundColor: phase.color }} />
-
-              {/* Decorative design element */}
-              <img
-                src={phase.design}
-                alt=""
-                className="pointer-events-none absolute -right-2 -bottom-2 h-32 w-32 opacity-[0.06]"
+          {/* Right: ascending path with phase icons */}
+          <div className="flex-1 flex justify-center">
+            <svg viewBox="0 0 340 280" width="340" height="280" className="overflow-visible">
+              {/* Dotted path ascending from bottom-left to top-right */}
+              <path
+                d="M 40 240 Q 100 230, 120 190 Q 140 150, 200 130 Q 230 120, 250 80 Q 270 40, 310 20"
+                fill="none"
+                stroke="#cbd5e1"
+                strokeWidth="2"
+                strokeDasharray="6 6"
               />
 
-              {/* Colored line divider */}
-              <div className="mb-6 h-0.5 w-12 rounded-full" style={{ backgroundColor: phase.color }} />
+              {/* Operate — bottom-left */}
+              <image href="/phases/operate.svg" x="22" y="228" width="28" height="28" />
 
-              <h3 className="text-base font-semibold text-slate-900 mb-3">{phase.name}</h3>
-              <p className="text-sm font-light leading-relaxed text-slate-500">{phase.description}</p>
-            </div>
-          ))}
-        </div>
+              {/* Secure — mid-left */}
+              <image href="/phases/secure.svg" x="112" y="172" width="26" height="26" />
 
-        {/* CTA — centered */}
-        <div className="journey-cta mt-24 text-center">
-          <Button
-            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-12 py-5 text-xl h-auto"
-            size="lg"
-            nativeButton={false}
-            render={<Link href="/get-started" />}
-          >
-            Get Started
-          </Button>
-          <p className="mt-3 text-sm text-muted-foreground">It&apos;s free — no credit card required</p>
+              {/* Streamline — mid-right */}
+              <image href="/phases/streamline.svg" x="240" y="68" width="26" height="26" />
+
+              {/* Accelerate — top-right */}
+              <image href="/phases/accelerate.svg" x="296" y="4" width="26" height="26" />
+            </svg>
+          </div>
         </div>
       </div>
     </section>

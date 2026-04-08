@@ -26,6 +26,7 @@ import {
   Bot,
   NetworkEnterprise,
   FlowStream,
+  UserAvatar,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -57,4 +58,5 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'bot': Bot,
   'network-enterprise': NetworkEnterprise,
   'flow-stream': FlowStream,
+  'user-avatar': UserAvatar,
 }
