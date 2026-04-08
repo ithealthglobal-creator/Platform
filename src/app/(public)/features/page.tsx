@@ -47,7 +47,7 @@ export default async function FeaturesPage() {
               {hero.title ?? 'Everything you need to modernise your IT'}
             </h1>
             <p className="mt-6 max-w-2xl text-lg font-light text-white/80">
-              {hero.subtitle ?? 'From assessment to implementation, IThealth gives your business the tools, knowledge, and guided journey to build a modern, resilient IT foundation.'}
+              {hero.subtitle ?? 'From assessment to implementation, we give your business the tools, knowledge, and guided journey to build a modern, resilient IT foundation.'}
             </p>
           </ScrollReveal>
         </div>

@@ -24,7 +24,7 @@ export const DEFAULT_CONTENT: Record<string, Record<string, object>> = {
     },
     team_banner: {
       image_url: '/images/team-banner.jpeg',
-      alt_text: 'The IThealth team',
+      alt_text: 'The team',
     },
     platform_showcase: {
       eyebrow: 'See It In Action',
@@ -73,7 +73,7 @@ export const DEFAULT_CONTENT: Record<string, Record<string, object>> = {
       heading: 'What our customers say',
       items: [
         {
-          quote: 'unreservedly recommend and support IThealth',
+          quote: 'unreservedly recommend and support our IT partner',
           name: 'Arnold Subel SC',
           company: 'Advocates Group 621',
         },
@@ -104,14 +104,14 @@ export const DEFAULT_CONTENT: Record<string, Record<string, object>> = {
 
   about: {
     hero: {
-      title: 'About IThealth',
+      title: 'About Us',
       subtitle: 'Your IT Modernisation Champions',
     },
     mission: {
       eyebrow: 'Our Mission',
       heading: 'Modernising IT for the businesses that matter most',
       paragraphs: [
-        'IThealth was founded with a simple belief: every small and medium business deserves enterprise-quality IT. We guide businesses through their IT modernisation journey, making complex technology simple, accessible, and secure.',
+        'We were founded with a simple belief: every small and medium business deserves enterprise-quality IT. We guide businesses through their IT modernisation journey, making complex technology simple, accessible, and secure.',
         "Our approach is built on the conviction that IT modernisation shouldn't be overwhelming. Through our proven four-phase journey — Operate, Secure, Streamline, and Accelerate — we transform IT from a cost centre into a competitive advantage.",
       ],
       image_url: null,
@@ -152,7 +152,7 @@ export const DEFAULT_CONTENT: Record<string, Record<string, object>> = {
       eyebrow: 'Features',
       title: 'Everything you need to modernise your IT',
       subtitle:
-        'From assessment to implementation, IThealth gives your business the tools, knowledge, and guided journey to build a modern, resilient IT foundation.',
+        'From assessment to implementation, we give your business the tools, knowledge, and guided journey to build a modern, resilient IT foundation.',
     },
     features: {
       items: [
@@ -235,7 +235,7 @@ export const DEFAULT_CONTENT: Record<string, Record<string, object>> = {
       subtitle: 'Get in touch with our team',
     },
     info: {
-      email: 'hello@ithealth.ai',
+      email: 'hello@platform.local',
       phone: '+27 (0) 11 123 4567',
       location: 'Johannesburg, South Africa',
     },

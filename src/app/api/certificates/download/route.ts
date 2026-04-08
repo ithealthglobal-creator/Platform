@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
   // Header
   doc.setFontSize(16)
   doc.setTextColor(0, 102, 153)
-  doc.text('IThealth.ai', pageWidth / 2, 32, { align: 'center' })
+  doc.text(process.env.PLATFORM_NAME ?? 'IT Modernisation Platform', pageWidth / 2, 32, { align: 'center' })
 
   doc.setFontSize(10)
   doc.setTextColor(100, 100, 100)

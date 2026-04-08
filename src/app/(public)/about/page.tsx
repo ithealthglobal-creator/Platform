@@ -37,7 +37,7 @@ export default async function AboutPage() {
     <>
       {/* Page Header */}
       <PageHero
-        title={hero.title ?? 'About IThealth'}
+        title={hero.title ?? 'About Us'}
         subtitle={hero.subtitle ?? 'Your IT Modernisation Champions'}
       />
 

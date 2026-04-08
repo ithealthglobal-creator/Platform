@@ -19,7 +19,7 @@ export default async function ContactPage() {
     <ContactClient
       heroTitle={hero.title ?? 'Contact Us'}
       heroSubtitle={hero.subtitle ?? 'Get in touch with our team'}
-      email={info.email ?? 'hello@ithealth.ai'}
+      email={info.email ?? 'hello@platform.local'}
       phone={info.phone ?? '+27 (0) 11 123 4567'}
       location={info.location ?? 'Johannesburg, South Africa'}
       formHeading={form.heading ?? 'Send us a message'}

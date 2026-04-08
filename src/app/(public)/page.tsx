@@ -76,7 +76,7 @@ export default async function HomePage() {
       <Parallax speed={0.2}>
         <Image
           src={teamBanner.image_url ?? '/images/team-banner.jpeg'}
-          alt={teamBanner.alt_text ?? 'The IThealth team'}
+          alt={teamBanner.alt_text ?? 'The team'}
           width={1920}
           height={400}
           className="w-full h-auto"

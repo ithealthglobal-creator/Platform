@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         ? async (to: string, subject: string, html: string) => {
             const { Resend } = await import('resend')
             const r = new Resend(process.env.RESEND_API_KEY)
-            await r.emails.send({ from: 'IThealth Support <support@ithealth.ai>', to, subject, html })
+            await r.emails.send({ from: process.env.SUPPORT_FROM_EMAIL ?? 'Platform Support <support@platform.local>', to, subject, html })
           }
         : null
 
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
                 const { Resend } = await import('resend')
                 const r = new Resend(process.env.RESEND_API_KEY)
                 await r.emails.send({
-                  from: 'IThealth Support <support@ithealth.ai>',
+                  from: process.env.SUPPORT_FROM_EMAIL ?? 'Platform Support <support@platform.local>',
                   to: assignee.email,
                   subject: `⚠ SLA at risk: [${ticket.ticket_number}] (${hoursLeft}h remaining)`,
                   html: `<p>SLA deadline approaching for ticket ${ticket.ticket_number}. ${hoursLeft} hours remaining.</p>`,

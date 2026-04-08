@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
   // Branding header
   doc.setFontSize(16)
   doc.setTextColor(0, 102, 153)
-  doc.text('IThealth', pageWidth / 2, 32, { align: 'center' })
+  doc.text(process.env.PLATFORM_NAME ?? 'IT Modernisation Platform', pageWidth / 2, 32, { align: 'center' })
 
   // Subtitle
   doc.setFontSize(10)
