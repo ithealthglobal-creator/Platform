@@ -17,7 +17,7 @@ import {
   SheetContent,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { createClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 
 const resourceLinks = [
   { label: 'Blog', href: '/blog' },
@@ -33,13 +33,12 @@ export function PublicHeader() {
   useEffect(() => {
     const companyId = process.env.NEXT_PUBLIC_DEFAULT_COMPANY_ID
     if (!companyId) return
-    const supabase = createClient()
     supabase
       .from('company_branding')
       .select('logo_light_url')
       .eq('company_id', companyId)
       .maybeSingle()
-      .then(({ data }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
+      .then(({ data }: { data: { logo_light_url: string | null } | null }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
   }, [])
 
   return (
@@ -111,8 +110,8 @@ export function PublicHeader() {
               <SheetTitle className="sr-only">Navigation</SheetTitle>
               <div className="flex flex-col gap-6 p-6">
                 <Image
-                  src="/logos/ithealth-logo-white.svg"
-                  alt="IThealth"
+                  src={logoUrl ?? '/logos/ithealth-logo-white.svg'}
+                  alt="Logo"
                   width={96}
                   height={24}
                   className="h-6 w-auto"

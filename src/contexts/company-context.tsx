@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
-import { createClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 import type { Company, CompanyBranding } from '@/lib/types'
 
 interface CompanyContextType {
@@ -18,7 +18,6 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
   const [company, setCompany] = useState<Company | null>(null)
   const [branding, setBranding] = useState<CompanyBranding | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
     if (authLoading || !profile) return

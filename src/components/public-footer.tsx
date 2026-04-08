@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { ScrollReveal } from '@/components/scroll-reveal'
-import { createClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 
 export function PublicFooter() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
@@ -12,13 +12,12 @@ export function PublicFooter() {
   useEffect(() => {
     const companyId = process.env.NEXT_PUBLIC_DEFAULT_COMPANY_ID
     if (!companyId) return
-    const supabase = createClient()
     supabase
       .from('company_branding')
       .select('logo_light_url')
       .eq('company_id', companyId)
       .maybeSingle()
-      .then(({ data }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
+      .then(({ data }: { data: { logo_light_url: string | null } | null }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
   }, [])
 
   return (

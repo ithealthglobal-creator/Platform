@@ -157,7 +157,7 @@ export function CertificateView({ certificate, userName, companyName }: Certific
             </span>
           </div>
 
-          {/* IThealth branding */}
+          {/* Platform branding */}
           <div className="flex items-center justify-center gap-1.5 mb-6">
             <div
               className="w-5 h-5 flex items-center justify-center"
