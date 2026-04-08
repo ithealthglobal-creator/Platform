@@ -1,5 +1,4 @@
 import Image from 'next/image'
-import Link from 'next/link'
 import { AnimatedHero } from '@/components/animated-hero'
 import { JourneySection } from '@/components/journey-section'
 import { AnimatedImage } from '@/components/animated-image'
@@ -8,6 +7,9 @@ import { CTABanner } from '@/components/cta-banner'
 import { ScrollReveal, Parallax } from '@/components/scroll-reveal'
 import { createClient } from '@supabase/supabase-js'
 import { BlogPost } from '@/lib/types'
+import { resolveCompanyId } from '@/lib/company-resolver'
+import { getPageContent } from '@/lib/website-content'
+import { DEFAULT_CONTENT } from '@/lib/default-content'
 
 export default async function HomePage() {
   const supabase = createClient(
@@ -23,6 +25,38 @@ export default async function HomePage() {
     .order('published_at', { ascending: false })
     .limit(3)
 
+  const companyId = await resolveCompanyId()
+  const sections = await getPageContent(companyId, 'home')
+
+  const get = (section: string): Record<string, any> =>
+    (sections[section]?.content ?? (DEFAULT_CONTENT.home as any)?.[section] ?? {}) as Record<string, any>
+
+  const mission = get('mission')
+  const teamBanner = get('team_banner')
+  const platformShowcase = get('platform_showcase')
+  const valueProps = get('value_props')
+  const testimonials = get('testimonials')
+  const blogPreview = get('blog_preview')
+  const cta = get('cta')
+
+  const showcaseImages: Array<{ src: string; alt: string; caption: string }> =
+    Array.isArray(platformShowcase.images)
+      ? platformShowcase.images
+      : (DEFAULT_CONTENT.home as any)?.platform_showcase?.images ?? []
+
+  const testimonialItems: Array<{ quote: string; name: string; company: string }> =
+    Array.isArray(testimonials.items)
+      ? testimonials.items
+      : (DEFAULT_CONTENT.home as any)?.testimonials?.items ?? []
+
+  const industries: string[] =
+    Array.isArray(valueProps.industries)
+      ? valueProps.industries
+      : (DEFAULT_CONTENT.home as any)?.value_props?.industries ?? []
+
+  const rotations = [-2, 2, 1.5, -1.5]
+  const delays = [0, 0.1, 0.15, 0.2]
+
   return (
     <>
       <AnimatedHero />
@@ -31,10 +65,7 @@ export default async function HomePage() {
       <section className="py-36 bg-white">
         <ScrollReveal blur>
           <p className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 text-3xl md:text-4xl font-extralight text-[var(--brand-dark)] leading-relaxed text-left">
-            In today&apos;s world, modern IT isn&apos;t optional — we guide
-            you through IT modernisation with simplicity,
-            clarity and security, keeping your business
-            resilient and future ready.
+            {mission.body ?? "In today\u2019s world, modern IT isn\u2019t optional \u2014 we guide you through IT modernisation with simplicity, clarity and security, keeping your business resilient and future ready."}
           </p>
         </ScrollReveal>
       </section>
@@ -44,8 +75,8 @@ export default async function HomePage() {
       {/* Team Banner — parallax */}
       <Parallax speed={0.2}>
         <Image
-          src="/images/team-banner.jpeg"
-          alt="The IThealth team"
+          src={teamBanner.image_url ?? '/images/team-banner.jpeg'}
+          alt={teamBanner.alt_text ?? 'The IThealth team'}
           width={1920}
           height={400}
           className="w-full h-auto"
@@ -57,61 +88,30 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
           <ScrollReveal>
             <p className="text-sm font-semibold uppercase tracking-widest text-[var(--phase-operate)] mb-4">
-              See It In Action
+              {platformShowcase.eyebrow ?? 'See It In Action'}
             </p>
             <h2 className="text-3xl md:text-4xl font-extralight text-[var(--brand-dark)] mb-6 max-w-3xl">
-              A platform built for your IT modernisation
+              {platformShowcase.heading ?? 'A platform built for your IT modernisation'}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mb-16">
-              From your health score to team insights, every feature is designed to move your business forward.
+              {platformShowcase.description ?? 'From your health score to team insights, every feature is designed to move your business forward.'}
             </p>
           </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div>
-              <AnimatedImage
-                src="/images/health-score.png"
-                alt="Company health score with IT maturity breakdown"
-                width={800}
-                height={500}
-                rotate={-2}
-                delay={0}
-              />
-              <p className="mt-4 text-sm font-medium text-slate-600 text-center">IT Health Score &amp; Phase Breakdown</p>
-            </div>
-            <div>
-              <AnimatedImage
-                src="/images/skill-profile.png"
-                alt="Personal skill profile with radar chart"
-                width={800}
-                height={500}
-                rotate={2}
-                delay={0.1}
-              />
-              <p className="mt-4 text-sm font-medium text-slate-600 text-center">Your Skill Profile vs Team Average</p>
-            </div>
-            <div>
-              <AnimatedImage
-                src="/images/phase-breakdown.png"
-                alt="Phase breakdown radar and progress bars"
-                width={800}
-                height={500}
-                rotate={1.5}
-                delay={0.15}
-              />
-              <p className="mt-4 text-sm font-medium text-slate-600 text-center">Phase Breakdown &amp; Service Scores</p>
-            </div>
-            <div>
-              <AnimatedImage
-                src="/images/recommended-services.png"
-                alt="Recommended services by phase"
-                width={800}
-                height={500}
-                rotate={-1.5}
-                delay={0.2}
-              />
-              <p className="mt-4 text-sm font-medium text-slate-600 text-center">Personalised Service Recommendations</p>
-            </div>
+            {showcaseImages.map((img, i) => (
+              <div key={i}>
+                <AnimatedImage
+                  src={img.src}
+                  alt={img.alt}
+                  width={800}
+                  height={500}
+                  rotate={rotations[i % rotations.length]}
+                  delay={delays[i % delays.length]}
+                />
+                <p className="mt-4 text-sm font-medium text-slate-600 text-center">{img.caption}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -124,7 +124,7 @@ export default async function HomePage() {
             {/* Blue block with text */}
             <ScrollReveal direction="left" className="col-span-5 relative overflow-hidden bg-[var(--brand-primary)] min-h-[280px] flex items-end">
               <p className="relative z-10 text-2xl font-extralight text-white leading-snug max-w-xs p-10">
-                We help small and medium-sized businesses thrive
+                {valueProps.tagline ?? 'We help small and medium-sized businesses thrive'}
               </p>
             </ScrollReveal>
 
@@ -136,7 +136,9 @@ export default async function HomePage() {
             {/* Affordable subscriptions */}
             <ScrollReveal direction="right" className="col-span-4 flex items-center pl-10">
               <p className="text-4xl font-extralight text-[var(--brand-dark)] leading-tight">
-                Affordable<br />monthly<br />subscriptions
+                {(valueProps.affordability ?? 'Affordable monthly subscriptions').split(' ').slice(0, 1)}<br />
+                {(valueProps.affordability ?? 'Affordable monthly subscriptions').split(' ').slice(1, 2)}<br />
+                {(valueProps.affordability ?? 'Affordable monthly subscriptions').split(' ').slice(2).join(' ')}
               </p>
             </ScrollReveal>
           </div>
@@ -151,11 +153,7 @@ export default async function HomePage() {
             {/* Testimonials on dark */}
             <ScrollReveal className="col-span-9 bg-[var(--brand-dark)] p-10 flex items-center">
               <div className="grid grid-cols-3 gap-8 w-full">
-                {[
-                  { quote: 'unreservedly recommend and support IThealth', name: 'Arnold Subel SC', company: 'Advocates Group 621' },
-                  { quote: 'extremely happy with the nature and extent of the IT services provided', name: 'Noel Graves SC', company: 'Advocates Group One' },
-                  { quote: 'The level of service we have received is of a very high standard', name: 'Robert Stockwell SC', company: 'Advocates Group 21' },
-                ].map((t, i) => (
+                {testimonialItems.map((t, i) => (
                   <div key={i} className="text-center">
                     <p className="text-sm font-light text-white/80 italic leading-relaxed mb-4">
                       &ldquo;{t.quote}&rdquo;
@@ -171,19 +169,19 @@ export default async function HomePage() {
           <div className="mt-24 text-center">
             <ScrollReveal>
               <p className="text-sm font-semibold uppercase tracking-widest text-[var(--brand-secondary)] mb-6">
-                Designed for professional knowledge-based workers
+                {valueProps.industries_label ?? 'Designed for professional knowledge-based workers'}
               </p>
             </ScrollReveal>
             <ScrollReveal delay={0.1} scale>
               <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
-                {['Legal', 'Consulting', 'Architecture', 'Finance', 'Retail', 'Hospitality', 'NGO'].map((industry) => (
+                {industries.filter((_, i) => i < industries.length - 1).map((industry) => (
                   <span key={industry} className="text-xl md:text-2xl font-extralight text-[var(--brand-dark)]">
                     {industry}
                   </span>
                 ))}
               </div>
               <p className="mt-4 text-xl md:text-2xl font-extralight text-[var(--brand-dark)]">
-                All businesses
+                {industries[industries.length - 1] ?? 'All businesses'}
               </p>
             </ScrollReveal>
           </div>
@@ -194,8 +192,12 @@ export default async function HomePage() {
       <section className="py-36 bg-white">
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
           <ScrollReveal>
-            <h2 className="text-3xl font-extralight text-[var(--brand-dark)] mb-4">Latest Insights</h2>
-            <p className="text-muted-foreground mb-12">Expert advice on IT modernisation</p>
+            <h2 className="text-3xl font-extralight text-[var(--brand-dark)] mb-4">
+              {blogPreview.heading ?? 'Latest Insights'}
+            </h2>
+            <p className="text-muted-foreground mb-12">
+              {blogPreview.subheading ?? 'Expert advice on IT modernisation'}
+            </p>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {(posts as BlogPost[] ?? []).map((post, index) => (
@@ -207,7 +209,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <CTABanner />
+      <CTABanner
+        heading={cta.heading ?? 'Ready to Modernise Your IT?'}
+        subheading={cta.subheading ?? 'Start your free modernisation journey today'}
+        buttonText={cta.button_text ?? 'Start Now'}
+        buttonHref={cta.button_link ?? '/login'}
+      />
     </>
   )
 }
