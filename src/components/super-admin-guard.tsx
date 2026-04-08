@@ -3,14 +3,13 @@
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { isAdminOrAbove } from '@/lib/auth-utils'
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
+export function SuperAdminGuard({ children }: { children: React.ReactNode }) {
   const { profile, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!profile || !isAdminOrAbove(profile.role))) {
+    if (!loading && (!profile || profile.role !== 'super_admin')) {
       router.replace('/login')
     }
   }, [loading, profile, router])
@@ -23,7 +22,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!profile || !isAdminOrAbove(profile.role)) {
+  if (!profile || profile.role !== 'super_admin') {
     return null
   }
 
