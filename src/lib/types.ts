@@ -12,6 +12,21 @@ export interface Company {
   updated_at: string
 }
 
+export interface CompanyBranding {
+  id: string
+  company_id: string
+  logo_url: string | null
+  logo_light_url: string | null
+  icon_url: string | null
+  primary_colour: string
+  secondary_colour: string
+  accent_colour: string | null
+  font_heading: string
+  font_body: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Profile {
   id: string
   company_id: string
