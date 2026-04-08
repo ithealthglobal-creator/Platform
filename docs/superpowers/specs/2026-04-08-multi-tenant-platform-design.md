@@ -105,6 +105,44 @@ CREATE POLICY "Admins update own company branding"
 - Write restricted to authenticated users uploading for their own company
 - Path convention: `{company_id}/logo.{ext}`, `{company_id}/logo-light.{ext}`, `{company_id}/icon.{ext}`
 
+```sql
+-- Migration: 20260408100003_create_branding_storage_bucket.sql
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('branding', 'branding', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Public read
+CREATE POLICY "Public read branding bucket"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'branding');
+
+-- Authenticated users upload to their company's folder
+CREATE POLICY "Admins upload to own branding folder"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'branding'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+
+-- Admins can update/delete their own company's files
+CREATE POLICY "Admins manage own branding files"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'branding'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+
+CREATE POLICY "Admins delete own branding files"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'branding'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+```
+
 ### 2.2 Menu Item
 
 New L2 under Growth:
@@ -271,6 +309,41 @@ CREATE POLICY "Admins delete own website content"
 - Public read access
 - Write restricted to authenticated admins
 - Path convention: `{company_id}/{page}/{section}/{filename}`
+
+```sql
+-- Migration: 20260408200003_create_website_content_bucket.sql
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('website-content', 'website-content', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Public read website-content bucket"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'website-content');
+
+CREATE POLICY "Admins upload to own website-content folder"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'website-content'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+
+CREATE POLICY "Admins manage own website-content files"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'website-content'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+
+CREATE POLICY "Admins delete own website-content files"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'website-content'
+    AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
+    AND public.is_admin_or_above()
+  );
+```
 
 ### 3.2 Content Schema Per Section
 
@@ -458,7 +531,13 @@ export interface HeroContent {
   background_image_url?: string | null
 }
 
-export interface MissionContent {
+// Home page mission (simple single paragraph)
+export interface HomeMissionContent {
+  body: string
+}
+
+// About page mission (structured with heading, paragraphs, image)
+export interface AboutMissionContent {
   eyebrow?: string
   heading: string
   paragraphs: string[]
@@ -692,8 +771,15 @@ CREATE POLICY "Admins update own company tree"
 CREATE OR REPLACE FUNCTION public.set_parent_company_on_insert()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- For customer/partner: parent is the creating user's company
   IF NEW.parent_company_id IS NULL AND NEW.type IN ('customer', 'partner') THEN
     NEW.parent_company_id := (SELECT company_id FROM public.profiles WHERE id = auth.uid());
+  END IF;
+  -- For admin: parent is the platform company (super_admin creates admin companies)
+  IF NEW.parent_company_id IS NULL AND NEW.type = 'admin' THEN
+    NEW.parent_company_id := (SELECT company_id FROM public.profiles WHERE id = auth.uid());
+    -- If creator is super_admin, their company_id IS the platform company — correct.
+    -- If creator is admin, this prevents orphaned admin companies.
   END IF;
   RETURN NEW;
 END;
@@ -784,17 +870,72 @@ The following tables all have policies using `get_my_role() = 'admin'` that must
 | `team_skills` | Team migration | Admin policies |
 | `team_skill_ratings` | Team migration | Admin policies |
 
-**Template for each simple table** (where admin had unrestricted access):
+**Multi-tenant scoping consideration:**
+
+The existing codebase uses unscoped `get_my_role() = 'admin'` policies because there was only one admin company (IThealth). In a multi-tenant world, admins from Company A should NOT see Company B's data. However, most of these tables (services, blog_posts, courses, etc.) do NOT have a `company_id` column today — they were designed as global admin-managed data.
+
+**Two categories of tables:**
+
+1. **Global admin tables** (services, blog_posts, courses, testimonials, partners, etc.) — currently shared across the platform, not company-scoped. These stay accessible to all admins via `is_admin_or_above()` for now. In a future migration, a `company_id` column will be added to enable per-company content isolation. Super admins always see all.
+
+2. **Company-scoped tables** (support_tickets, orders, service_requests, customer_contracts, team_invitations, team_skills, etc.) — already have `company_id` or link to a company via the user. These use company-tree scoping.
+
+**Template A — Global admin tables** (no company_id column):
 
 ```sql
--- Example for services table
+-- Example for services table (global, shared across admin companies)
 DROP POLICY IF EXISTS "Admins can do everything with services" ON public.services;
 
-CREATE POLICY "Admin or above full access on services"
+-- Super admins: full access
+CREATE POLICY "Super admins full access on services"
   ON public.services FOR ALL
-  USING (public.is_admin_or_above())
-  WITH CHECK (public.is_admin_or_above());
+  USING (public.get_my_role() = 'super_admin')
+  WITH CHECK (public.get_my_role() = 'super_admin');
+
+-- Admins: full access (global — these tables will be company-scoped in a future migration)
+CREATE POLICY "Admins full access on services"
+  ON public.services FOR ALL
+  USING (public.get_my_role() = 'admin')
+  WITH CHECK (public.get_my_role() = 'admin');
 ```
+
+**Tables using Template A:** services, service_phase_junction, service_vertical_junction, service_persona_junction, service_pain_junction, service_gain_junction, runbook_steps, service_costing_items, blog_posts, testimonials, partners, courses, course_sections, course_modules, assessments, assessment_questions, meta_campaigns, meta_ad_sets, meta_ads, meta_ad_metrics, ai_agents, ai_agent_tools
+
+**Template B — Company-scoped tables** (have company_id or join to company):
+
+```sql
+-- Example for support_tickets (company-scoped)
+DROP POLICY IF EXISTS "Admins manage support_tickets" ON public.support_tickets;
+
+-- Super admins: full access to all
+CREATE POLICY "Super admins full access on support_tickets"
+  ON public.support_tickets FOR ALL
+  USING (public.get_my_role() = 'super_admin')
+  WITH CHECK (public.get_my_role() = 'super_admin');
+
+-- Admins: access own company tree's tickets only
+CREATE POLICY "Admins manage own company tree support_tickets"
+  ON public.support_tickets FOR ALL
+  USING (
+    public.get_my_role() = 'admin'
+    AND company_id IN (
+      SELECT id FROM public.companies
+      WHERE id = public.get_my_company_id()
+        OR parent_company_id = public.get_my_company_id()
+    )
+  )
+  WITH CHECK (
+    company_id IN (
+      SELECT id FROM public.companies
+      WHERE id = public.get_my_company_id()
+        OR parent_company_id = public.get_my_company_id()
+    )
+  );
+```
+
+**Tables using Template B:** support_tickets, ticket_replies, ticket_routing_rules, ticket_email_log, sla_templates, service_sla, customer_contracts, service_requests, orders, order_items, payfast_integrations, team_invitations, team_skills, team_skill_ratings, assessment_attempts, certificates, course_progress, ai_conversations, ai_messages, ai_execution_steps
+
+**Note on DELETE**: Both templates use `FOR ALL` which includes DELETE. This matches the existing behaviour (admins could always delete). For tables where deletion is destructive and should be restricted, individual policies should be used (as done for `company_branding`). The migration should be reviewed table-by-table during implementation, but the default is to preserve existing capability.
 
 **Super admin policies for Phase 1 & 2 tables** (added in this migration):
 
@@ -875,6 +1016,15 @@ if (profile.role === 'super_admin') {
 }
 ```
 
+**Login page branding (pre-authentication):**
+
+Before the user logs in, there is no session to determine which company's branding to show. Resolution strategy:
+1. Check for a `?company=<slug>` query parameter (allows bookmarkable branded login URLs like `/login?company=ithealth`)
+2. If no query param, use `DEFAULT_COMPANY_ID` env var to fetch branding from `company_branding`
+3. Fall back to Servolu (platform) branding if no default is configured
+
+This means the login page fetches branding server-side via `resolveCompanyId()` (which checks query params before falling back to the default). The branding is passed as props to the login page component.
+
 ### 4.4 Menu System
 
 **Super admin menu tree:**
@@ -909,6 +1059,14 @@ SELECT 'super_admin', id FROM public.menu_items WHERE id::text LIKE '50000000%' 
 -- When impersonating an admin company (via company switcher), the UI fetches
 -- get_menu_tree('admin') directly and renders the admin sidebar in that context.
 -- This prevents mixing platform and admin menu items in get_menu_tree('super_admin').
+--
+-- IMPORTANT: The existing get_menu_tree() function does NOT validate that the passed
+-- role matches the caller's actual role — it's a SECURITY DEFINER function that simply
+-- joins role_menu_access on the given role parameter. This means any authenticated user
+-- can call get_menu_tree('admin'), but the menu items returned are harmless metadata
+-- (labels, icons, routes) — actual data access is controlled by RLS on each table.
+-- The frontend only calls get_menu_tree() with the user's own role (or 'admin' during
+-- super_admin impersonation). No function modification is needed.
 ```
 
 ### 4.5 Route Group: `(super-admin)/`
