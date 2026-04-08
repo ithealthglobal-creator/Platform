@@ -122,7 +122,7 @@ CREATE POLICY "Admins upload to own branding folder"
   WITH CHECK (
     bucket_id = 'branding'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 
 -- Admins can update/delete their own company's files
@@ -131,7 +131,7 @@ CREATE POLICY "Admins manage own branding files"
   USING (
     bucket_id = 'branding'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 
 CREATE POLICY "Admins delete own branding files"
@@ -139,7 +139,7 @@ CREATE POLICY "Admins delete own branding files"
   USING (
     bucket_id = 'branding'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 ```
 
@@ -325,7 +325,7 @@ CREATE POLICY "Admins upload to own website-content folder"
   WITH CHECK (
     bucket_id = 'website-content'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 
 CREATE POLICY "Admins manage own website-content files"
@@ -333,7 +333,7 @@ CREATE POLICY "Admins manage own website-content files"
   USING (
     bucket_id = 'website-content'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 
 CREATE POLICY "Admins delete own website-content files"
@@ -341,7 +341,7 @@ CREATE POLICY "Admins delete own website-content files"
   USING (
     bucket_id = 'website-content'
     AND (storage.foldername(name))[1] = (public.get_my_company_id())::text
-    AND public.is_admin_or_above()
+    AND public.get_my_role() = 'admin'
   );
 ```
 
@@ -1405,6 +1405,8 @@ Migrations must be applied in order. Each phase produces a set of migration file
 20260408300004_seed_servolu_company.sql              -- create Servolu, update IThealth parent, update customer/partner parents
 20260408300005_auth_helper_functions_v2.sql          -- get_my_company_type(), is_admin_or_above(), set_parent_company_on_insert()
 20260408300006_rls_policies_v2.sql                   -- DROP+CREATE ALL 45+ admin policies across ALL tables (see §4.2 table)
+                                                       -- ALSO updates storage.objects policies for 'branding' and 'website-content' buckets
+                                                       -- to use is_admin_or_above() instead of get_my_role() = 'admin'
 20260408300007_seed_super_admin_menu.sql
 20260408300008_seed_super_admin_user.sql             -- Servolu admin profile (requires auth user from setup script)
 ```
