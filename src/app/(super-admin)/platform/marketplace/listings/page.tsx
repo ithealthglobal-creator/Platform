@@ -1,56 +1,137 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase-client'
-import { Company } from '@/lib/types'
-import { Store } from '@carbon/icons-react'
+import { Store, CheckmarkFilled, CloseFilled } from '@carbon/icons-react'
+import { toast } from 'sonner'
 
-interface ListingRow extends Company {
-  featured: boolean
-  active: boolean
+interface ListingRow {
+  id: string
+  company_id: string
+  description: string | null
+  is_featured: boolean
+  is_active: boolean
+  sort_order: number
+  company: {
+    id: string
+    name: string
+    domain: string | null
+    slug: string | null
+  } | null
 }
 
 export default function MarketplaceListingsPage() {
   const [listings, setListings] = useState<ListingRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingDesc, setEditingDesc] = useState<string | null>(null)
+  const [descValue, setDescValue] = useState('')
+  const descRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    async function fetchListings() {
-      const { data, error } = await supabase
-        .from('companies')
-        .select('*')
-        .eq('type', 'admin')
-        .order('name')
-
-      if (error || !data) {
-        setLoading(false)
-        return
-      }
-
-      // Stub: derive featured/active from company status for now
-      const rows: ListingRow[] = (data as Company[]).map(c => ({
-        ...c,
-        featured: false,
-        active: c.status === 'active',
-      }))
-
-      setListings(rows)
-      setLoading(false)
-    }
-
     fetchListings()
   }, [])
 
-  function toggleFeatured(id: string) {
-    setListings(prev =>
-      prev.map(l => (l.id === id ? { ...l, featured: !l.featured } : l))
-    )
+  useEffect(() => {
+    if (editingDesc && descRef.current) {
+      descRef.current.focus()
+    }
+  }, [editingDesc])
+
+  async function fetchListings() {
+    setLoading(true)
+
+    const { data: listingsRaw, error } = await supabase
+      .from('marketplace_listings')
+      .select('id, company_id, description, is_featured, is_active, sort_order')
+      .order('sort_order')
+
+    if (error || !listingsRaw) {
+      setLoading(false)
+      return
+    }
+
+    // Fetch company data
+    const rows: ListingRow[] = []
+    for (const listing of listingsRaw) {
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id, name, domain, slug')
+        .eq('id', listing.company_id)
+        .maybeSingle()
+
+      rows.push({ ...listing, company })
+    }
+
+    setListings(rows)
+    setLoading(false)
   }
 
-  function toggleActive(id: string) {
+  async function toggleFeatured(listing: ListingRow) {
+    const newVal = !listing.is_featured
+
+    const { error } = await supabase
+      .from('marketplace_listings')
+      .update({ is_featured: newVal })
+      .eq('id', listing.id)
+
+    if (error) {
+      toast.error('Failed to update featured status')
+      return
+    }
+
     setListings(prev =>
-      prev.map(l => (l.id === id ? { ...l, active: !l.active } : l))
+      prev.map(l => (l.id === listing.id ? { ...l, is_featured: newVal } : l))
     )
+    toast.success(`${listing.company?.name ?? 'Listing'} ${newVal ? 'featured' : 'unfeatured'}`)
+  }
+
+  async function toggleActive(listing: ListingRow) {
+    const newVal = !listing.is_active
+
+    const { error } = await supabase
+      .from('marketplace_listings')
+      .update({ is_active: newVal })
+      .eq('id', listing.id)
+
+    if (error) {
+      toast.error('Failed to update active status')
+      return
+    }
+
+    setListings(prev =>
+      prev.map(l => (l.id === listing.id ? { ...l, is_active: newVal } : l))
+    )
+    toast.success(`${listing.company?.name ?? 'Listing'} ${newVal ? 'activated' : 'deactivated'}`)
+  }
+
+  function startEditDesc(listing: ListingRow) {
+    setEditingDesc(listing.id)
+    setDescValue(listing.description ?? '')
+  }
+
+  async function saveDesc(listing: ListingRow) {
+    const trimmed = descValue.trim()
+
+    const { error } = await supabase
+      .from('marketplace_listings')
+      .update({ description: trimmed || null })
+      .eq('id', listing.id)
+
+    if (error) {
+      toast.error('Failed to save description')
+      return
+    }
+
+    setListings(prev =>
+      prev.map(l => (l.id === listing.id ? { ...l, description: trimmed || null } : l))
+    )
+    setEditingDesc(null)
+    toast.success('Description saved')
+  }
+
+  function cancelEdit() {
+    setEditingDesc(null)
+    setDescValue('')
   }
 
   return (
@@ -58,7 +139,7 @@ export default function MarketplaceListingsPage() {
       <div>
         <h1 className="font-poppins text-2xl font-semibold text-gray-900">Marketplace Listings</h1>
         <p className="mt-1 text-sm text-gray-500">
-          Control which admin companies are visible in the marketplace. Full configuration coming in Phase 5.
+          Control which companies are visible in the Servolu Marketplace. Changes persist immediately.
         </p>
       </div>
 
@@ -79,7 +160,10 @@ export default function MarketplaceListingsPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
               <Store size={24} className="text-gray-400" />
             </div>
-            <p className="text-sm text-gray-500">No admin companies found.</p>
+            <p className="text-sm text-gray-500">No marketplace listings found.</p>
+            <p className="text-xs text-gray-400">
+              Add companies to marketplace_listings to see them here.
+            </p>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -96,32 +180,74 @@ export default function MarketplaceListingsPage() {
                 <tr key={listing.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
                     <div>
-                      <p className="font-medium text-gray-900">{listing.name}</p>
-                      <p className="text-xs text-gray-400">{listing.domain ?? '—'}</p>
+                      <p className="font-medium text-gray-900">{listing.company?.name ?? listing.company_id}</p>
+                      <p className="text-xs text-gray-400">{listing.company?.domain ?? listing.company?.slug ?? '—'}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-500 max-w-xs truncate">
-                    {listing.tagline ?? <span className="text-gray-300 italic">No tagline</span>}
+                  <td className="px-6 py-4 max-w-xs">
+                    {editingDesc === listing.id ? (
+                      <div className="flex flex-col gap-2">
+                        <textarea
+                          ref={descRef}
+                          value={descValue}
+                          onChange={e => setDescValue(e.target.value)}
+                          rows={3}
+                          className="w-full rounded border border-gray-200 px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => saveDesc(listing)}
+                            className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium"
+                          >
+                            <CheckmarkFilled size={14} />
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600"
+                          >
+                            <CloseFilled size={14} />
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => startEditDesc(listing)}
+                        className="text-left w-full group"
+                        title="Click to edit description"
+                      >
+                        {listing.description ? (
+                          <span className="text-gray-600 text-sm line-clamp-2 group-hover:text-gray-900 transition-colors">
+                            {listing.description}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 italic text-sm group-hover:text-gray-400 transition-colors">
+                            Click to add description
+                          </span>
+                        )}
+                      </button>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
-                      onClick={() => toggleFeatured(listing.id)}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${listing.featured ? 'bg-blue-600' : 'bg-gray-200'}`}
-                      title="Toggle featured"
+                      onClick={() => toggleFeatured(listing)}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${listing.is_featured ? 'bg-blue-600' : 'bg-gray-200'}`}
+                      title={listing.is_featured ? 'Remove from featured' : 'Mark as featured'}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${listing.featured ? 'translate-x-4' : 'translate-x-0.5'}`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${listing.is_featured ? 'translate-x-4' : 'translate-x-0.5'}`}
                       />
                     </button>
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
-                      onClick={() => toggleActive(listing.id)}
-                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${listing.active ? 'bg-emerald-500' : 'bg-gray-200'}`}
-                      title="Toggle active"
+                      onClick={() => toggleActive(listing)}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${listing.is_active ? 'bg-emerald-500' : 'bg-gray-200'}`}
+                      title={listing.is_active ? 'Deactivate listing' : 'Activate listing'}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${listing.active ? 'translate-x-4' : 'translate-x-0.5'}`}
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${listing.is_active ? 'translate-x-4' : 'translate-x-0.5'}`}
                       />
                     </button>
                   </td>
@@ -131,10 +257,6 @@ export default function MarketplaceListingsPage() {
           </table>
         )}
       </div>
-
-      <p className="text-xs text-gray-400 text-right">
-        Note: Toggle state is UI-only in this phase. Persistence will be added in Phase 5.
-      </p>
     </div>
   )
 }

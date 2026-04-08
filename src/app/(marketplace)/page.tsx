@@ -3,8 +3,6 @@ import Image from 'next/image'
 import { createClient } from '@supabase/supabase-js'
 import { ProviderCard } from '@/components/marketplace/provider-card'
 import { ScrollReveal } from '@/components/scroll-reveal'
-import type { Phase } from '@/lib/types'
-
 const SERVOLU_ID = '00000000-0000-0000-0000-000000000000'
 
 const phaseColors: Record<string, string> = {
@@ -159,7 +157,7 @@ export default async function MarketplaceHomePage() {
               <p className="text-gray-500 mb-12">Find services tailored to each stage of your IT modernisation</p>
             </ScrollReveal>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {phases.map((phase: Phase, i) => (
+              {phases.map((phase: { id: string; name: string; sort_order: number }, i) => (
                 <ScrollReveal key={phase.id} delay={i * 0.1}>
                   <Link
                     href={`/marketplace/services?phase=${phase.name.toLowerCase()}`}

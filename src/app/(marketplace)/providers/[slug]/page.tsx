@@ -118,10 +118,10 @@ export default async function ProviderProfilePage({ params }: PageProps) {
           <div className="mx-auto max-w-7xl">
             <ScrollReveal>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">About</h2>
-              {mission.heading && (
+              {!!mission.heading && (
                 <h3 className="text-2xl font-light text-gray-800 mb-4">{String(mission.heading)}</h3>
               )}
-              {Array.isArray(mission.paragraphs) && mission.paragraphs.map((p, i) => (
+              {Array.isArray(mission.paragraphs) && (mission.paragraphs as unknown[]).map((p, i) => (
                 <p key={i} className="text-gray-600 mb-3 max-w-3xl">{String(p)}</p>
               ))}
               {typeof mission.body === 'string' && (
