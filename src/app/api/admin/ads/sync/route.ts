@@ -1,3 +1,4 @@
+import { isAdminOrAbove } from '@/lib/auth-utils'
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase-server'
 import { decrypt } from '@/lib/encryption'
@@ -20,7 +21,7 @@ async function verifyAuth(request: NextRequest) {
     .select('role, company_id')
     .eq('id', user.id)
     .single()
-  if (!profile || profile.role !== 'admin') return null
+  if (!profile || !isAdminOrAbove(profile.role)) return null
   return profile.company_id
 }
 
