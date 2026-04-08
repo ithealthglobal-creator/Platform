@@ -773,3 +773,73 @@ export interface MemberProfile {
     service_score: number
   }[]
 }
+
+// ---------------------------------------------------------------------------
+// Customer Support
+// ---------------------------------------------------------------------------
+export type TicketCategory = 'general' | 'billing' | 'service'
+export type TicketPriority = 'critical' | 'high' | 'medium' | 'low'
+export type TicketStatus = 'open' | 'in_progress' | 'waiting_on_customer' | 'resolved' | 'closed'
+export type EmailType = 'new_ticket' | 'reply' | 'status_change' | 'sla_warning' | 'sla_breach'
+export type EmailStatus = 'pending' | 'sent' | 'failed'
+
+export interface SupportTicket {
+  id: string
+  ticket_number: string
+  company_id: string
+  created_by: string
+  assigned_to: string | null
+  category: TicketCategory
+  service_id: string | null
+  priority: TicketPriority
+  status: TicketStatus
+  subject: string
+  description: string
+  sla_template_id: string | null
+  response_due_at: string | null
+  resolution_due_at: string | null
+  first_responded_at: string | null
+  resolved_at: string | null
+  created_at: string
+  updated_at: string
+  company?: Company
+  created_by_profile?: Profile
+  assigned_to_profile?: Profile
+  service?: Service
+  sla_template?: SlaTemplate
+}
+
+export interface TicketReply {
+  id: string
+  ticket_id: string
+  author_id: string
+  body: string
+  is_internal: boolean
+  email_sent: boolean
+  email_sent_at: string | null
+  created_at: string
+  author?: Profile
+}
+
+export interface TicketRoutingRule {
+  id: string
+  category: TicketCategory
+  service_id: string | null
+  assigned_to: string
+  is_active: boolean
+  created_at: string
+  assigned_to_profile?: Profile
+  service?: Service
+}
+
+export interface TicketEmailLog {
+  id: string
+  ticket_id: string
+  reply_id: string | null
+  recipient_email: string
+  email_type: EmailType
+  status: EmailStatus
+  sent_at: string | null
+  error: string | null
+  created_at: string
+}
