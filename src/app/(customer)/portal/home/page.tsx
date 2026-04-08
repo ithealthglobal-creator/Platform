@@ -136,12 +136,12 @@ export default function HomePage() {
                       <Link
                         key={c.id}
                         href={`/portal/academy/courses/${c.id}`}
-                        className="overflow-hidden rounded-lg transition-shadow hover:shadow-lg"
+                        className="overflow-hidden rounded-xl transition-all hover:shadow-lg hover:scale-[1.02]"
                         style={{ backgroundColor: phaseColor }}
                       >
-                        <div className="p-4">
+                        <div className="p-5">
                           <div className="text-sm font-semibold text-white">{c.name}</div>
-                          <div className="mt-1 text-xs text-white/80">
+                          <div className="mt-1.5 text-xs text-white/80">
                             {c.phase_name} · Your score: {c.service_score}%
                           </div>
                         </div>
@@ -203,7 +203,7 @@ function ScoreCard({
               r="60"
               fill="none"
               stroke="#e2e8f0"
-              strokeWidth="20"
+              strokeWidth="18"
             />
             {/* Progress arc */}
             <circle
@@ -212,7 +212,7 @@ function ScoreCard({
               r="60"
               fill="none"
               stroke="#1175E4"
-              strokeWidth="20"
+              strokeWidth="18"
               strokeLinecap="round"
               strokeDasharray={`${CIRCUMFERENCE} ${CIRCUMFERENCE}`}
               strokeDashoffset={dashOffset}
@@ -262,9 +262,9 @@ function ScoreCard({
                     <span className="font-medium text-slate-700">{phase.name}</span>
                     <span className="text-slate-500">{phaseScore}%</span>
                   </div>
-                  <div className="h-2 rounded-full bg-slate-200">
+                  <div className="h-2.5 rounded-full bg-slate-200">
                     <div
-                      className="h-2 rounded-full transition-all duration-500"
+                      className="h-2.5 rounded-full transition-all duration-500"
                       style={{
                         width: `${Math.min(phaseScore, 100)}%`,
                         backgroundColor: color,
@@ -284,7 +284,7 @@ function ScoreCard({
           Assessment completed {assessmentDate}
         </p>
         <Link
-          href="/journey"
+          href="/portal/journey"
           className="text-sm font-medium text-[#1175E4] transition-colors hover:text-[#0d5fc4]"
         >
           View full report →
@@ -379,36 +379,28 @@ function RecommendedServices({
 
               <div className="space-y-2">
                 {phaseServices.map((s) => {
-                  const bgColor =
+                  const scoreColor =
                     (s.score ?? 0) <= 25
-                      ? 'bg-red-50 border-red-200'
+                      ? 'text-red-600'
                       : (s.score ?? 0) <= 50
-                        ? 'bg-orange-50 border-orange-200'
-                        : 'bg-slate-50 border-slate-200'
+                        ? 'text-orange-600'
+                        : 'text-slate-600'
 
                   return (
                     <div
                       key={s.id}
-                      className={`flex items-center gap-3 rounded-lg border p-3 ${bgColor}`}
+                      className="flex items-center gap-4 rounded-xl bg-orange-50/60 px-4 py-3.5"
                     >
                       <div className="min-w-[48px] text-center">
-                        <span
-                          className={`text-lg font-bold ${
-                            (s.score ?? 0) <= 25
-                              ? 'text-red-600'
-                              : (s.score ?? 0) <= 50
-                                ? 'text-orange-600'
-                                : 'text-slate-600'
-                          }`}
-                        >
+                        <span className={`text-lg font-bold ${scoreColor}`}>
                           {s.score}%
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-800">
+                        <p className="text-sm font-semibold text-slate-800">
                           {s.name}
                         </p>
-                        <p className="text-xs text-slate-500">{s.description}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">{s.description}</p>
                       </div>
                     </div>
                   )

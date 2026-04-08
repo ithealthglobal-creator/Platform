@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight } from '@carbon/icons-react'
 import { Button } from '@/components/ui/button'
 import { ScrollReveal } from '@/components/scroll-reveal'
 
@@ -33,83 +32,74 @@ const phases = [
   },
 ]
 
-const values = [
-  {
-    heading: 'Enterprise Solutions',
-    description: 'Access enterprise-grade IT without the enterprise price tag.',
-  },
-  {
-    heading: 'Guided Journey',
-    description: 'Step-by-step modernisation with expert support at every stage.',
-  },
-  {
-    heading: 'Strategic Partnership',
-    description: 'A dedicated IT partner invested in your long-term success.',
-  },
-]
-
 export function JourneySection() {
   return (
-    <section className="py-32 px-8 md:px-16 lg:px-24 bg-white text-center">
-      {/* Phase lockups row — staggered reveal */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-        {phases.map((phase, index) => (
-          <ScrollReveal key={phase.name} delay={index * 0.1}>
-            <div className="flex items-center gap-8 md:gap-16">
-              <div className="flex items-center gap-4">
-                <Image src={phase.icon} alt={phase.name} width={48} height={48} className="h-12 w-12" />
-                <span className="font-semibold text-lg" style={{ color: phase.color }}>
-                  {phase.name}
-                </span>
-              </div>
-              {index < phases.length - 1 && (
-                <ArrowRight size={24} className="hidden md:block text-gray-400" />
-              )}
-            </div>
-          </ScrollReveal>
-        ))}
-      </div>
+    <section className="py-96 bg-white">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+        {/* Platform intro */}
+        <ScrollReveal>
+          <p className="text-sm font-semibold uppercase tracking-widest text-[var(--phase-operate)] mb-4">
+            The IT Modernisation Platform
+          </p>
+          <h2 className="text-3xl md:text-4xl font-light text-[var(--brand-dark)] mb-6 max-w-3xl">
+            Your entire modernisation journey, one platform
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mb-16">
+            From assessments and guided learning to service delivery and progress tracking — everything you need to modernise your IT, step by step.
+          </p>
+        </ScrollReveal>
 
-      {/* Phase descriptions grid — staggered reveal */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mt-24 max-w-6xl mx-auto">
-        {phases.map((phase, index) => (
-          <ScrollReveal key={phase.name} delay={index * 0.1}>
-            <div
-              className="text-left rounded-lg p-10"
-              style={{ borderTop: `4px solid ${phase.color}` }}
-            >
-              <h3 className="font-bold mb-4">{phase.name}</h3>
-              <p className="text-sm text-muted-foreground">{phase.description}</p>
-            </div>
-          </ScrollReveal>
-        ))}
-      </div>
+        {/* Platform screenshot */}
+        <ScrollReveal className="mb-24">
+          <Image
+            src="/images/platform-preview.png"
+            alt="IThealth platform showing the modernisation journey, academy courses, home dashboard and recommended services"
+            width={1400}
+            height={900}
+            className="w-full h-auto"
+            priority
+          />
+        </ScrollReveal>
 
-      {/* Value strip — fade up */}
-      <ScrollReveal className="mt-24">
-        <div className="bg-white shadow-md rounded-lg p-12 max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {values.map((value) => (
-              <div key={value.heading} className="text-center">
-                <h4 className="font-bold mb-4">{value.heading}</h4>
-                <p className="text-sm text-muted-foreground">{value.description}</p>
+        {/* Phase icons row */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-6">
+          {phases.map((phase, index) => (
+            <ScrollReveal key={`icon-${phase.name}`} delay={index * 0.1}>
+              <div className="flex items-center justify-center">
+                <Image src={phase.icon} alt={phase.name} width={96} height={96} className="h-24 w-24" />
               </div>
-            ))}
-          </div>
+            </ScrollReveal>
+          ))}
         </div>
-      </ScrollReveal>
 
-      {/* CTA — scale reveal */}
-      <ScrollReveal className="mt-24">
-        <Button
-          className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
-          size="lg"
-          nativeButton={false}
-          render={<Link href="/login" />}
-        >
-          Start Your Journey
-        </Button>
-      </ScrollReveal>
+        {/* Phase descriptions grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          {phases.map((phase, index) => (
+            <ScrollReveal key={`card-${phase.name}`} delay={index * 0.1}>
+              <div
+                className="text-left rounded-lg p-10"
+                style={{ borderTop: `4px solid ${phase.color}` }}
+              >
+                <h3 className="font-bold mb-4">{phase.name}</h3>
+                <p className="text-sm text-muted-foreground">{phase.description}</p>
+              </div>
+            </ScrollReveal>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <ScrollReveal className="mt-24">
+          <Button
+            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-12 py-5 text-xl h-auto"
+            size="lg"
+            nativeButton={false}
+            render={<Link href="/get-started" />}
+          >
+            Get Started
+          </Button>
+          <p className="mt-3 text-sm text-muted-foreground">It&apos;s free — no credit card required</p>
+        </ScrollReveal>
+      </div>
     </section>
   )
 }

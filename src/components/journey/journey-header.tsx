@@ -23,10 +23,10 @@ export function JourneyHeader({
   return (
     <div className="mb-6 flex items-end justify-between">
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-brand-primary">
           Journey
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
+        <h1 className="mt-1 text-2xl font-bold text-brand-dark">
           Your Modernisation Journey
         </h1>
         <p className="mt-1 text-sm text-slate-500">
@@ -43,7 +43,7 @@ export function JourneyHeader({
             onClick={() => onTimeUnitChange(value)}
             className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               timeUnit === value
-                ? 'bg-slate-900 text-white'
+                ? 'bg-brand-primary text-white'
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >

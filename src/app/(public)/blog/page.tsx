@@ -60,7 +60,7 @@ export default async function BlogPage({
       <PageHero title="Blog" subtitle="Expert insights on IT modernisation" />
 
       {/* Category filter pills */}
-      <div className="max-w-6xl mx-auto px-8 py-16">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 py-48">
         <div className="flex flex-wrap gap-4 mb-20">
           <Link
             href="/blog"

@@ -19,7 +19,7 @@ function MetricRow({ label, metric, ads, format }: {
     <div className="grid gap-4" style={{ gridTemplateColumns: `120px repeat(${ads.length}, 1fr)` }}>
       <div className="text-xs text-muted-foreground py-1">{label}</div>
       {ads.map((ad) => {
-        const value = (ad as Record<string, unknown>)[metric] as number | null
+        const value = (ad as unknown as Record<string, unknown>)[metric] as number | null
         if (value === null || value === undefined) {
           return <div key={ad.id} className="text-xs text-muted-foreground py-1">—</div>
         }

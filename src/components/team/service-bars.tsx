@@ -33,7 +33,7 @@ export function ServiceBars({ services }: ServiceBarsProps) {
             </span>
             <span className="text-xs font-semibold text-slate-600">{service.pct}%</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
             <div
               className="h-full rounded-full"
               style={{

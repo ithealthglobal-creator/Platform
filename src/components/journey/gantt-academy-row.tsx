@@ -23,17 +23,17 @@ export function GanttAcademyRow({
     totalMinutes > 0 ? (serviceDurationMinutes / totalMinutes) * 100 : 0
 
   return (
-    <div className="flex border-b border-slate-50 bg-amber-50/50">
+    <div className="flex border-b border-slate-50 bg-brand-secondary/5">
       <div
         className="flex shrink-0 items-center gap-1.5 px-4 py-1"
         style={{ width: labelWidth, paddingLeft: 56 }}
       >
-        <Education size={14} className="shrink-0 text-amber-600" />
-        <span className="truncate text-xs italic text-amber-800">
+        <Education size={14} className="shrink-0 text-brand-secondary" />
+        <span className="truncate text-xs italic text-brand-secondary">
           {course.courseName}
         </span>
         {course.isRequired && (
-          <span className="ml-auto shrink-0 rounded bg-amber-200 px-1 py-0.5 text-[9px] font-medium text-amber-800">
+          <span className="ml-auto shrink-0 rounded bg-brand-secondary/20 px-1 py-0.5 text-[9px] font-medium text-brand-secondary">
             Required
           </span>
         )}

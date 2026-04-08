@@ -7,37 +7,41 @@ import { GanttTimeAxis } from './gantt-time-axis'
 import { GanttPhaseRow } from './gantt-phase-row'
 import { GanttSummaryFooter } from './gantt-summary-footer'
 
-// Phase color config keyed by phase name (lowercase)
+// Phase color config keyed by phase name (lowercase) — IThealth brand palette
+// Operate    = Brand Primary (#1175E4) — foundational, core IT operations
+// Secure     = Brand Secondary (#FF246B) — security & compliance
+// Streamline = Brand Dark Navy (#133258) — optimisation, process efficiency
+// Accelerate = Brand Gold (#EDB600) — innovation, growth, forward momentum
 export const PHASE_COLORS: Record<
   string,
   { bg: string; barFrom: string; barTo: string; text: string; stepBar: string }
 > = {
   operate: {
-    bg: '#f0fdf4',
-    barFrom: '#16a34a',
-    barTo: '#4ade80',
-    text: '#166534',
-    stepBar: '#86efac',
+    bg: '#eef5fd',
+    barFrom: '#1175E4',
+    barTo: '#5aa0f0',
+    text: '#0d5bb5',
+    stepBar: '#a3ccf7',
   },
   secure: {
-    bg: '#eff6ff',
-    barFrom: '#2563eb',
-    barTo: '#60a5fa',
-    text: '#1e40af',
-    stepBar: '#93c5fd',
+    bg: '#fff0f4',
+    barFrom: '#FF246B',
+    barTo: '#ff6e9b',
+    text: '#c41a52',
+    stepBar: '#ffb3cb',
   },
   streamline: {
-    bg: '#faf5ff',
-    barFrom: '#9333ea',
-    barTo: '#c084fc',
-    text: '#6b21a8',
-    stepBar: '#d8b4fe',
+    bg: '#ebedf4',
+    barFrom: '#133258',
+    barTo: '#2a5080',
+    text: '#0e2440',
+    stepBar: '#8ea4c4',
   },
   accelerate: {
-    bg: '#fffbeb',
-    barFrom: '#d97706',
-    barTo: '#fbbf24',
-    text: '#92400e',
+    bg: '#fef8e6',
+    barFrom: '#EDB600',
+    barTo: '#f5ce42',
+    text: '#8a6a10',
     stepBar: '#fde68a',
   },
 }
@@ -72,7 +76,7 @@ export function GanttChart({ timeline, timeUnit }: GanttChartProps) {
   const chartColumns = Math.max(1, Math.ceil(totalUnits))
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-brand-primary/15 bg-white">
       <div style={{ minWidth: LABEL_WIDTH + chartColumns * 100 }}>
         {/* SVG defs for gradients and patterns (hidden) */}
         <svg width="0" height="0" style={{ position: 'absolute' }}>
@@ -97,8 +101,8 @@ export function GanttChart({ timeline, timeUnit }: GanttChartProps) {
               patternUnits="userSpaceOnUse"
               patternTransform="rotate(45)"
             >
-              <rect width="4" height="8" fill="#fbbf24" />
-              <rect x="4" width="4" height="8" fill="#fde68a" />
+              <rect width="4" height="8" fill="#FF246B" />
+              <rect x="4" width="4" height="8" fill="#ff6e9b" />
             </pattern>
           </defs>
         </svg>

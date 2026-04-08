@@ -14,8 +14,8 @@ export function JourneyEmptyState({ type }: JourneyEmptyStateProps) {
   if (type === 'all-above-threshold') {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-center">
-        <CheckmarkOutline size={48} className="mb-4 text-green-500" />
-        <h2 className="text-lg font-semibold text-slate-900">
+        <CheckmarkOutline size={48} className="mb-4 text-brand-primary" />
+        <h2 className="text-lg font-semibold text-brand-dark">
           Outstanding IT Maturity
         </h2>
         <p className="mt-2 max-w-md text-sm text-slate-500">
@@ -28,8 +28,8 @@ export function JourneyEmptyState({ type }: JourneyEmptyStateProps) {
 
   return (
     <div className="flex flex-col items-center justify-center rounded-xl border border-slate-200 bg-white py-16 text-center">
-      <Roadmap size={48} className="mb-4 text-slate-300" />
-      <h2 className="text-lg font-semibold text-slate-900">
+      <Roadmap size={48} className="mb-4 text-brand-primary/40" />
+      <h2 className="text-lg font-semibold text-brand-dark">
         No Journey Data Yet
       </h2>
       <p className="mt-2 max-w-md text-sm text-slate-500">
@@ -37,7 +37,7 @@ export function JourneyEmptyState({ type }: JourneyEmptyStateProps) {
         implementation journey.
       </p>
       <Button
-        className="mt-6"
+        className="mt-6 bg-brand-primary hover:bg-brand-primary/90"
         onClick={() => router.push('/portal/home')}
       >
         Go to Assessment

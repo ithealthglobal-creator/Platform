@@ -54,8 +54,8 @@ export default function ContactPage() {
       <PageHero title="Contact Us" subtitle="Get in touch with our team" />
 
       {/* Contact Content */}
-      <section className="py-32 px-8 md:px-16 bg-white">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+      <section className="py-96 bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
           {/* Left Column — Form */}
           <ScrollReveal direction="left">
           <form onSubmit={handleSubmit} className="space-y-8">

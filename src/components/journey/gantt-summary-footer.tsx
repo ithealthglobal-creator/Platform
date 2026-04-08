@@ -15,15 +15,15 @@ export function GanttSummaryFooter({
   labelWidth,
 }: GanttSummaryFooterProps) {
   return (
-    <div className="flex border-t-2 border-slate-200 bg-slate-50">
+    <div className="flex border-t-2 border-brand-primary/20 bg-brand-primary/5">
       <div
-        className="shrink-0 px-4 py-3 text-sm font-semibold text-slate-900"
+        className="shrink-0 px-4 py-3 text-sm font-semibold text-brand-dark"
         style={{ width: labelWidth }}
       >
         Total Implementation
       </div>
       <div className="flex flex-1 items-center gap-4 px-4 py-3">
-        <span className="text-sm font-semibold text-slate-900">
+        <span className="text-sm font-semibold text-brand-primary">
           {formatDuration(timeline.totalMinutes, timeUnit)}
         </span>
         <span className="text-xs text-slate-500">

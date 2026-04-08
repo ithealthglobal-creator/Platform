@@ -10,14 +10,14 @@ export default function AboutPage() {
       <PageHero title="About IThealth" subtitle="Your IT Modernisation Champions" />
 
       {/* Mission Section */}
-      <section className="py-32 px-8 md:px-16 bg-white">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto items-center">
+      <section className="py-96 bg-white">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-7xl mx-auto px-6 md:px-12 lg:px-16 items-center">
           <ScrollReveal direction="left">
             <div>
               <p className="text-sm uppercase tracking-wider text-[var(--brand-primary)] font-semibold mb-4">
                 Our Mission
               </p>
-              <h2 className="text-3xl font-bold text-[var(--brand-dark)] mb-8">
+              <h2 className="text-3xl font-light text-[var(--brand-dark)] mb-8">
                 Modernising IT for the businesses that matter most
               </h2>
               <p className="text-gray-600 mb-8">
@@ -39,9 +39,10 @@ export default function AboutPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-32 px-8 md:px-16 bg-gray-50">
-        <h2 className="text-3xl font-bold text-center mb-20">Our Values</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-4xl mx-auto">
+      <section className="py-96 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+        <h2 className="text-3xl font-light mb-20">Our Values</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           <ScrollReveal delay={0 * 0.15}>
             <div className="bg-white rounded-xl p-12 shadow-sm">
               <Trophy size={32} className="text-[var(--brand-primary)]" />
@@ -72,6 +73,7 @@ export default function AboutPage() {
               </p>
             </div>
           </ScrollReveal>
+        </div>
         </div>
       </section>
 

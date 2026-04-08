@@ -94,9 +94,10 @@ export default function PartnersPage() {
       <PageHero title="Our Partners" subtitle="Trusted technology partnerships" />
 
       {/* Partner Logo Grid */}
-      <section className="py-32 px-8 bg-white">
+      <section className="py-96 bg-white">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
         {partners.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-12 max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
             {partners.map((partner, index) => {
               const card = (
                 <div
@@ -130,12 +131,13 @@ export default function PartnersPage() {
             })}
           </div>
         )}
+        </div>
       </section>
 
       {/* Become a Partner */}
-      <section className="py-32 px-8 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-[var(--brand-dark)] mb-20">
+      <section className="py-96 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+          <h2 className="text-3xl font-light text-left text-[var(--brand-dark)] mb-20">
             Become a Partner
           </h2>
 

@@ -45,6 +45,10 @@ export function PublicHeader() {
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-6 md:flex">
+          <Link href="/features" className="text-sm font-light text-white hover:text-white/80">
+            Features
+          </Link>
+
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-1 text-sm font-light text-white hover:text-white/80">
               Resources
@@ -101,6 +105,13 @@ export function PublicHeader() {
                 />
 
                 <nav className="flex flex-col gap-4">
+                  <Link
+                    href="/features"
+                    className="text-sm font-medium text-white hover:text-white/80"
+                    onClick={() => setSheetOpen(false)}
+                  >
+                    Features
+                  </Link>
                   {resourceLinks.map((link) => (
                     <Link
                       key={link.href}

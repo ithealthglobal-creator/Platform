@@ -35,10 +35,10 @@ export default function JourneyPage() {
   if (loading) {
     return (
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-brand-primary">
           Journey
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
+        <h1 className="mt-1 text-2xl font-bold text-brand-dark">
           Your Modernisation Journey
         </h1>
         <div className="mt-6 space-y-3">
@@ -54,10 +54,10 @@ export default function JourneyPage() {
   if (!timeline) {
     return (
       <div>
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-brand-primary">
           Journey
         </p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">
+        <h1 className="mt-1 text-2xl font-bold text-brand-dark">
           Your Modernisation Journey
         </h1>
         <div className="mt-6">

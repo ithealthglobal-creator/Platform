@@ -168,13 +168,13 @@ export default function TeamPage() {
       <div className="mt-4 grid grid-cols-2 gap-4">
         {/* Phase Radar */}
         <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <p className="mb-4 text-sm font-semibold text-slate-700">Phase Breakdown</p>
+          <h3 className="mb-4 text-base font-semibold text-slate-900">Phase Breakdown</h3>
           <PhaseRadar phases={radarPhases} overall={stats.avgMaturity} />
         </div>
 
         {/* Service Bars */}
         <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <p className="mb-4 text-sm font-semibold text-slate-700">Service Scores</p>
+          <h3 className="mb-4 text-base font-semibold text-slate-900">Service Scores</h3>
           <ServiceBars services={serviceBars} />
         </div>
       </div>

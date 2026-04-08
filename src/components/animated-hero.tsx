@@ -105,14 +105,15 @@ export function AnimatedHero() {
         {/* CTA button */}
         <div className="hero-cta" style={{ opacity: 0 }}>
           <Button
-            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-8 py-4 text-lg gap-2"
+            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90 px-12 py-5 text-xl h-auto gap-2"
             size="lg"
             nativeButton={false}
             render={<Link href="/get-started" />}
           >
             Get started
-            <ChevronRight size={20} />
+            <ChevronRight size={22} />
           </Button>
+          <p className="mt-3 text-sm text-white/60">It&apos;s free — no credit card required</p>
         </div>
       </div>
     </section>

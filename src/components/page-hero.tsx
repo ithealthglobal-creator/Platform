@@ -9,10 +9,10 @@ interface PageHeroProps {
 
 export function PageHero({ title, subtitle }: PageHeroProps) {
   return (
-    <section className="min-h-screen flex items-center justify-center bg-[var(--brand-primary)] px-8 text-center text-white">
-      <div>
+    <section className="h-[50vh] flex items-end bg-[var(--brand-primary)] text-white">
+      <div className="max-w-7xl mx-auto w-full px-6 md:px-12 lg:px-16 pb-16">
         <motion.h1
-          className="text-4xl md:text-5xl font-bold"
+          className="text-4xl md:text-5xl font-light"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: 'easeOut' }}

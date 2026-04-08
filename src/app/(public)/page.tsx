@@ -35,7 +35,7 @@ export default async function HomePage() {
       <AnimatedHero />
 
       {/* Mission statement */}
-      <section className="py-16 bg-white">
+      <section className="py-48 bg-white">
         <p className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16 text-3xl md:text-4xl font-light text-[var(--brand-dark)] leading-relaxed text-left">
           In today&apos;s world, modern IT isn&apos;t optional — we guide
           you through IT modernisation with simplicity,
@@ -43,15 +43,6 @@ export default async function HomePage() {
           resilient and future ready.
         </p>
       </section>
-
-      <div className="flex justify-center py-12">
-        <Link
-          href="/get-started"
-          className="rounded-lg bg-[#1175E4] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d5fc2] transition-colors"
-        >
-          Get Started
-        </Link>
-      </div>
 
       <JourneySection />
 
@@ -67,32 +58,36 @@ export default async function HomePage() {
       </div>
 
       {/* Blog Highlights */}
-      <section className="py-32 px-8 md:px-16 lg:px-24 bg-white">
-        <ScrollReveal>
-          <h2 className="text-center text-3xl font-bold text-[var(--brand-dark)] mb-4">Latest Insights</h2>
-          <p className="text-center text-muted-foreground mb-20">Expert advice on IT modernisation</p>
-        </ScrollReveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
-          {(posts as BlogPost[] ?? []).map((post, index) => (
-            <ScrollReveal key={post.id} delay={index * 0.15}>
-              <BlogCard post={post} />
-            </ScrollReveal>
-          ))}
+      <section className="py-96 bg-white">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+          <ScrollReveal>
+            <h2 className="text-3xl font-light text-[var(--brand-dark)] mb-4">Latest Insights</h2>
+            <p className="text-muted-foreground mb-20">Expert advice on IT modernisation</p>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {(posts as BlogPost[] ?? []).map((post, index) => (
+              <ScrollReveal key={post.id} delay={index * 0.15}>
+                <BlogCard post={post} />
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-32 px-8 md:px-16 lg:px-24 bg-[var(--brand-dark)]">
-        <ScrollReveal>
-          <h2 className="text-center text-3xl font-bold text-white mb-4">What Our Clients Say</h2>
-          <p className="text-center text-white/60 mb-20">Trusted by businesses across industries</p>
-        </ScrollReveal>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 max-w-6xl mx-auto">
-          {(testimonials as Testimonial[] ?? []).map((t, index) => (
-            <ScrollReveal key={t.id} delay={index * 0.15}>
-              <TestimonialCard testimonial={t} />
-            </ScrollReveal>
-          ))}
+      <section className="py-96 bg-[var(--brand-dark)]">
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+          <ScrollReveal>
+            <h2 className="text-3xl font-light text-white mb-4">What Our Clients Say</h2>
+            <p className="text-white/60 mb-20">Trusted by businesses across industries</p>
+          </ScrollReveal>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+            {(testimonials as Testimonial[] ?? []).map((t, index) => (
+              <ScrollReveal key={t.id} delay={index * 0.15}>
+                <TestimonialCard testimonial={t} />
+              </ScrollReveal>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -18,19 +18,21 @@ export function CTABanner({
   buttonHref = '/login',
 }: CTABannerProps) {
   return (
-    <section className="bg-[var(--brand-primary)] py-32 px-8 text-center">
-      <ScrollReveal>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">{heading}</h2>
-        <p className="text-lg text-white/80 mb-16">{subheading}</p>
-        <Button
-          className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
-          size="lg"
-          nativeButton={false}
-          render={<Link href={buttonHref} />}
-        >
-          {buttonText}
-        </Button>
-      </ScrollReveal>
+    <section className="bg-[var(--brand-primary)] py-96">
+      <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-16">
+        <ScrollReveal>
+          <h2 className="text-3xl md:text-4xl font-light text-white mb-8">{heading}</h2>
+          <p className="text-lg text-white/80 mb-16">{subheading}</p>
+          <Button
+            className="bg-[var(--brand-secondary)] text-white hover:bg-[var(--brand-secondary)]/90"
+            size="lg"
+            nativeButton={false}
+            render={<Link href={buttonHref} />}
+          >
+            {buttonText}
+          </Button>
+        </ScrollReveal>
+      </div>
     </section>
   )
 }

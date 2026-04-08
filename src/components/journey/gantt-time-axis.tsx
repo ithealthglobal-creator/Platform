@@ -7,9 +7,9 @@ interface GanttTimeAxisProps {
 
 export function GanttTimeAxis({ labels, labelWidth }: GanttTimeAxisProps) {
   return (
-    <div className="flex border-b-2 border-slate-200 bg-slate-50">
+    <div className="flex border-b-2 border-brand-primary/20 bg-brand-primary/5">
       <div
-        className="shrink-0 px-4 py-2.5 text-sm font-semibold text-slate-700"
+        className="shrink-0 px-4 py-2.5 text-sm font-semibold text-brand-dark"
         style={{ width: labelWidth }}
       >
         Task

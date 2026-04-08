@@ -17,18 +17,18 @@ export function StatsRow({ memberCount, avgMaturity, trend30d, coursesCompleted 
   return (
     <div className="grid grid-cols-4 gap-4">
       {/* Card 1: Team Members */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Team Members</p>
-        <p className="mt-2 text-3xl font-bold text-slate-900">{memberCount}</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Team Members</p>
+        <p className="mt-3 text-4xl font-bold text-slate-900">{memberCount}</p>
       </div>
 
       {/* Card 2: Avg Maturity */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Avg Maturity</p>
-        <div className="mt-2 flex items-end gap-2">
-          <p className="text-3xl font-bold" style={{ color: '#1175E4' }}>{avgMaturity}%</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Avg Maturity</p>
+        <div className="mt-3 flex items-end gap-2.5">
+          <p className="text-4xl font-bold" style={{ color: '#1175E4' }}>{avgMaturity}%</p>
           <span
-            className="mb-1 rounded-full px-2 py-0.5 text-xs font-semibold text-white"
+            className="mb-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold text-white"
             style={{ backgroundColor: '#1175E4' }}
           >
             {getMaturityLabel(avgMaturity)}
@@ -37,17 +37,17 @@ export function StatsRow({ memberCount, avgMaturity, trend30d, coursesCompleted 
       </div>
 
       {/* Card 3: 30-Day Trend */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">30-Day Trend</p>
-        <p className="mt-2 text-3xl font-bold" style={{ color: trendColor }}>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">30-Day Trend</p>
+        <p className="mt-3 text-4xl font-bold" style={{ color: trendColor }}>
           {trendPrefix}{trend30d}%
         </p>
       </div>
 
       {/* Card 4: Courses Completed */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
-        <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Courses Completed</p>
-        <p className="mt-2 text-3xl font-bold" style={{ color: '#EDB600' }}>{coursesCompleted}</p>
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-400">Courses Completed</p>
+        <p className="mt-3 text-4xl font-bold" style={{ color: '#EDB600' }}>{coursesCompleted}</p>
       </div>
     </div>
   )
