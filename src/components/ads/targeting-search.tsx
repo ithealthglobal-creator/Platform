@@ -28,7 +28,7 @@ export default function TargetingSearch({ type, selected, onChange, placeholder 
   const [results, setResults] = useState<TargetingOption[]>([])
   const [loading, setLoading] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
-  const debounceRef = useRef<NodeJS.Timeout>()
+  const debounceRef = useRef<NodeJS.Timeout>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

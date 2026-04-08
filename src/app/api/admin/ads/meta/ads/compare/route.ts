@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         const data = await metaApiGet(`/${ad.meta_ad_id}`, {
           fields: 'id,name,status,creative{thumbnail_url,body,title,link_url},insights{impressions,clicks,spend,ctr,cpm,actions,cost_per_action_type,video_p25_watched_actions,quality_ranking,engagement_rate_ranking,conversion_rate_ranking}',
         }, { accessToken })
-        return { internalId: ad.id, ...data }
+        return { internalId: ad.id, ...(data as Record<string, unknown>) }
       })
     )
     return NextResponse.json({ ads: results })

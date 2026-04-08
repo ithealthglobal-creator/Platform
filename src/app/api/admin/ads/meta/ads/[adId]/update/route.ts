@@ -28,7 +28,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
   const { data: existingAd } = await supabaseAdmin
     .from('meta_ads')
-    .select('meta_ad_id, ad_set_id, creative_id')
+    .select('meta_ad_id, ad_set_id, creative_id, name, creative_body, creative_title, creative_link_url')
     .eq('id', adId)
     .single()
 
