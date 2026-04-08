@@ -34,11 +34,11 @@ export async function generateMetadata({
   const post = await getPost(slug)
 
   if (!post) {
-    return { title: 'Post Not Found | IThealth' }
+    return { title: 'Post Not Found' }
   }
 
   return {
-    title: `${post.title} | IThealth Blog`,
+    title: `${post.title} | Blog`,
     description: post.excerpt ?? undefined,
   }
 }

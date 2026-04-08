@@ -212,7 +212,7 @@ export default function GetStartedPage() {
 
         {/* Logo */}
         <div>
-          <Image src="/logos/ithealth-logo-white.svg" alt="IThealth" width={130} height={16} />
+          <Image src="/logos/ithealth-logo-white.svg" alt="Logo" width={130} height={16} />
         </div>
 
         {/* Score */}
@@ -273,7 +273,7 @@ export default function GetStartedPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white px-4">
         <div className="text-center max-w-sm">
-          <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={160} height={40} className="mx-auto mb-8" />
+          <Image src="/logos/ithealth-logo.svg" alt="Logo" width={160} height={40} className="mx-auto mb-8" />
           <h1 className="text-xl font-semibold text-slate-900 mb-2">No Assessment Available</h1>
           <p className="text-slate-500 text-sm">No assessment is currently available. Please check back later.</p>
         </div>
@@ -290,7 +290,7 @@ export default function GetStartedPage() {
           <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/[0.05]" />
           <div className="absolute -bottom-32 -left-16 w-80 h-80 rounded-full bg-white/[0.05]" />
           <div className="relative z-10 text-center">
-            <Image src="/logos/ithealth-logo-white.svg" alt="IThealth" width={160} height={20} className="mx-auto mb-10" />
+            <Image src="/logos/ithealth-logo-white.svg" alt="Logo" width={160} height={20} className="mx-auto mb-10" />
             <div className="mx-auto mb-6">
               <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
                 <circle cx="40" cy="40" r="36" stroke="rgba(255,255,255,0.2)" strokeWidth="8" />
@@ -307,7 +307,7 @@ export default function GetStartedPage() {
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="max-w-md w-full">
             <div className="lg:hidden mb-8">
-              <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={140} height={35} />
+              <Image src="/logos/ithealth-logo.svg" alt="Logo" width={140} height={35} />
             </div>
             <h1 className="text-3xl font-bold text-slate-900 mb-4">
               {assessment?.welcome_heading ?? 'How Healthy Is Your IT?'}
@@ -364,7 +364,7 @@ export default function GetStartedPage() {
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
             <div className="lg:hidden">
-              <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={100} height={25} />
+              <Image src="/logos/ithealth-logo.svg" alt="Logo" width={100} height={25} />
             </div>
             <div className="hidden lg:block" />
             <div className="flex items-center gap-4">
@@ -480,7 +480,7 @@ export default function GetStartedPage() {
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="max-w-md w-full">
             <div className="lg:hidden mb-6">
-              <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={140} height={35} />
+              <Image src="/logos/ithealth-logo.svg" alt="Logo" width={140} height={35} />
               {/* Mobile score preview */}
               <div className="mt-4 flex items-center gap-4 rounded-xl bg-pink-50 p-4">
                 <div className="text-3xl font-extrabold text-[#FF246B]">{liveScores.overall}</div>
@@ -564,7 +564,7 @@ export default function GetStartedPage() {
         <div className="flex-1 flex items-center justify-center px-8">
           <div className="text-center max-w-sm">
             <div className="lg:hidden mb-6">
-              <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={140} height={35} className="mx-auto" />
+              <Image src="/logos/ithealth-logo.svg" alt="Logo" width={140} height={35} className="mx-auto" />
             </div>
             <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center mx-auto mb-6">
               <svg

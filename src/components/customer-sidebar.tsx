@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useMenu } from '@/contexts/menu-context'
+import { useBranding } from '@/contexts/branding-context'
 import { useRouter, usePathname } from 'next/navigation'
 import { iconMap } from '@/lib/icon-map'
 import Image from 'next/image'
@@ -10,6 +11,7 @@ import Image from 'next/image'
 export function CustomerSidebar() {
   const { profile, signOut } = useAuth()
   const { menuTree, flatMenu } = useMenu()
+  const { branding } = useBranding()
   const router = useRouter()
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -35,8 +37,8 @@ export function CustomerSidebar() {
       {/* Logo */}
       <div className="border-b border-white/15 px-5 py-7">
         <Image
-          src="/logos/ithealth-logo-white.svg"
-          alt="IThealth"
+          src={branding?.logo_light_url ?? '/logos/ithealth-logo-white.svg'}
+          alt="Logo"
           width={140}
           height={17}
           className="h-6"

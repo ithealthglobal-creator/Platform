@@ -7,7 +7,7 @@ import { GanttTimeAxis } from './gantt-time-axis'
 import { GanttPhaseRow } from './gantt-phase-row'
 import { GanttSummaryFooter } from './gantt-summary-footer'
 
-// Phase color config keyed by phase name (lowercase) — IThealth brand palette
+// Phase color config keyed by phase name (lowercase) — platform brand palette
 // Operate    = Brand Primary (#1175E4) — foundational, core IT operations
 // Secure     = Brand Secondary (#FF246B) — security & compliance
 // Streamline = Brand Dark Navy (#133258) — optimisation, process efficiency

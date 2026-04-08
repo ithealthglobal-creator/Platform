@@ -165,7 +165,7 @@ export function CertificateView({ certificate, userName, companyName }: Certific
             >
               <span className="text-white text-[9px] font-bold">IT</span>
             </div>
-            <span className="text-sm font-semibold text-slate-700">IThealth.ai</span>
+            <span className="text-sm font-semibold text-slate-700">IT Modernisation</span>
             <span className="text-xs text-slate-400">· Your IT Modernisation Champion</span>
           </div>
 

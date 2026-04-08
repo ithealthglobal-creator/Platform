@@ -2,9 +2,25 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState, useEffect } from 'react'
 import { ScrollReveal } from '@/components/scroll-reveal'
+import { createClient } from '@/lib/supabase-client'
 
 export function PublicFooter() {
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    const companyId = process.env.NEXT_PUBLIC_DEFAULT_COMPANY_ID
+    if (!companyId) return
+    const supabase = createClient()
+    supabase
+      .from('company_branding')
+      .select('logo_light_url')
+      .eq('company_id', companyId)
+      .maybeSingle()
+      .then(({ data }) => { if (data?.logo_light_url) setLogoUrl(data.logo_light_url) })
+  }, [])
+
   return (
     <footer className="bg-[var(--brand-footer)] text-white">
       <ScrollReveal direction="none">
@@ -13,8 +29,8 @@ export function PublicFooter() {
           {/* Column 1: Logo & tagline */}
           <div className="flex flex-col gap-8">
             <Image
-              src="/logos/ithealth-logo-white.svg"
-              alt="IThealth"
+              src={logoUrl ?? '/logos/ithealth-logo-white.svg'}
+              alt="Logo"
               width={112}
               height={28}
               className="h-7 w-auto"
@@ -81,7 +97,7 @@ export function PublicFooter() {
         {/* Bottom bar */}
         <div className="mt-24 flex flex-col items-center justify-between gap-8 border-t border-white/10 pt-16 md:flex-row">
           <p className="text-sm text-white/50">
-            &copy; 2026 IThealth. All rights reserved.
+            &copy; {new Date().getFullYear()} All rights reserved.
           </p>
           <div className="flex gap-6">
             <span className="text-sm text-white/50">Privacy Policy</span>

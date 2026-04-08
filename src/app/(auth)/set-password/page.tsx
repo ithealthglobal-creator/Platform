@@ -73,7 +73,7 @@ export default function SetPasswordPage() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="mb-4 flex justify-center">
-              <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={160} height={40} priority />
+              <Image src="/logos/ithealth-logo.svg" alt="Logo" width={160} height={40} priority />
             </div>
             <CardTitle className="text-2xl">Something went wrong</CardTitle>
             <CardDescription>
@@ -90,7 +90,7 @@ export default function SetPasswordPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mb-4 flex justify-center">
-            <Image src="/logos/ithealth-logo.svg" alt="IThealth" width={160} height={40} priority />
+            <Image src="/logos/ithealth-logo.svg" alt="Logo" width={160} height={40} priority />
           </div>
           <CardTitle className="text-2xl">Set your password</CardTitle>
           <CardDescription>Create a password for your account</CardDescription>

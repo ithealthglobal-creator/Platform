@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { useMenu } from '@/contexts/menu-context'
 import { useAuth } from '@/contexts/auth-context'
+import { useBranding } from '@/contexts/branding-context'
 import { usePathname, useRouter } from 'next/navigation'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { iconMap } from '@/lib/icon-map'
@@ -24,6 +25,7 @@ function getIcon(iconName: string | null) {
 export function Sidebar() {
   const { menuTree } = useMenu()
   const { profile, signOut } = useAuth()
+  const { branding } = useBranding()
   const pathname = usePathname()
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -50,8 +52,8 @@ export function Sidebar() {
         {/* Logo with more spacing */}
         <div className="mb-8 flex h-10 w-10 items-center justify-center">
           <Image
-            src="/logos/ithealth-icon-white.svg"
-            alt="IThealth"
+            src={branding?.icon_url ?? branding?.logo_light_url ?? '/logos/ithealth-icon-white.svg'}
+            alt="Logo"
             width={32}
             height={32}
             className="h-8 w-8"
