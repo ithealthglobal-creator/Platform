@@ -9,7 +9,7 @@ async def lifespan(app: FastAPI):
     init_checkpointer()
     yield
 
-app = FastAPI(title="IThealth AI Service", lifespan=lifespan)
+app = FastAPI(title="AI Service", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
