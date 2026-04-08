@@ -9,7 +9,7 @@ import { getCustomerSlaSummary } from '@/lib/supabase/queries/sla-measurements'
 import { SlaKpiCards } from '@/components/support/sla-kpi-cards'
 import { SlaServiceCard } from '@/components/support/sla-service-card'
 import { SlaStatus, getSlaState } from '@/components/support/sla-status'
-import { TicketForm } from '@/components/support/ticket-form'
+import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
@@ -104,7 +104,6 @@ export default function SupportPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [slaTickets, setSlaTickets] = useState<SlaTicket[]>([])
   const [serviceCards, setServiceCards] = useState<ServiceCardData[]>([])
-  const [formOpen, setFormOpen] = useState(false)
 
   const fetchData = useCallback(async () => {
     if (!profile?.company_id) return
@@ -215,12 +214,12 @@ export default function SupportPage() {
               ))}
             </SelectContent>
           </Select>
-          <button
-            onClick={() => setFormOpen(true)}
+          <Link
+            href="/portal/support/new"
             className="inline-flex items-center gap-1.5 rounded-lg bg-[#1175E4] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0d5fc4]"
           >
             + New Ticket
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -260,9 +259,9 @@ export default function SupportPage() {
         {tickets.length === 0 ? (
           <div className="px-6 py-12 text-center text-slate-400">
             No tickets yet.{' '}
-            <button onClick={() => setFormOpen(true)} className="font-medium text-[#1175E4] hover:underline">
+            <Link href="/portal/support/new" className="font-medium text-[#1175E4] hover:underline">
               Open your first ticket
-            </button>
+            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -319,12 +318,6 @@ export default function SupportPage() {
         )}
       </div>
 
-      <TicketForm
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        onSuccess={fetchData}
-        isAdmin={false}
-      />
     </div>
   )
 }

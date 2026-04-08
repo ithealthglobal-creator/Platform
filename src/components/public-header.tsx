@@ -38,7 +38,8 @@ export function PublicHeader() {
             alt="IThealth"
             width={96}
             height={24}
-            className="h-6 w-auto"
+            className="h-6"
+            style={{ width: 'auto' }}
             priority
           />
         </Link>

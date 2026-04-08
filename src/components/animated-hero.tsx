@@ -96,7 +96,7 @@ export function AnimatedHero() {
         </h1>
 
         {/* Description */}
-        <p className="hero-desc text-white/80 text-base max-w-lg mb-10" style={{ opacity: 0 }}>
+        <p className="hero-desc text-white/80 text-base font-light max-w-lg mb-10" style={{ opacity: 0 }}>
           We help small and medium-sized businesses grow stronger, smarter, and more
           successful by modernising their IT, from core IT infrastructure to advanced
           digital platforms.
