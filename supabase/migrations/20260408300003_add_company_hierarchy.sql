@@ -15,9 +15,6 @@ BEGIN
   IF NEW.parent_company_id IS NULL AND NEW.type IN ('customer', 'partner') THEN
     NEW.parent_company_id := (SELECT company_id FROM public.profiles WHERE id = auth.uid());
   END IF;
-  IF NEW.parent_company_id IS NULL AND NEW.type = 'admin' THEN
-    NEW.parent_company_id := (SELECT company_id FROM public.profiles WHERE id = auth.uid());
-  END IF;
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -1515,50 +1515,15 @@ ON CONFLICT (user_id, section_id) DO NOTHING;
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
--- SERVOLU (Platform Company)
+-- ITHEALTH COMPANY METADATA
 -- ---------------------------------------------------------------------------
-INSERT INTO public.companies (id, name, type, status, domain, tagline, support_email, contact_email, slug)
-VALUES (
-  '00000000-0000-0000-0000-000000000000',
-  'Servolu', 'platform', 'active', 'servolu.com',
-  'Managed Services Marketplace', 'support@servolu.com', 'hello@servolu.com', 'servolu'
-) ON CONFLICT (id) DO NOTHING;
-
--- Update IThealth to be a child of Servolu
 UPDATE public.companies SET
-  parent_company_id = '00000000-0000-0000-0000-000000000000',
   domain = 'ithealth.ai', tagline = 'Your IT Modernisation Champion',
   support_email = 'support@ithealth.ai', contact_email = 'hello@ithealth.ai', slug = 'ithealth'
 WHERE id = '00000000-0000-0000-0000-000000000001';
 
 UPDATE public.companies SET parent_company_id = '00000000-0000-0000-0000-000000000001' WHERE type = 'customer' AND parent_company_id IS NULL;
 UPDATE public.companies SET parent_company_id = '00000000-0000-0000-0000-000000000001' WHERE type = 'partner' AND parent_company_id IS NULL;
-
--- ---------------------------------------------------------------------------
--- SUPER ADMIN USER
--- ---------------------------------------------------------------------------
-INSERT INTO auth.users (instance_id, id, aud, role, email, raw_app_meta_data, raw_user_meta_data, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token)
-VALUES (
-  '00000000-0000-0000-0000-000000000000',
-  'c0000000-0000-0000-0000-000000000000',
-  'authenticated', 'authenticated',
-  'admin@servolu.com',
-  '{"provider":"email","providers":["email"]}',
-  '{"sub":"c0000000-0000-0000-0000-000000000000","email":"admin@servolu.com"}',
-  '$2a$10$PznXHEIMDCjC/jqYBvoJQ.Q8QTLhNBiLos4RLlGHr/hPR3yFjVBFy',
-  now(), now(), now(), ''
-) ON CONFLICT DO NOTHING;
-
-INSERT INTO auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
-VALUES (
-  gen_random_uuid(), 'c0000000-0000-0000-0000-000000000000',
-  '{"sub":"c0000000-0000-0000-0000-000000000000","email":"admin@servolu.com"}',
-  'email', 'c0000000-0000-0000-0000-000000000000', now(), now(), now()
-) ON CONFLICT DO NOTHING;
-
-INSERT INTO public.profiles (id, email, display_name, role, company_id)
-VALUES ('c0000000-0000-0000-0000-000000000000', 'admin@servolu.com', 'Servolu Admin', 'super_admin', '00000000-0000-0000-0000-000000000000')
-ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
 -- COMPANY BRANDING
@@ -1568,16 +1533,6 @@ VALUES (
   '00000000-0000-0000-0000-000000000001',
   '/logos/ithealth-logo.svg', '/logos/ithealth-logo-white.svg', '/logos/ithealth-icon-white.svg',
   '#1175E4', '#FF246B', '#C8A951', 'Poppins', 'Poppins'
-) ON CONFLICT (company_id) DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- MARKETPLACE LISTINGS
--- ---------------------------------------------------------------------------
-INSERT INTO public.marketplace_listings (company_id, description, is_featured, is_active, sort_order)
-VALUES (
-  '00000000-0000-0000-0000-000000000001',
-  'Your IT Modernisation Champion. We guide businesses through their IT modernisation journey, making complex technology simple, accessible, and secure.',
-  true, true, 1
 ) ON CONFLICT (company_id) DO NOTHING;
 
 
