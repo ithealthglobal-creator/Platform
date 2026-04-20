@@ -1,0 +1,8 @@
+{
+  "setup": [
+    "npm ci",
+    "docker compose up -d"
+  ],
+  "teardown": [],
+  "run": []
+}
