@@ -1,1 +1,0 @@
--- Seed data moved to seed.sql (companies don't exist at migration time)

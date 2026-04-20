@@ -1,1 +1,0 @@
--- Seed data moved to seed.sql (profiles require auth.users which are created in seed.sql)
