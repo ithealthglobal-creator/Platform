@@ -43,9 +43,7 @@ export default function LoginPage() {
           .select('role')
           .eq('id', user.id)
           .single()
-        if (profileData?.role === 'super_admin') {
-          router.replace('/platform')
-        } else if (profileData?.role === 'customer') {
+        if (profileData?.role === 'customer') {
           router.replace('/home')
         } else {
           router.replace('/dashboard')
