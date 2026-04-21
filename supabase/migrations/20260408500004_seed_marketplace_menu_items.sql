@@ -1,2 +1,0 @@
--- Marketplace menu items were seeded in 20260408300007_seed_super_admin_menu.sql
--- No additional menu items needed for Phase 5

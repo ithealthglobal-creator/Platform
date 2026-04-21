@@ -1,6 +1,6 @@
-export type UserRole = 'super_admin' | 'admin' | 'customer' | 'partner'
+export type UserRole = 'admin' | 'customer' | 'partner'
 
-export type CompanyType = 'platform' | 'admin' | 'customer' | 'partner'
+export type CompanyType = 'admin' | 'customer' | 'partner'
 export type CompanyStatus = 'prospect' | 'active' | 'churned' | 'pending' | 'approved' | 'inactive'
 
 export interface Company {

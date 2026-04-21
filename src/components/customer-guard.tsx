@@ -9,7 +9,7 @@ export function CustomerGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && (!profile || (profile.role !== 'customer' && profile.role !== 'super_admin'))) {
+    if (!loading && (!profile || profile.role !== 'customer')) {
       router.replace('/login')
     }
   }, [loading, profile, router])
@@ -22,7 +22,7 @@ export function CustomerGuard({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!profile || (profile.role !== 'customer' && profile.role !== 'super_admin')) {
+  if (!profile || profile.role !== 'customer') {
     return null
   }
 
