@@ -20,6 +20,7 @@ import { GrowthTab } from '@/components/services/growth-tab'
 import { CostingTab } from '@/components/services/costing-tab'
 import { AcademyTab } from '@/components/services/academy-tab'
 import { SlaTab } from '@/components/services/sla-tab'
+import { ServiceBuilderPanel } from '@/components/services/service-builder-panel'
 
 export default function ServiceEditorPage() {
   const params = useParams()
@@ -30,6 +31,7 @@ export default function ServiceEditorPage() {
   const [serviceId, setServiceId] = useState<string | null>(isNew ? null : id)
   const [loading, setLoading] = useState(!isNew)
   const [description, setDescription] = useState('')
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const fetchService = useCallback(async () => {
     if (isNew) return
@@ -75,76 +77,87 @@ export default function ServiceEditorPage() {
   }
 
   return (
-    <div>
-      <Tabs defaultValue="description">
-        <TabsList>
-          <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="market" disabled={!serviceId}>
-            Market
-          </TabsTrigger>
-          <TabsTrigger value="products" disabled={!serviceId}>
-            Products
-          </TabsTrigger>
-          <TabsTrigger value="skills" disabled={!serviceId}>
-            Skills
-          </TabsTrigger>
-          <TabsTrigger value="runbook" disabled={!serviceId}>
-            Runbook
-          </TabsTrigger>
-          <TabsTrigger value="growth" disabled={!serviceId}>
-            Growth
-          </TabsTrigger>
-          <TabsTrigger value="costing" disabled={!serviceId}>
-            Costing
-          </TabsTrigger>
-          <TabsTrigger value="academy" disabled={!serviceId}>
-            Academy
-          </TabsTrigger>
-          <TabsTrigger value="sla" disabled={!serviceId}>
-            SLA
-          </TabsTrigger>
-        </TabsList>
+    <div className="-m-6 flex h-full">
+      <div
+        key={refreshKey}
+        className="min-w-0 flex-1 overflow-y-auto p-6"
+      >
+        <Tabs defaultValue="description">
+          <TabsList>
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="market" disabled={!serviceId}>
+              Market
+            </TabsTrigger>
+            <TabsTrigger value="products" disabled={!serviceId}>
+              Products
+            </TabsTrigger>
+            <TabsTrigger value="skills" disabled={!serviceId}>
+              Skills
+            </TabsTrigger>
+            <TabsTrigger value="runbook" disabled={!serviceId}>
+              Runbook
+            </TabsTrigger>
+            <TabsTrigger value="growth" disabled={!serviceId}>
+              Growth
+            </TabsTrigger>
+            <TabsTrigger value="costing" disabled={!serviceId}>
+              Costing
+            </TabsTrigger>
+            <TabsTrigger value="academy" disabled={!serviceId}>
+              Academy
+            </TabsTrigger>
+            <TabsTrigger value="sla" disabled={!serviceId}>
+              SLA
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="description">
-          <DescriptionTab
-            serviceId={serviceId}
-            onServiceCreated={handleServiceCreated}
-            onDescriptionChange={handleDescriptionChange}
-          />
-        </TabsContent>
+          <TabsContent value="description">
+            <DescriptionTab
+              serviceId={serviceId}
+              onServiceCreated={handleServiceCreated}
+              onDescriptionChange={handleDescriptionChange}
+            />
+          </TabsContent>
 
-        <TabsContent value="market">
-          <MarketTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="market">
+            <MarketTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="products">
-          <ProductsTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="products">
+            <ProductsTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="skills">
-          <SkillsTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="skills">
+            <SkillsTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="runbook">
-          <RunbookTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="runbook">
+            <RunbookTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="growth">
-          <GrowthTab serviceId={serviceId!} description={description} />
-        </TabsContent>
+          <TabsContent value="growth">
+            <GrowthTab serviceId={serviceId!} description={description} />
+          </TabsContent>
 
-        <TabsContent value="costing">
-          <CostingTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="costing">
+            <CostingTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="academy">
-          <AcademyTab serviceId={serviceId!} />
-        </TabsContent>
+          <TabsContent value="academy">
+            <AcademyTab serviceId={serviceId!} />
+          </TabsContent>
 
-        <TabsContent value="sla">
-          <SlaTab serviceId={serviceId!} />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="sla">
+            <SlaTab serviceId={serviceId!} />
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <ServiceBuilderPanel
+        serviceId={serviceId}
+        onServiceCreated={handleServiceCreated}
+        onAgentDone={() => setRefreshKey((k) => k + 1)}
+      />
     </div>
   )
 }
