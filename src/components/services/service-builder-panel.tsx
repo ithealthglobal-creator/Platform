@@ -150,6 +150,128 @@ export function ServiceBuilderPanel({
     let assistantAgentIcon: string | null = null
     let assistantMsgId = newId()
 
+    // Named SSE event parsing: track the current event name across lines until
+    // a blank line ends the record. Backend emits "event: <name>\ndata: <json>\n\n".
+    let currentEvent: string | null = null
+
+    const handleEvent = async (
+      eventName: string,
+      data: Record<string, unknown>,
+    ): Promise<'pause' | void> => {
+      if (eventName === 'token') {
+        const text = extractTokenText(data.content)
+        if (text) {
+          assistantContent += text
+          setStreamingContent(assistantContent)
+        }
+      } else if (eventName === 'agent_start') {
+        assistantAgentName = (data.agent_name as string) ?? ''
+        assistantAgentIcon = (data.agent_icon as string | null) ?? null
+        setStreamingAgentName(assistantAgentName)
+      } else if (eventName === 'tool_start') {
+        const toolName = data.tool as string
+        const toolInput = (data.input as Record<string, unknown>) ?? {}
+        const tcMsgId = newId()
+        activeToolCallMessageId.current = tcMsgId
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: tcMsgId,
+            role: 'assistant',
+            content: '',
+            agent_name: assistantAgentName || undefined,
+            agent_icon: assistantAgentIcon,
+            tool_calls: [{ name: toolName, input: toolInput, status: 'running' }],
+          },
+        ])
+      } else if (eventName === 'tool_end') {
+        const toolName = data.tool as string
+        const toolOutput = data.output as
+          | Record<string, unknown>
+          | string
+          | undefined
+        const tcMsgId = activeToolCallMessageId.current
+
+        if (tcMsgId) {
+          setMessages((prev) =>
+            prev.map((m) => {
+              if (m.id !== tcMsgId) return m
+              return {
+                ...m,
+                tool_calls: m.tool_calls?.map((tc) =>
+                  tc.name === toolName
+                    ? { ...tc, output: toolOutput, status: 'completed' }
+                    : tc,
+                ),
+              }
+            }),
+          )
+        }
+        activeToolCallMessageId.current = null
+
+        if (isWriteTool(toolName)) {
+          sawWriteToolThisRun.current = true
+        }
+
+        if (toolName === 'services_create' && !serviceId) {
+          const newServiceId = extractIdFromOutput(toolOutput)
+          if (newServiceId) {
+            onServiceCreated(newServiceId)
+          }
+        }
+      } else if (eventName === 'delegation') {
+        const toAgent = (data.to_agent as string) || (data.agent_name as string) || 'sub-agent'
+        assistantAgentName = toAgent
+        setStreamingAgentName(toAgent)
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newId(),
+            role: 'system',
+            content: `Delegating to: ${toAgent}`,
+          },
+        ])
+      } else if (eventName === 'interrupt') {
+        const approvalToolCalls =
+          (data.tool_calls as Array<{
+            name: string
+            args: Record<string, unknown>
+            id: string
+          }>) ?? []
+        const approvalMsg = (data.message as string) ?? 'Approval required to proceed.'
+        pendingConversationId.current = conversationId ?? headerConvId ?? null
+
+        if (autoApproveRef.current) {
+          setIsStreaming(false)
+          await sendInternal('', { resume: true, resumeApproved: true })
+          return 'pause'
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: newId(),
+            role: 'assistant',
+            content: '',
+            agent_name: assistantAgentName || undefined,
+            agent_icon: assistantAgentIcon,
+            approval_request: {
+              tool_calls: approvalToolCalls,
+              message: approvalMsg,
+            },
+          },
+        ])
+        setIsStreaming(false)
+        return 'pause'
+      } else if (eventName === 'done') {
+        if (data.conversation_id && !conversationId) {
+          setConversationId(data.conversation_id as string)
+        }
+      } else if (eventName === 'error') {
+        toast.error((data.message as string) || 'AI error')
+      }
+    }
+
     try {
       while (true) {
         const { done, value } = await reader.read()
@@ -160,130 +282,28 @@ export function ServiceBuilderPanel({
         buffer = lines.pop() ?? ''
 
         for (const line of lines) {
+          if (line === '') {
+            currentEvent = null
+            continue
+          }
+          if (line.startsWith('event: ')) {
+            currentEvent = line.slice(7).trim()
+            continue
+          }
           if (!line.startsWith('data: ')) continue
           const raw = line.slice(6).trim()
           if (!raw || raw === '[DONE]') continue
 
-          let event: Record<string, unknown>
+          let data: Record<string, unknown>
           try {
-            event = JSON.parse(raw) as Record<string, unknown>
+            data = JSON.parse(raw) as Record<string, unknown>
           } catch {
             continue
           }
 
-          const eventType = event.type as string
-
-          if (eventType === 'token') {
-            assistantContent += event.token as string
-            setStreamingContent(assistantContent)
-          } else if (eventType === 'agent_start') {
-            assistantAgentName = (event.agent_name as string) ?? ''
-            assistantAgentIcon = (event.agent_icon as string | null) ?? null
-            setStreamingAgentName(assistantAgentName)
-          } else if (eventType === 'tool_start') {
-            const toolName = event.tool as string
-            const toolInput = (event.input as Record<string, unknown>) ?? {}
-            const tcMsgId = newId()
-            activeToolCallMessageId.current = tcMsgId
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: tcMsgId,
-                role: 'assistant',
-                content: '',
-                agent_name: assistantAgentName || undefined,
-                agent_icon: assistantAgentIcon,
-                tool_calls: [{ name: toolName, input: toolInput, status: 'running' }],
-              },
-            ])
-          } else if (eventType === 'tool_end') {
-            const toolName = event.tool as string
-            const toolOutput = event.output as
-              | Record<string, unknown>
-              | string
-              | undefined
-            const tcMsgId = activeToolCallMessageId.current
-
-            if (tcMsgId) {
-              setMessages((prev) =>
-                prev.map((m) => {
-                  if (m.id !== tcMsgId) return m
-                  return {
-                    ...m,
-                    tool_calls: m.tool_calls?.map((tc) =>
-                      tc.name === toolName
-                        ? { ...tc, output: toolOutput, status: 'completed' }
-                        : tc,
-                    ),
-                  }
-                }),
-              )
-            }
-            activeToolCallMessageId.current = null
-
-            if (isWriteTool(toolName)) {
-              sawWriteToolThisRun.current = true
-            }
-
-            // Detect new service creation: services_create returning a row with id.
-            if (toolName === 'services_create' && !serviceId) {
-              const newServiceId = extractIdFromOutput(toolOutput)
-              if (newServiceId) {
-                onServiceCreated(newServiceId)
-              }
-            }
-          } else if (eventType === 'delegation') {
-            const toAgent = event.to_agent as string
-            assistantAgentName = toAgent
-            setStreamingAgentName(toAgent)
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: newId(),
-                role: 'system',
-                content: `Delegating to: ${toAgent}`,
-              },
-            ])
-          } else if (eventType === 'interrupt') {
-            const approvalToolCalls = event.tool_calls as Array<{
-              name: string
-              args: Record<string, unknown>
-              id: string
-            }>
-            const approvalMsg =
-              (event.message as string) ?? 'Approval required to proceed.'
-            pendingConversationId.current = conversationId ?? headerConvId ?? null
-
-            if (autoApproveRef.current) {
-              // Skip the card entirely — resume immediately.
-              setIsStreaming(false)
-              await sendInternal('', { resume: true, resumeApproved: true })
-              return
-            }
-
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: newId(),
-                role: 'assistant',
-                content: '',
-                agent_name: assistantAgentName || undefined,
-                agent_icon: assistantAgentIcon,
-                approval_request: {
-                  tool_calls: approvalToolCalls,
-                  message: approvalMsg,
-                },
-              },
-            ])
-            setIsStreaming(false)
-            return
-          } else if (eventType === 'done') {
-            if (event.conversation_id && !conversationId) {
-              setConversationId(event.conversation_id as string)
-            }
-          } else if (eventType === 'error') {
-            toast.error((event.message as string) || 'AI error')
-          }
+          const eventName = currentEvent ?? (data.type as string) ?? ''
+          const result = await handleEvent(eventName, data)
+          if (result === 'pause') return
         }
       }
     } finally {
@@ -445,4 +465,24 @@ function extractIdFromOutput(
     return output.id
   }
   return null
+}
+
+// LangChain message content can be a plain string or an array of content blocks
+// like [{type: "text", text: "..."}, {type: "tool_use", ...}, ...]. We only
+// surface text chunks in the streaming UI.
+function extractTokenText(content: unknown): string {
+  if (typeof content === 'string') return content
+  if (Array.isArray(content)) {
+    return content
+      .map((c) => {
+        if (typeof c === 'string') return c
+        if (c && typeof c === 'object' && 'text' in c) {
+          const t = (c as { text?: unknown }).text
+          return typeof t === 'string' ? t : ''
+        }
+        return ''
+      })
+      .join('')
+  }
+  return ''
 }
