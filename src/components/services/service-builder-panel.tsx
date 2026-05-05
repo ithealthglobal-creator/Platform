@@ -69,7 +69,11 @@ export function ServiceBuilderPanel({
   const sendInternal = useCallback(
     async (
       message: string,
-      opts: { resume?: boolean; resumeApproved?: boolean } = {},
+      opts: {
+        resume?: boolean
+        resumeApproved?: boolean
+        displayMessage?: string
+      } = {},
     ) => {
       const { data: sessionData } = await supabase.auth.getSession()
       const token = sessionData?.session?.access_token
@@ -80,7 +84,8 @@ export function ServiceBuilderPanel({
 
       if (!opts.resume) {
         const userMsgId = newId()
-        setMessages((prev) => [...prev, { id: userMsgId, role: 'user', content: message }])
+        const visible = opts.displayMessage ?? message
+        setMessages((prev) => [...prev, { id: userMsgId, role: 'user', content: visible }])
       }
 
       setStreamingContent('')
@@ -326,13 +331,14 @@ export function ServiceBuilderPanel({
   function handleSend(text: string) {
     if (isStreaming) return
     // Inject service context on the first real user turn so the orchestrator knows what it's editing.
+    // The prefix goes to the agent only — the user sees their original text in the bubble.
     const isFirstUserTurn = !messages.some((m) => m.role === 'user')
     const prefix = isFirstUserTurn
       ? serviceId
         ? `[Editing existing service id=${serviceId}] `
         : `[Creating a new service from scratch] `
       : ''
-    sendInternal(prefix + text)
+    sendInternal(prefix + text, { displayMessage: text })
   }
 
   async function handleApprove() {

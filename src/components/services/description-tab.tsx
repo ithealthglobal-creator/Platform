@@ -35,52 +35,49 @@ export function DescriptionTab({
   const [phases, setPhases] = useState<Phase[]>([])
   const [loaded, setLoaded] = useState(false)
 
-  const fetchPhases = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('phases')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order')
-
-    if (error) {
-      toast.error('Failed to load phases')
-      return
-    }
-
-    setPhases(data ?? [])
-  }, [])
-
-  const fetchService = useCallback(async () => {
-    if (!serviceId) {
-      setLoaded(true)
-      return
-    }
-
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('id', serviceId)
-      .single()
-
-    if (error) {
-      toast.error('Failed to load service')
-      setLoaded(true)
-      return
-    }
-
-    const service = data as Service
-    setName(service.name)
-    setDescription(service.description ?? '')
-    setPhaseId(service.phase_id ?? '')
-    setStatus(service.status)
-    onDescriptionChange(service.description ?? '')
-    setLoaded(true)
-  }, [serviceId, onDescriptionChange])
-
   useEffect(() => {
-    fetchPhases()
-    fetchService()
-  }, [fetchPhases, fetchService])
+    let cancelled = false
+
+    async function load() {
+      const phasesPromise = supabase
+        .from('phases')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order')
+
+      const servicePromise = serviceId
+        ? supabase.from('services').select('*').eq('id', serviceId).single()
+        : Promise.resolve({ data: null, error: null })
+
+      const [phasesRes, serviceRes] = await Promise.all([
+        phasesPromise,
+        servicePromise,
+      ])
+
+      if (cancelled) return
+
+      if (phasesRes.error) toast.error('Failed to load phases')
+      else setPhases(phasesRes.data ?? [])
+
+      if (serviceRes.error) {
+        toast.error('Failed to load service')
+      } else if (serviceRes.data) {
+        const service = serviceRes.data as Service
+        setName(service.name)
+        setDescription(service.description ?? '')
+        setPhaseId(service.phase_id ?? '')
+        setStatus(service.status)
+        onDescriptionChange(service.description ?? '')
+      }
+
+      setLoaded(true)
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [serviceId, onDescriptionChange])
 
   function handleDescriptionChange(value: string) {
     setDescription(value)
