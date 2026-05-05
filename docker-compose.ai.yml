@@ -4,14 +4,22 @@ services:
     ports:
       - "8100:8100"
     environment:
-      - SUPABASE_URL=http://host.docker.internal:54321
+      - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - SUPABASE_DB_URL=postgresql://postgres:postgres@host.docker.internal:54322/postgres
+      - SUPABASE_DB_URL=${SUPABASE_DB_URL}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY}
       - ENVIRONMENT=local
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - supabase
     restart: unless-stopped
     volumes:
       - ./ai-service:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8100 --reload
+
+networks:
+  supabase:
+    name: supabase_default
+    external: true

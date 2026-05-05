@@ -27,6 +27,11 @@ import {
   NetworkEnterprise,
   FlowStream,
   UserAvatar,
+  Notebook,
+  Folder,
+  FolderOpen,
+  Document,
+  DocumentBlank,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -59,4 +64,9 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'network-enterprise': NetworkEnterprise,
   'flow-stream': FlowStream,
   'user-avatar': UserAvatar,
+  'notebook': Notebook,
+  'folder': Folder,
+  'folder-open': FolderOpen,
+  'document': Document,
+  'document-blank': DocumentBlank,
 }

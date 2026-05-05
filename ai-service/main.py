@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import chat, executions
+from api.routes import chat, executions, knowledge
 from services.checkpointer import init_checkpointer
 
 @asynccontextmanager
@@ -20,6 +20,7 @@ app.add_middleware(
 
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(executions.router, prefix="/executions", tags=["executions"])
+app.include_router(knowledge.router, prefix="/knowledge", tags=["knowledge"])
 
 @app.get("/health")
 async def health():

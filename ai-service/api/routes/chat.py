@@ -20,6 +20,7 @@ class ChatRequest(BaseModel):
     conversation_id: str | None = None
     message: str
     agent_id: str | None = None
+    document_id: str | None = None
 
 
 class ResumeRequest(BaseModel):
@@ -35,14 +36,26 @@ async def chat(request: ChatRequest, user: AuthUser = Depends(get_current_user))
     # 1. Create or load conversation
     if request.conversation_id:
         conversation_id = request.conversation_id
+        # Resolve the document scope from the existing conversation if any.
+        existing = (
+            client.table("ai_conversations")
+            .select("document_id")
+            .eq("id", conversation_id)
+            .single()
+            .execute()
+        )
+        document_id = (existing.data or {}).get("document_id") or request.document_id
     else:
         # Create new conversation
-        conv_data = {
+        conv_data: dict = {
             "user_id": user.id,
             "agent_id": request.agent_id,
         }
+        if request.document_id:
+            conv_data["document_id"] = request.document_id
         result = client.table("ai_conversations").insert(conv_data).execute()
         conversation_id = result.data[0]["id"]
+        document_id = request.document_id
 
     # 2. Determine which agent to use
     agent_id = request.agent_id
@@ -56,7 +69,11 @@ async def chat(request: ChatRequest, user: AuthUser = Depends(get_current_user))
     agent = agent_config.data
 
     # 4. Build tools
-    tools = build_tools_for_agent(agent_id)
+    tools = build_tools_for_agent(
+        agent_id,
+        company_id=user.company_id,
+        document_id=document_id,
+    )
 
     # Add delegation tool for orchestrators
     if agent["agent_type"] == "orchestrator":
@@ -124,14 +141,19 @@ async def resume(request: ResumeRequest, user: AuthUser = Depends(get_current_us
     client = get_supabase_admin()
 
     # Load conversation and agent
-    conv = client.table("ai_conversations").select("agent_id").eq("id", request.conversation_id).single().execute()
+    conv = client.table("ai_conversations").select("agent_id, document_id").eq("id", request.conversation_id).single().execute()
     agent_id = conv.data["agent_id"]
 
     agent_config = client.table("ai_agents").select("*").eq("id", agent_id).single().execute()
     agent = agent_config.data
 
-    # Rebuild graph with same tools
-    tools = build_tools_for_agent(agent_id)
+    # Rebuild graph with same tools (resume preserves document scope from the conversation row)
+    document_id = (conv.data or {}).get("document_id") if hasattr(conv, "data") else None
+    tools = build_tools_for_agent(
+        agent_id,
+        company_id=user.company_id,
+        document_id=document_id,
+    )
     if agent["agent_type"] == "orchestrator":
         tools.append(create_delegation_tool(agent_id, 0, [agent_id]))
 

@@ -1,9 +1,53 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { iconMap } from '@/lib/icon-map'
 import { ToolCallCard } from './tool-call-card'
 import { ApprovalCard } from './approval-card'
+
+const CITATION_RE = /\(source:\s*([^)]+)\)/g
+
+function renderWithCitations(text: string) {
+  const parts: Array<string | { kind: 'cite'; title: string }> = []
+  let lastIndex = 0
+  for (const match of text.matchAll(CITATION_RE)) {
+    const start = match.index ?? 0
+    if (start > lastIndex) parts.push(text.slice(lastIndex, start))
+    parts.push({ kind: 'cite', title: match[1].trim() })
+    lastIndex = start + match[0].length
+  }
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex))
+  return parts
+}
+
+function CitationBadge({ title }: { title: string }) {
+  return (
+    <span
+      className="mx-0.5 inline-flex items-center rounded-full border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] font-medium text-blue-700"
+      title={`Source: ${title}`}
+    >
+      {title}
+    </span>
+  )
+}
+
+function CitedText({ text }: { text: string }) {
+  const parts = renderWithCitations(text)
+  if (parts.length === 1 && typeof parts[0] === 'string') {
+    return <p className="text-sm whitespace-pre-wrap break-words">{text}</p>
+  }
+  return (
+    <p className="text-sm whitespace-pre-wrap break-words">
+      {parts.map((part, idx) =>
+        typeof part === 'string' ? (
+          <Fragment key={idx}>{part}</Fragment>
+        ) : (
+          <CitationBadge key={idx} title={part.title} />
+        ),
+      )}
+    </p>
+  )
+}
 
 interface Message {
   id: string
@@ -81,7 +125,7 @@ export function MessageList({
   }, [messages, streamingContent, isStreaming])
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="relative flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map(message => {
         const isUser = message.role === 'user'
         const isAssistant = message.role === 'assistant'
@@ -131,7 +175,11 @@ export function MessageList({
                         : 'bg-white border rounded-2xl rounded-bl-sm px-4 py-2'
                     }
                   >
-                    <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    {isAssistant ? (
+                      <CitedText text={message.content} />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -151,7 +199,7 @@ export function MessageList({
             )}
             <div className="bg-white border rounded-2xl rounded-bl-sm px-4 py-2">
               {streamingContent ? (
-                <p className="text-sm whitespace-pre-wrap break-words">{streamingContent}</p>
+                <CitedText text={streamingContent} />
               ) : (
                 <ThinkingDots />
               )}

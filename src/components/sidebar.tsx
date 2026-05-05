@@ -48,20 +48,20 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] py-6">
-        {/* Logo with more spacing */}
-        <div className="mb-8 flex h-10 w-10 items-center justify-center">
+      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] pb-6">
+        {/* Logo row — same height as MegaMenu (h-12) so the logo aligns with the header tab text */}
+        <div className="flex h-12 w-full items-center justify-center">
           <Image
             src={branding?.icon_url ?? branding?.logo_light_url ?? '/logos/ithealth-icon-white.svg'}
             alt="Logo"
-            width={32}
-            height={32}
-            className="h-8 w-8"
+            width={28}
+            height={28}
+            className="h-7 w-7"
           />
         </div>
 
         {/* Nav items */}
-        <nav className="flex flex-1 flex-col items-center gap-1">
+        <nav className="flex flex-1 flex-col items-center gap-1 pt-4">
           {l1Items.map(item => {
             const isActive = item.route ? (pathname === item.route || pathname.startsWith(item.route + '/')) : false
             return (

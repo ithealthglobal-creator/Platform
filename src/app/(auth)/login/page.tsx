@@ -77,6 +77,7 @@ export default function LoginPage() {
             width={120}
             height={32}
             className="h-8 w-auto mb-16"
+            style={{ width: 'auto' }}
           />
           <h1 className="text-4xl font-bold leading-tight mb-6">
             Your Free IT<br />

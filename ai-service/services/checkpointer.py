@@ -13,6 +13,7 @@ def init_checkpointer() -> PostgresSaver:
     global _checkpointer, _conn
     _conn = Connection.connect(
         settings.supabase_db_url,
+        autocommit=True,
         prepare_threshold=0,
     )
     _checkpointer = PostgresSaver(conn=_conn)
