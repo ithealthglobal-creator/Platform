@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels'
 import { toast } from 'sonner'
+import { ChartLine, Close } from '@carbon/icons-react'
+import { Button } from '@/components/ui/button'
 import { DashboardCanvas } from '@/components/dashboard/dashboard-canvas'
 import { DashboardTabs } from '@/components/dashboard/dashboard-tabs'
 import { DashboardGeneratorPanel } from '@/components/dashboard/dashboard-generator-panel'
@@ -31,6 +33,7 @@ export default function DashboardPage() {
   const [selectedChartId, setSelectedChartId] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [resetSignal, setResetSignal] = useState(0)
+  const [agentOpen, setAgentOpen] = useState(false)
   const initialLoadRef = useRef(false)
 
   const refreshDashboards = useCallback(async () => {
@@ -198,9 +201,43 @@ export default function DashboardPage() {
         onDelete={handleDelete}
         onChangeVisibility={handleChangeVisibility}
       />
-      <div className="min-h-0 flex-1">
-        <PanelGroup direction="horizontal">
-          <Panel defaultSize={70} minSize={40}>
+      <div className="relative min-h-0 flex-1">
+        {agentOpen ? (
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={70} minSize={40}>
+              <div className="h-full bg-gray-50">
+                <DashboardCanvas
+                  charts={charts}
+                  selectedChartId={selectedChartId}
+                  onSelectChart={setSelectedChartId}
+                  onRemoveChart={handleChartRemoved}
+                />
+              </div>
+            </Panel>
+            <PanelResizeHandle className="w-px bg-gray-200 transition-colors data-[resize-handle-state=hover]:bg-primary" />
+            <Panel defaultSize={30} minSize={20}>
+              <div className="relative h-full">
+                <DashboardGeneratorPanel
+                  selectedChartId={selectedChartId}
+                  onChartProposed={handleChartProposed}
+                  onChartUpdated={handleChartUpdated}
+                  onChartRemoved={handleChartRemoved}
+                  resetSignal={resetSignal}
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setAgentOpen(false)}
+                  title="Hide Dashboard Generator"
+                  className="absolute right-2 top-2 z-10"
+                >
+                  <Close size={14} />
+                </Button>
+              </div>
+            </Panel>
+          </PanelGroup>
+        ) : (
+          <>
             <div className="h-full bg-gray-50">
               <DashboardCanvas
                 charts={charts}
@@ -209,18 +246,16 @@ export default function DashboardPage() {
                 onRemoveChart={handleChartRemoved}
               />
             </div>
-          </Panel>
-          <PanelResizeHandle className="w-px bg-gray-200 transition-colors data-[resize-handle-state=hover]:bg-primary" />
-          <Panel defaultSize={30} minSize={20}>
-            <DashboardGeneratorPanel
-              selectedChartId={selectedChartId}
-              onChartProposed={handleChartProposed}
-              onChartUpdated={handleChartUpdated}
-              onChartRemoved={handleChartRemoved}
-              resetSignal={resetSignal}
-            />
-          </Panel>
-        </PanelGroup>
+            <Button
+              onClick={() => setAgentOpen(true)}
+              title="Open Dashboard Generator"
+              className="absolute bottom-6 right-6 z-10 shadow-lg"
+            >
+              <ChartLine size={16} className="mr-2" />
+              Dashboard Generator
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )
