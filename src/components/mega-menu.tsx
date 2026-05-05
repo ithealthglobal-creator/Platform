@@ -24,6 +24,8 @@ export function MegaMenu() {
     }
   }, [expandedL2])
 
+  if (pathname.startsWith('/settings')) return null
+
   const activeL1 = menuTree.find(item =>
     item.level === 1 && pathname.startsWith(item.route || '')
   )
