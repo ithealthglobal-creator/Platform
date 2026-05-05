@@ -29,44 +29,64 @@ export default function ServiceEditorPage() {
   const isNew = id === 'new'
 
   const [serviceId, setServiceId] = useState<string | null>(isNew ? null : id)
+  const [service, setService] = useState<Service | null>(null)
   const [loading, setLoading] = useState(!isNew)
   const [description, setDescription] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
 
-  const fetchService = useCallback(async () => {
-    if (isNew) return
+  const fetchService = useCallback(
+    async (idToLoad: string | null) => {
+      if (!idToLoad) {
+        setService(null)
+        setLoading(false)
+        return
+      }
 
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .eq('id', id)
-      .single()
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .eq('id', idToLoad)
+        .single()
 
-    if (error) {
-      toast.error('Failed to load service')
+      if (error) {
+        toast.error('Failed to load service')
+        setLoading(false)
+        return
+      }
+
+      const svc = data as Service
+      setService(svc)
+      setServiceId(svc.id)
+      setDescription(svc.description ?? '')
       setLoading(false)
-      return
-    }
-
-    const service = data as Service
-    setServiceId(service.id)
-    setDescription(service.description ?? '')
-    setLoading(false)
-  }, [id, isNew])
+    },
+    [],
+  )
 
   useEffect(() => {
-    fetchService()
-  }, [fetchService])
+    fetchService(isNew ? null : id)
+  }, [fetchService, id, isNew])
 
   function handleServiceCreated(newId: string) {
     setServiceId(newId)
     router.replace(`/services/${newId}/edit`)
+    fetchService(newId)
+  }
+
+  function handleServiceUpdated() {
+    if (serviceId) fetchService(serviceId)
   }
 
   function handleDescriptionChange(desc: string) {
     setDescription(desc)
   }
+
+  // Toggle gates for optional tabs. Default to true when service hasn't loaded.
+  const showProducts = service?.includes_products ?? true
+  const showGrowth = service?.includes_marketing_content ?? true
+  const showAcademy = service?.includes_academy ?? false
+  const showSla = service?.includes_sla ?? true
 
   if (loading) {
     return (
@@ -88,33 +108,42 @@ export default function ServiceEditorPage() {
             <TabsTrigger value="market" disabled={!serviceId}>
               Market
             </TabsTrigger>
-            <TabsTrigger value="products" disabled={!serviceId}>
-              Products
-            </TabsTrigger>
+            {showProducts && (
+              <TabsTrigger value="products" disabled={!serviceId}>
+                Products
+              </TabsTrigger>
+            )}
             <TabsTrigger value="skills" disabled={!serviceId}>
               Skills
             </TabsTrigger>
             <TabsTrigger value="runbook" disabled={!serviceId}>
               Runbook
             </TabsTrigger>
-            <TabsTrigger value="growth" disabled={!serviceId}>
-              Growth
-            </TabsTrigger>
+            {showGrowth && (
+              <TabsTrigger value="growth" disabled={!serviceId}>
+                Growth
+              </TabsTrigger>
+            )}
             <TabsTrigger value="costing" disabled={!serviceId}>
               Costing
             </TabsTrigger>
-            <TabsTrigger value="academy" disabled={!serviceId}>
-              Academy
-            </TabsTrigger>
-            <TabsTrigger value="sla" disabled={!serviceId}>
-              SLA
-            </TabsTrigger>
+            {showAcademy && (
+              <TabsTrigger value="academy" disabled={!serviceId}>
+                Academy
+              </TabsTrigger>
+            )}
+            {showSla && (
+              <TabsTrigger value="sla" disabled={!serviceId}>
+                SLA
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="description">
             <DescriptionTab
               serviceId={serviceId}
               onServiceCreated={handleServiceCreated}
+              onServiceUpdated={handleServiceUpdated}
               onDescriptionChange={handleDescriptionChange}
             />
           </TabsContent>

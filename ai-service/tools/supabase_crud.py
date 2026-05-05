@@ -7,6 +7,7 @@ ALLOWED_TABLES = {
     "service_verticals", "service_personas", "service_pains", "service_gains",
     "service_products", "service_skills",
     "service_runbook_steps", "service_costing_items", "service_academy_links", "service_sla",
+    "service_business_outcomes",
     "cost_variables", "sla_templates",
     "blog_posts", "courses", "course_sections", "course_modules",
     "orders", "service_requests", "customer_contracts",

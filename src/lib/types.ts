@@ -292,7 +292,7 @@ export interface UserCourseEnrollment {
   course?: Course
 }
 
-export type ServiceStatus = 'draft' | 'active' | 'archived'
+export type ServiceStatus = 'draft' | 'in_review' | 'active' | 'archived'
 export type CostingCategory = 'setup' | 'maintenance'
 export type PricingType = 'tiered' | 'formula'
 
@@ -300,6 +300,11 @@ export interface CostingTier {
   min: number
   max: number | null
   rate: number
+}
+
+export interface ValueProp {
+  title: string
+  description: string
 }
 
 export interface Service {
@@ -312,9 +317,40 @@ export interface Service {
   hero_image_url: string | null
   thumbnail_url: string | null
   is_active: boolean
+  // Tab toggles (M1)
+  includes_products: boolean
+  includes_marketing_content: boolean
+  includes_academy: boolean
+  includes_sla: boolean
+  // Per-tab descriptions (M1)
+  market_description: string | null
+  products_description: string | null
+  skills_description: string | null
+  runbook_description: string | null
+  growth_description: string | null
+  costing_description: string | null
+  academy_description: string | null
+  sla_description: string | null
+  // Marketing / positioning (M1)
+  tagline: string | null
+  seo_title: string | null
+  seo_description: string | null
+  value_props: ValueProp[]
+  phase_alignment: string | null
+  pain_alignment: string | null
   created_at: string
   updated_at: string
   phase?: Phase
+}
+
+export interface ServiceBusinessOutcome {
+  id: string
+  service_id: string
+  outcome: string
+  explanation: string | null
+  sort_order: number
+  created_at: string
+  updated_at: string
 }
 
 export interface ServiceProduct {
