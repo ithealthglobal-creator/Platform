@@ -37,7 +37,7 @@ def generate_crud_tools(table_name: str, operations: list[str]) -> list:
         def _make_read_tool(tname: str):
             @tool
             def read_tool(query: str = "", limit: int = 50) -> str:
-                f"""Read rows from the {tname} table. Use query to filter by column values (e.g. 'name=eq.Endpoint Security'). Returns up to {limit} rows as JSON."""
+                """Read rows from a table. Filter via query param (e.g. 'name=eq.value'). Returns JSON array."""
                 client = get_supabase_admin()
                 q = client.table(tname).select("*").limit(limit)
                 if query:
@@ -62,7 +62,7 @@ def generate_crud_tools(table_name: str, operations: list[str]) -> list:
         def _make_create_tool(tname: str):
             @tool
             def create_tool(data: dict) -> str:
-                f"""Create a new row in the {tname} table. Pass a dict of column:value pairs."""
+                """Create a row. Pass a dict of column:value pairs. Uses upsert semantics."""
                 client = get_supabase_admin()
                 result = client.table(tname).upsert(data).execute()
                 return str(result.data)
@@ -77,7 +77,7 @@ def generate_crud_tools(table_name: str, operations: list[str]) -> list:
         def _make_update_tool(tname: str):
             @tool
             def update_tool(id: str, data: dict) -> str:
-                f"""Update a row in {tname} by its UUID id."""
+                """Update a row by its UUID id. Pass id and a dict of fields to update."""
                 client = get_supabase_admin()
                 result = client.table(tname).update(data).eq("id", id).execute()
                 return str(result.data)
@@ -92,7 +92,7 @@ def generate_crud_tools(table_name: str, operations: list[str]) -> list:
         def _make_delete_tool(tname: str):
             @tool
             def delete_tool(id: str) -> str:
-                f"""Delete a row from {tname} by its UUID id."""
+                """Delete a row by its UUID id."""
                 client = get_supabase_admin()
                 result = client.table(tname).delete().eq("id", id).execute()
                 return str(result.data)
