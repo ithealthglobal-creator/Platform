@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { Phase, Service, ServiceStatus } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -35,6 +35,13 @@ export function DescriptionTab({
   const [phases, setPhases] = useState<Phase[]>([])
   const [loaded, setLoaded] = useState(false)
 
+  // Keep the latest onDescriptionChange in a ref so the load effect doesn't re-run
+  // every parent render (the parent recreates the function on each render).
+  const onDescriptionChangeRef = useRef(onDescriptionChange)
+  useEffect(() => {
+    onDescriptionChangeRef.current = onDescriptionChange
+  }, [onDescriptionChange])
+
   useEffect(() => {
     let cancelled = false
 
@@ -67,7 +74,7 @@ export function DescriptionTab({
         setDescription(service.description ?? '')
         setPhaseId(service.phase_id ?? '')
         setStatus(service.status)
-        onDescriptionChange(service.description ?? '')
+        onDescriptionChangeRef.current(service.description ?? '')
       }
 
       setLoaded(true)
@@ -77,7 +84,7 @@ export function DescriptionTab({
     return () => {
       cancelled = true
     }
-  }, [serviceId, onDescriptionChange])
+  }, [serviceId])
 
   function handleDescriptionChange(value: string) {
     setDescription(value)
