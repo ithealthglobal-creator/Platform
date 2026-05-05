@@ -6,7 +6,7 @@ from services.checkpointer import init_checkpointer
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_checkpointer()
+    await init_checkpointer()
     yield
 
 app = FastAPI(title="AI Service", lifespan=lifespan)
