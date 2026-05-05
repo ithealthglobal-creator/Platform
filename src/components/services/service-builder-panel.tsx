@@ -150,10 +150,6 @@ export function ServiceBuilderPanel({
     let assistantAgentIcon: string | null = null
     let assistantMsgId = newId()
 
-    // Named SSE event parsing: track the current event name across lines until
-    // a blank line ends the record. Backend emits "event: <name>\ndata: <json>\n\n".
-    let currentEvent: string | null = null
-
     const handleEvent = async (
       eventName: string,
       data: Record<string, unknown>,
@@ -278,30 +274,29 @@ export function ServiceBuilderPanel({
         if (done) break
 
         buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
 
-        for (const line of lines) {
-          if (line === '') {
-            currentEvent = null
-            continue
+        // SSE records are separated by a blank line. Process complete records;
+        // keep any trailing partial in the buffer for the next read.
+        const records = buffer.split('\n\n')
+        buffer = records.pop() ?? ''
+
+        for (const record of records) {
+          let eventName = ''
+          let dataPayload = ''
+          for (const line of record.split('\n')) {
+            if (line.startsWith('event: ')) eventName = line.slice(7).trim()
+            else if (line.startsWith('data: ')) dataPayload += line.slice(6)
           }
-          if (line.startsWith('event: ')) {
-            currentEvent = line.slice(7).trim()
-            continue
-          }
-          if (!line.startsWith('data: ')) continue
-          const raw = line.slice(6).trim()
-          if (!raw || raw === '[DONE]') continue
+          if (!dataPayload || dataPayload === '[DONE]') continue
 
           let data: Record<string, unknown>
           try {
-            data = JSON.parse(raw) as Record<string, unknown>
+            data = JSON.parse(dataPayload) as Record<string, unknown>
           } catch {
             continue
           }
 
-          const eventName = currentEvent ?? (data.type as string) ?? ''
+          if (!eventName) eventName = (data.type as string) ?? ''
           const result = await handleEvent(eventName, data)
           if (result === 'pause') return
         }
