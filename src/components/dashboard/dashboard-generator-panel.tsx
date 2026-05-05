@@ -51,6 +51,25 @@ function parseToolOutput(
   return output as Record<string, unknown>
 }
 
+// LangChain streams content as either a plain string or an array of content
+// blocks like [{type: "text", text: "..."}, ...]. Surface the text chunks only.
+function extractTokenText(content: unknown): string {
+  if (typeof content === 'string') return content
+  if (Array.isArray(content)) {
+    return content
+      .map((c) => {
+        if (typeof c === 'string') return c
+        if (c && typeof c === 'object' && 'text' in c) {
+          const t = (c as { text?: unknown }).text
+          return typeof t === 'string' ? t : ''
+        }
+        return ''
+      })
+      .join('')
+  }
+  return ''
+}
+
 export function DashboardGeneratorPanel({
   selectedChartId,
   onChartProposed,
@@ -160,99 +179,112 @@ export function DashboardGeneratorPanel({
     let assistantAgentIcon: string | null = null
     const assistantMsgId = newId()
 
+    const handleEvent = (eventName: string, data: Record<string, unknown>) => {
+      if (eventName === 'token') {
+        const text = extractTokenText(data.content) || (data.token as string) || ''
+        if (text) {
+          assistantContent += text
+          setStreamingContent(assistantContent)
+        }
+      } else if (eventName === 'agent_start') {
+        assistantAgentName = (data.agent_name as string) ?? ''
+        assistantAgentIcon = (data.agent_icon as string | null) ?? null
+        setStreamingAgentName(assistantAgentName)
+      } else if (eventName === 'tool_start') {
+        const toolName = data.tool as string
+        const toolInput = (data.input as Record<string, unknown>) ?? {}
+        const tcMsgId = newId()
+        activeToolCallMessageId.current = tcMsgId
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: tcMsgId,
+            role: 'assistant',
+            content: '',
+            agent_name: assistantAgentName || undefined,
+            agent_icon: assistantAgentIcon,
+            tool_calls: [{ name: toolName, input: toolInput, status: 'running' }],
+          },
+        ])
+      } else if (eventName === 'tool_end') {
+        const toolName = data.tool as string
+        const toolOutput = data.output as
+          | Record<string, unknown>
+          | string
+          | undefined
+        const tcMsgId = activeToolCallMessageId.current
+
+        if (tcMsgId) {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === tcMsgId
+                ? {
+                    ...m,
+                    tool_calls: m.tool_calls?.map((tc) =>
+                      tc.name === toolName
+                        ? { ...tc, output: toolOutput, status: 'completed' }
+                        : tc,
+                    ),
+                  }
+                : m,
+            ),
+          )
+        }
+        activeToolCallMessageId.current = null
+
+        // Apply chart-mutation tool outputs to the canvas.
+        const parsed = parseToolOutput(toolOutput)
+        if (parsed && parsed.ok) {
+          if (toolName === 'dashboard_propose_chart' && parsed.chart) {
+            onChartProposedRef.current(parsed.chart as ChartSpec)
+          } else if (toolName === 'dashboard_update_chart' && parsed.chart_id) {
+            onChartUpdatedRef.current(
+              parsed.chart_id as string,
+              (parsed.patch as Partial<ChartSpec>) ?? {},
+            )
+          } else if (toolName === 'dashboard_remove_chart' && parsed.chart_id) {
+            onChartRemovedRef.current(parsed.chart_id as string)
+          }
+        }
+      } else if (eventName === 'done') {
+        if (data.conversation_id && !conversationId) {
+          setConversationId(data.conversation_id as string)
+        }
+      } else if (eventName === 'error') {
+        toast.error((data.message as string) || 'AI error')
+      }
+    }
+
     try {
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
 
         buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() ?? ''
 
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue
-          const raw = line.slice(6).trim()
-          if (!raw || raw === '[DONE]') continue
+        // SSE records are separated by a blank line. Process complete records;
+        // keep any trailing partial in the buffer for the next read.
+        const records = buffer.split('\n\n')
+        buffer = records.pop() ?? ''
 
-          let event: Record<string, unknown>
+        for (const record of records) {
+          let eventName = ''
+          let dataPayload = ''
+          for (const line of record.split('\n')) {
+            if (line.startsWith('event: ')) eventName = line.slice(7).trim()
+            else if (line.startsWith('data: ')) dataPayload += line.slice(6)
+          }
+          if (!dataPayload || dataPayload === '[DONE]') continue
+
+          let data: Record<string, unknown>
           try {
-            event = JSON.parse(raw) as Record<string, unknown>
+            data = JSON.parse(dataPayload) as Record<string, unknown>
           } catch {
             continue
           }
 
-          const eventType = event.type as string
-
-          if (eventType === 'token') {
-            assistantContent += (event.token as string) ?? (event.content as string) ?? ''
-            setStreamingContent(assistantContent)
-          } else if (eventType === 'agent_start') {
-            assistantAgentName = (event.agent_name as string) ?? ''
-            assistantAgentIcon = (event.agent_icon as string | null) ?? null
-            setStreamingAgentName(assistantAgentName)
-          } else if (eventType === 'tool_start') {
-            const toolName = event.tool as string
-            const toolInput = (event.input as Record<string, unknown>) ?? {}
-            const tcMsgId = newId()
-            activeToolCallMessageId.current = tcMsgId
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: tcMsgId,
-                role: 'assistant',
-                content: '',
-                agent_name: assistantAgentName || undefined,
-                agent_icon: assistantAgentIcon,
-                tool_calls: [{ name: toolName, input: toolInput, status: 'running' }],
-              },
-            ])
-          } else if (eventType === 'tool_end') {
-            const toolName = event.tool as string
-            const toolOutput = event.output as
-              | Record<string, unknown>
-              | string
-              | undefined
-            const tcMsgId = activeToolCallMessageId.current
-
-            if (tcMsgId) {
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === tcMsgId
-                    ? {
-                        ...m,
-                        tool_calls: m.tool_calls?.map((tc) =>
-                          tc.name === toolName
-                            ? { ...tc, output: toolOutput, status: 'completed' }
-                            : tc,
-                        ),
-                      }
-                    : m,
-                ),
-              )
-            }
-            activeToolCallMessageId.current = null
-
-            // Apply chart-mutation tool outputs to the canvas.
-            const parsed = parseToolOutput(toolOutput)
-            if (parsed && parsed.ok) {
-              if (toolName === 'dashboard_propose_chart' && parsed.chart) {
-                onChartProposedRef.current(parsed.chart as ChartSpec)
-              } else if (toolName === 'dashboard_update_chart' && parsed.chart_id) {
-                onChartUpdatedRef.current(
-                  parsed.chart_id as string,
-                  (parsed.patch as Partial<ChartSpec>) ?? {},
-                )
-              } else if (toolName === 'dashboard_remove_chart' && parsed.chart_id) {
-                onChartRemovedRef.current(parsed.chart_id as string)
-              }
-            }
-          } else if (eventType === 'done') {
-            if (event.conversation_id && !conversationId) {
-              setConversationId(event.conversation_id as string)
-            }
-          } else if (eventType === 'error') {
-            toast.error((event.message as string) || 'AI error')
-          }
+          if (!eventName) eventName = (data.type as string) ?? ''
+          handleEvent(eventName, data)
         }
       }
     } finally {
