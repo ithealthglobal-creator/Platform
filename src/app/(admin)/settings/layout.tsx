@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMenu } from '@/contexts/menu-context'
-import { iconMap } from '@/lib/icon-map'
 import { MenuItem } from '@/lib/types'
 import { cn } from '@/lib/utils'
 
@@ -31,21 +30,19 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
         </div>
         <ul>
           {l2Items.map(item => {
-            const Icon = item.icon ? iconMap[item.icon] : null
             const isActive = item.route ? pathname.startsWith(item.route) : false
             return (
               <li key={item.id}>
                 <Link
                   href={item.route || '#'}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 text-sm transition-colors',
+                    'block px-4 py-2 text-sm transition-colors',
                     isActive
                       ? 'bg-muted text-foreground font-medium'
                       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   )}
                 >
-                  {Icon && <Icon size={16} />}
-                  <span>{item.label}</span>
+                  {item.label}
                 </Link>
               </li>
             )
