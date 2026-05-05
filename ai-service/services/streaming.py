@@ -55,6 +55,11 @@ def _safe_serialize(obj) -> dict | str | list:
     try:
         if isinstance(obj, (dict, list, str, int, float, bool, type(None))):
             return obj
+        # LangChain ToolMessage / BaseMessage: surface the .content payload so
+        # the client doesn't see a Python repr like "content='...' name='...'".
+        content = getattr(obj, "content", None)
+        if isinstance(content, (str, dict, list)):
+            return content
         return str(obj)[:2000]
     except Exception:
         return str(obj)[:2000]
