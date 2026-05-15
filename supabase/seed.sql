@@ -40,65 +40,6 @@ SELECT 'admin', id FROM public.menu_items WHERE id::text NOT LIKE 'c0000000%'
 ON CONFLICT (role, menu_item_id) DO NOTHING;
 
 -- ---------------------------------------------------------------------------
--- 4. VERTICALS (target industries)
--- ---------------------------------------------------------------------------
-INSERT INTO public.verticals (name, description) VALUES
-  ('Legal', 'Law firms and legal practices requiring secure document management, compliance, and client data protection.'),
-  ('Financial Services', 'Accounting firms, financial advisors, and wealth management companies with strict regulatory requirements.'),
-  ('Healthcare', 'Medical practices, dental clinics, and allied health providers needing HIPAA-style compliance and patient data security.'),
-  ('Professional Services', 'Consulting firms, engineering practices, and professional service companies relying on collaboration and project management.'),
-  ('Construction', 'Builders, contractors, and construction companies needing mobile-first IT, project tracking, and field connectivity.'),
-  ('Manufacturing', 'Production facilities requiring OT/IT convergence, supply chain management, and process automation.'),
-  ('Retail', 'Brick-and-mortar and e-commerce businesses needing POS integration, inventory management, and customer analytics.'),
-  ('Education', 'Schools, training organisations, and educational institutions requiring student data protection and learning platforms.'),
-  ('Not-for-Profit', 'Charities and NGOs needing cost-effective IT with strong donor data protection and grant compliance.')
-ON CONFLICT (name) DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- 5. PERSONAS (buyer personas)
--- ---------------------------------------------------------------------------
-INSERT INTO public.personas (name, description) VALUES
-  ('Business Owner', 'Small business owner wearing multiple hats, focused on growth and keeping costs manageable. Wants IT to "just work."'),
-  ('IT Manager', 'Internal IT lead managing a small team. Overwhelmed by vendor sprawl, security threats, and legacy systems.'),
-  ('CFO / Finance Director', 'Focused on ROI, TCO, and predictable IT spending. Needs clear cost-benefit analysis for any IT investment.'),
-  ('Operations Manager', 'Responsible for day-to-day efficiency. Wants automation, fewer manual processes, and reliable systems.'),
-  ('Compliance Officer', 'Ensures regulatory adherence (GDPR, ISO 27001, Cyber Essentials). Needs audit trails and policy enforcement.'),
-  ('Managing Partner', 'Senior partner at a professional firm. Cares about client confidentiality, reputation, and competitive advantage.')
-ON CONFLICT (name) DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- 6. PAINS (customer pain points)
--- ---------------------------------------------------------------------------
-INSERT INTO public.pains (name, description) VALUES
-  ('Frequent downtime', 'Regular outages disrupting business operations, frustrating staff and losing revenue.'),
-  ('Rising IT costs', 'IT budget growing year-on-year without corresponding improvements in capability or reliability.'),
-  ('Security anxiety', 'Constant worry about ransomware, phishing, and data breaches with no confidence in current defences.'),
-  ('Vendor sprawl', 'Too many IT vendors to manage — no single pane of glass, finger-pointing when things go wrong.'),
-  ('Slow response times', 'Helpdesk tickets taking days to resolve, staff productivity suffering while waiting for fixes.'),
-  ('Compliance gaps', 'Failing audits or unable to demonstrate compliance with industry regulations like GDPR or Cyber Essentials.'),
-  ('No IT strategy', 'Reactive firefighting with no roadmap for technology improvement or digital transformation.'),
-  ('Shadow IT', 'Employees using unapproved tools and services because official IT can''t keep up with their needs.'),
-  ('Data silos', 'Information trapped in disconnected systems — no unified view of customers, projects, or operations.'),
-  ('Ageing infrastructure', 'Running on end-of-life hardware and software that''s expensive to maintain and impossible to secure.')
-ON CONFLICT (name) DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- 7. GAINS (desired outcomes)
--- ---------------------------------------------------------------------------
-INSERT INTO public.gains (name, description) VALUES
-  ('Predictable IT costs', 'Fixed monthly spend with no surprise bills. Clear understanding of what they''re paying for.'),
-  ('Peace of mind', 'Confidence that systems are secure, monitored 24/7, and backed up properly.'),
-  ('Improved productivity', 'Staff spend less time fighting IT issues and more time on revenue-generating work.'),
-  ('Strategic IT roadmap', 'A clear plan for technology investment that aligns with business goals and growth targets.'),
-  ('Single point of contact', 'One trusted partner for all IT needs instead of juggling multiple vendors.'),
-  ('Compliance confidence', 'Ready for audits at any time with documented policies, controls, and evidence.'),
-  ('Competitive advantage', 'Using technology to outperform competitors — faster service, better insights, lower costs.'),
-  ('Scalable infrastructure', 'IT that grows with the business without painful migration projects every few years.'),
-  ('Business continuity', 'Knowing that if disaster strikes, the business can recover quickly with minimal data loss.'),
-  ('Empowered employees', 'Staff have the right tools and training to work efficiently from anywhere.')
-ON CONFLICT (name) DO NOTHING;
-
--- ---------------------------------------------------------------------------
 -- 8. SKILLS (required technical skills)
 -- ---------------------------------------------------------------------------
 INSERT INTO public.skills (name, description, category) VALUES
@@ -376,17 +317,6 @@ INSERT INTO public.blog_posts (title, slug, excerpt, content, category, status, 
    'A practical guide to achieving Cyber Essentials certification for your business.',
    '<h2>What is Cyber Essentials?</h2><p>Cyber Essentials is a UK government-backed scheme that helps organisations protect themselves against common cyber attacks. It covers five key controls: firewalls, secure configuration, access control, malware protection, and patch management.</p>',
    'Security', 'draft', NULL)
-ON CONFLICT DO NOTHING;
-
--- ---------------------------------------------------------------------------
--- 16. TESTIMONIALS (public website)
--- ---------------------------------------------------------------------------
-INSERT INTO public.testimonials (name, company, role, quote, sort_order) VALUES
-  ('Sarah Chen', 'TechFlow Ltd', 'CTO', 'IThealth transformed our IT infrastructure. We went from constant firefighting to proactive management. Their modernisation journey gave us a clear path forward.', 1),
-  ('James Wright', 'Wright & Co Attorneys', 'Managing Partner', 'The modernisation journey framework gave us a clear roadmap. Best IT decision we''ve made. Our team is more productive and our data is finally secure.', 2),
-  ('Maria Santos', 'Santos Financial Advisory', 'Managing Director', 'Professional, responsive, and they actually understand small business IT needs. IThealth doesn''t just fix problems — they prevent them.', 3),
-  ('David Kumar', 'Kumar Construction Group', 'Operations Director', 'Moving to the cloud with IThealth was seamless. Our field teams can now access everything they need from their tablets. Game changer for site productivity.', 4),
-  ('Lisa Thompson', 'Horizon Healthcare', 'Practice Manager', 'The compliance and governance service gave us complete peace of mind for our CQC inspection. Everything was documented, tested, and audit-ready.', 5)
 ON CONFLICT DO NOTHING;
 
 -- ---------------------------------------------------------------------------

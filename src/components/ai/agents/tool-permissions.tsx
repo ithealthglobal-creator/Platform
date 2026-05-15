@@ -6,15 +6,7 @@ const SUPABASE_TABLES = [
   'services',
   'phases',
   'products',
-  'verticals',
-  'personas',
-  'pains',
-  'gains',
   'skills',
-  'service_verticals',
-  'service_personas',
-  'service_pains',
-  'service_gains',
   'service_products',
   'service_skills',
   'blog_posts',
@@ -25,7 +17,6 @@ const SUPABASE_TABLES = [
   'service_requests',
   'customer_contracts',
   'companies',
-  'testimonials',
   'partners',
 ]
 

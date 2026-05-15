@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { DescriptionTab } from '@/components/services/description-tab'
-import { MarketTab } from '@/components/services/market-tab'
 import { ProductsTab } from '@/components/services/products-tab'
 import { SkillsTab } from '@/components/services/skills-tab'
 import { RunbookTab } from '@/components/services/runbook-tab'
@@ -111,9 +110,6 @@ export function ServiceEditorWorkspace({
         <Tabs defaultValue="description">
           <TabsList>
             <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="market" disabled={!serviceId}>
-              Market
-            </TabsTrigger>
             {showProducts && (
               <TabsTrigger value="products" disabled={!serviceId}>
                 Products
@@ -152,10 +148,6 @@ export function ServiceEditorWorkspace({
               onServiceUpdated={handleServiceUpdated}
               onDescriptionChange={handleDescriptionChange}
             />
-          </TabsContent>
-
-          <TabsContent value="market">
-            <MarketTab serviceId={serviceId!} />
           </TabsContent>
 
           <TabsContent value="products">

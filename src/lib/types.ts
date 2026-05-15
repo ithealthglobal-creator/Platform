@@ -103,42 +103,6 @@ export interface CostVariable {
   updated_at: string
 }
 
-export interface Vertical {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Persona {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Pain {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Gain {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
 export interface Skill {
   id: string
   name: string
@@ -536,19 +500,6 @@ export interface BlogPost {
   author_id: string | null
   status: BlogPostStatus
   published_at: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Testimonial {
-  id: string
-  name: string
-  company: string | null
-  role: string | null
-  quote: string
-  avatar_url: string | null
-  sort_order: number
   is_active: boolean
   created_at: string
   updated_at: string
