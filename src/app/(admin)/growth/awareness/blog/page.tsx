@@ -22,7 +22,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Add, Edit, TrashCan, View } from '@carbon/icons-react'
+import { Add, Bullhorn, Edit, TrashCan, View } from '@carbon/icons-react'
+import { SocialPostComposer } from '@/components/social-post-composer'
 
 interface BlogPostWithAuthor extends BlogPost {
   profiles: { display_name: string } | null
@@ -35,6 +36,8 @@ export default function BlogPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [categories, setCategories] = useState<string[]>([])
+  const [composerOpen, setComposerOpen] = useState(false)
+  const [composerBlog, setComposerBlog] = useState<BlogPost | null>(null)
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
@@ -217,6 +220,17 @@ export default function BlogPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        onClick={() => {
+                          setComposerBlog(post)
+                          setComposerOpen(true)
+                        }}
+                        title="Generate social posts"
+                      >
+                        <Bullhorn size={16} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => router.push(`/growth/awareness/blog/${post.id}/edit`)}
                       >
                         <Edit size={16} />
@@ -236,6 +250,12 @@ export default function BlogPage() {
           </TableBody>
         </Table>
       </div>
+
+      <SocialPostComposer
+        blogPost={composerBlog}
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+      />
     </div>
   )
 }

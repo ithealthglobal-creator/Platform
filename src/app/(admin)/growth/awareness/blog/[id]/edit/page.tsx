@@ -16,7 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Save, Send, DocumentBlank } from '@carbon/icons-react'
+import { Save, Send, DocumentBlank, Bullhorn } from '@carbon/icons-react'
+import { SocialPostComposer } from '@/components/social-post-composer'
 
 const CATEGORIES = ['Security', 'Cloud', 'Operations', 'Strategy', 'Modernisation', 'Business']
 
@@ -36,6 +37,7 @@ export default function EditBlogPostPage() {
   const [isActive, setIsActive] = useState(true)
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [composerOpen, setComposerOpen] = useState(false)
 
   useEffect(() => {
     async function fetchPost() {
@@ -257,8 +259,38 @@ export default function EditBlogPostPage() {
               </Button>
             </>
           )}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setComposerOpen(true)}
+            disabled={saving}
+            title="Generate social posts from this article"
+          >
+            <Bullhorn size={16} className="mr-2" />
+            Generate social posts
+          </Button>
         </div>
       </div>
+
+      <SocialPostComposer
+        blogPost={{
+          id,
+          title,
+          slug,
+          excerpt: excerpt || null,
+          content: content || null,
+          cover_image_url: coverImageUrl || null,
+          category: category || null,
+          author_id: profile?.id ?? null,
+          status,
+          published_at: publishedAt,
+          is_active: isActive,
+          created_at: '',
+          updated_at: '',
+        }}
+        open={composerOpen}
+        onOpenChange={setComposerOpen}
+      />
     </div>
   )
 }
