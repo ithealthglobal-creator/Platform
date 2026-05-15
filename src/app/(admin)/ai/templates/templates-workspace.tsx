@@ -10,7 +10,11 @@ import {
 } from '@/components/ai/templates/template-list-panel'
 import { TemplatePreview } from '@/components/ai/templates/template-preview'
 import { TemplateBuilderPanel } from '@/components/ai/templates/template-builder-panel'
-import type { TemplateContent, TemplateRow } from '@/components/ai/templates/types'
+import type {
+  TemplateContent,
+  TemplateRow,
+  TemplateStatus,
+} from '@/components/ai/templates/types'
 
 type ListRow = TemplateListItem & {
   description: string | null
@@ -29,6 +33,7 @@ export function TemplatesWorkspace() {
   const [loadingList, setLoadingList] = useState(true)
   const [selected, setSelected] = useState<TemplateRow | null>(null)
   const [loadingSelected, setLoadingSelected] = useState(false)
+  const [savingMeta, setSavingMeta] = useState(false)
 
   const fetchList = useCallback(async () => {
     setLoadingList(true)
@@ -99,6 +104,31 @@ export function TemplatesWorkspace() {
     if (selectedId) await fetchSelected(selectedId)
   }, [fetchList, fetchSelected, selectedId])
 
+  const updateMeta = useCallback(
+    async (patch: { name?: string; status?: TemplateStatus }) => {
+      if (!selected) return
+      const payload: Record<string, unknown> = {}
+      if (patch.name !== undefined) payload.name = patch.name
+      if (patch.status !== undefined) payload.status = patch.status
+      if (Object.keys(payload).length === 0) return
+
+      setSavingMeta(true)
+      const { error } = await supabase
+        .from('ai_templates')
+        .update(payload)
+        .eq('id', selected.id)
+      setSavingMeta(false)
+
+      if (error) {
+        toast.error('Failed to save template')
+        return
+      }
+      toast.success('Saved')
+      await refreshAll()
+    },
+    [selected, refreshAll],
+  )
+
   return (
     <div className="flex h-[calc(100vh-7rem)] -mx-6 -mb-6 border-t">
       <TemplateListPanel
@@ -109,7 +139,12 @@ export function TemplatesWorkspace() {
         onCreate={startCreate}
       />
 
-      <TemplatePreview template={selected} loading={loadingSelected} />
+      <TemplatePreview
+        template={selected}
+        loading={loadingSelected}
+        saving={savingMeta}
+        onUpdate={updateMeta}
+      />
 
       <TemplateBuilderPanel
         templateId={selectedId}
