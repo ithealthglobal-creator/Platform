@@ -32,6 +32,8 @@ interface ChatMessage {
 
 interface AgentChatProps {
   selectedDocumentId: string | null
+  /** Called after the assistant finishes streaming so the page can refresh tree + active doc. */
+  onChatComplete?: () => void
 }
 
 type Mode = 'document' | 'workspace'
@@ -40,7 +42,7 @@ function newId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36)
 }
 
-export function AgentChat({ selectedDocumentId }: AgentChatProps) {
+export function AgentChat({ selectedDocumentId, onChatComplete }: AgentChatProps) {
   const [mode, setMode] = useState<Mode>('document')
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
@@ -209,6 +211,7 @@ export function AgentChat({ selectedDocumentId }: AgentChatProps) {
       setIsStreaming(false)
       setStreamingContent('')
       await fetchConversations()
+      onChatComplete?.()
     }
   }
 

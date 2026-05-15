@@ -1,4 +1,4 @@
-// src/app/(admin)/growth/campaigns/[campaignId]/[adId]/page.tsx
+// src/app/(admin)/growth/campaigns/[campaignId]/[id]/page.tsx
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
@@ -31,7 +31,7 @@ export default function AdCreativePreviewPage() {
   const router = useRouter()
   const params = useParams()
   const campaignId = params.campaignId as string
-  const adId = params.adId as string
+  const adId = params.id as string
 
   const [ad, setAd] = useState<AdWithCampaign | null>(null)
   const [campaignName, setCampaignName] = useState<string>('')

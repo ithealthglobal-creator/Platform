@@ -8,14 +8,16 @@ _embedder: GoogleGenerativeAIEmbeddings | None = None
 def get_embedder() -> GoogleGenerativeAIEmbeddings:
     """Return a process-wide GoogleGenerativeAIEmbeddings instance.
 
-    text-embedding-004 produces 768-dim vectors which match the
-    knowledge_chunks.embedding column.
+    Uses gemini-embedding-001 with output_dimensionality=768 so vectors match
+    the knowledge_chunks.embedding column. (text-embedding-004 was removed
+    from the v1beta endpoint.)
     """
     global _embedder
     if _embedder is None:
         _embedder = GoogleGenerativeAIEmbeddings(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",
             google_api_key=settings.google_api_key,
+            output_dimensionality=768,
         )
     return _embedder
 

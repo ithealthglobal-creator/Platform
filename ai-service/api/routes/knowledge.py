@@ -82,40 +82,38 @@ def _resolve_wikilinks(client, company_id: str, content: str) -> list[dict]:
     ]
 
 
-@router.post("/ingest")
-async def ingest(request: IngestRequest, user: AuthUser = Depends(get_current_user)):
-    client = get_supabase_admin()
+def reingest_document(document_id: str, expected_company_id: str | None = None) -> dict:
+    """Re-chunk + re-embed + refresh wiki-link graph for a document.
 
-    # Verify the document exists and is in the caller's company.
+    Reusable from both the HTTP route and from agent tools that mutate documents.
+    Pass expected_company_id to enforce tenant scope (None skips the check, only
+    safe when called by trusted server-side code that already validated scope).
+    """
+    client = get_supabase_admin()
     doc_resp = (
         client.table("knowledge_documents")
         .select("id, company_id, content")
-        .eq("id", request.document_id)
+        .eq("id", document_id)
         .single()
         .execute()
     )
     doc = doc_resp.data
     if not doc:
-        raise HTTPException(status_code=404, detail="Document not found")
-    if doc["company_id"] != user.company_id:
-        raise HTTPException(status_code=403, detail="Forbidden")
+        raise ValueError(f"Document {document_id} not found")
+    if expected_company_id is not None and doc["company_id"] != expected_company_id:
+        raise PermissionError("Document does not belong to caller's company")
 
     company_id = doc["company_id"]
     content = doc["content"] or ""
 
     chunks = _chunk_markdown(content)
-
-    # Replace existing chunks atomically-ish (delete + insert).
-    client.table("knowledge_chunks").delete().eq(
-        "document_id", request.document_id
-    ).execute()
-
+    client.table("knowledge_chunks").delete().eq("document_id", document_id).execute()
     if chunks:
         embeddings = embed_documents([c["content"] for c in chunks])
         rows = []
         for idx, (chunk, vec) in enumerate(zip(chunks, embeddings)):
             rows.append({
-                "document_id": request.document_id,
+                "document_id": document_id,
                 "company_id": company_id,
                 "chunk_index": idx,
                 "heading_path": chunk["heading_path"],
@@ -124,24 +122,33 @@ async def ingest(request: IngestRequest, user: AuthUser = Depends(get_current_us
             })
         client.table("knowledge_chunks").insert(rows).execute()
 
-    # Refresh wiki-link graph.
     client.table("knowledge_links").delete().eq(
-        "source_document_id", request.document_id
+        "source_document_id", document_id
     ).execute()
     link_rows = _resolve_wikilinks(client, company_id, content)
     if link_rows:
         client.table("knowledge_links").insert([
-            {"source_document_id": request.document_id, **r} for r in link_rows
+            {"source_document_id": document_id, **r} for r in link_rows
         ]).execute()
 
     client.table("knowledge_documents").update(
         {"last_ingested_at": datetime.now(timezone.utc).isoformat()}
-    ).eq("id", request.document_id).execute()
+    ).eq("id", document_id).execute()
 
     broken = sum(1 for r in link_rows if r["target_document_id"] is None)
     return {
-        "document_id": request.document_id,
+        "document_id": document_id,
         "chunks": len(chunks),
         "links": len(link_rows),
         "broken_links": broken,
     }
+
+
+@router.post("/ingest")
+async def ingest(request: IngestRequest, user: AuthUser = Depends(get_current_user)):
+    try:
+        return reingest_document(request.document_id, expected_company_id=user.company_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Document not found")
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Forbidden")

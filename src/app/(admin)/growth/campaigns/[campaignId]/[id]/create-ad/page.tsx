@@ -1,4 +1,4 @@
-// src/app/(admin)/growth/campaigns/[campaignId]/[adSetId]/create-ad/page.tsx
+// src/app/(admin)/growth/campaigns/[campaignId]/[id]/create-ad/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -13,7 +13,7 @@ export default function CreateAdPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const campaignId = params.campaignId as string
-  const adSetId = params.adSetId as string
+  const adSetId = params.id as string
   const editId = searchParams.get('edit')
   const isEdit = !!editId
   const [submitting, setSubmitting] = useState(false)

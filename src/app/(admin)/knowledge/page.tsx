@@ -204,7 +204,23 @@ export default function KnowledgePage() {
         </Panel>
         <PanelResizeHandle className="w-1 bg-slate-100 hover:bg-blue-300 transition-colors" />
         <Panel defaultSize={30} minSize={20}>
-          <AgentChat selectedDocumentId={selectedDocumentId} />
+          <AgentChat
+            selectedDocumentId={selectedDocumentId}
+            onChatComplete={async () => {
+              await refreshTree()
+              if (selectedDocumentId) {
+                try {
+                  const res = await authedFetch(`/api/admin/knowledge/documents/${selectedDocumentId}`)
+                  if (res.ok) {
+                    const json = await res.json()
+                    setActiveDocument(json.document)
+                  }
+                } catch {
+                  // best-effort refresh
+                }
+              }
+            }}
+          />
         </Panel>
       </PanelGroup>
     </div>
