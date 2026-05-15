@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { BlogPost } from '@/lib/types'
 import { CTABanner } from '@/components/cta-banner'
 import { ScrollReveal } from '@/components/scroll-reveal'
+import { FunnelPageTracker } from '@/components/funnel-page-tracker'
 
 function getSupabase() {
   return createClient(
@@ -57,6 +58,7 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <FunnelPageTracker eventType="content_view" blogPostId={post.id} blogSlug={post.slug} />
       {/* Cover image */}
       {post.cover_image_url ? (
         <div className="relative h-80 md:h-[480px] w-full">
@@ -73,7 +75,7 @@ export default async function BlogPostPage({
       <ScrollReveal>
       <article className="max-w-3xl mx-auto px-8 py-24">
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold mb-8">{post.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-light mb-8">{post.title}</h1>
 
         {/* Meta row */}
         <div className="flex items-center gap-8 mb-16">

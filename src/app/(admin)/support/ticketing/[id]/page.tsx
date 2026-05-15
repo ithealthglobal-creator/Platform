@@ -95,27 +95,27 @@ export default function TicketDetailPage() {
     await fetchTicket()
   }
 
-  if (loading) return <div className="py-12 text-center text-slate-400">Loading...</div>
-  if (!ticket) return <div className="py-12 text-center text-slate-400">Ticket not found</div>
+  if (loading) return <div className="py-12 text-center text-muted-foreground">Loading...</div>
+  if (!ticket) return <div className="py-12 text-center text-muted-foreground">Ticket not found</div>
 
   return (
     <div className="flex gap-6">
       {/* Left: conversation */}
       <div className="flex-1 space-y-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{ticket.subject}</h2>
-          <p className="mt-0.5 text-sm text-slate-400">
+          <h2 className="text-xl font-bold text-foreground">{ticket.subject}</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             {ticket.ticket_number} · {ticket.created_by_profile?.display_name ?? 'Unknown'} · {formatTimeAgo(ticket.created_at)}
           </p>
         </div>
 
         {/* Original description */}
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <div className="rounded-lg bg-white p-4 ring-1 ring-foreground/10">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-semibold">{ticket.created_by_profile?.display_name ?? 'Unknown'}</span>
-            <span className="text-xs text-slate-400">{formatTimeAgo(ticket.created_at)}</span>
+            <span className="text-xs text-muted-foreground">{formatTimeAgo(ticket.created_at)}</span>
           </div>
-          <p className="whitespace-pre-wrap text-sm text-slate-700">{ticket.description}</p>
+          <p className="whitespace-pre-wrap text-sm text-foreground">{ticket.description}</p>
         </div>
 
         {replies.map((reply, index) => (
@@ -132,10 +132,10 @@ export default function TicketDetailPage() {
 
       {/* Right: metadata sidebar */}
       <div className="w-[300px] shrink-0">
-        <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm">
+        <div className="rounded-lg bg-white p-4 text-sm ring-1 ring-foreground/10">
           {/* Status */}
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Status</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</p>
             <Select value={ticket.status} onValueChange={(v) => { if (v) handleStatusChange(v) }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -146,27 +146,27 @@ export default function TicketDetailPage() {
             </Select>
           </div>
 
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-border" />
 
           {/* Priority */}
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Priority</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Priority</p>
             <Badge variant="outline" className="capitalize">{ticket.priority}</Badge>
           </div>
 
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-border" />
 
           {/* Category */}
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Category</p>
-            <p className="capitalize text-slate-700">{ticket.category}{ticket.service ? ` — ${ticket.service.name}` : ''}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Category</p>
+            <p className="capitalize text-foreground">{ticket.category}{ticket.service ? ` — ${ticket.service.name}` : ''}</p>
           </div>
 
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-border" />
 
           {/* Assigned To */}
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Assigned To</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Assigned To</p>
             <Select value={ticket.assigned_to ?? 'unassigned'} onValueChange={(v) => { if (v) handleAssigneeChange(v) }}>
               <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
               <SelectContent>
@@ -178,23 +178,23 @@ export default function TicketDetailPage() {
             </Select>
           </div>
 
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-border" />
 
           {/* Company */}
           <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Company</p>
-            <p className="text-slate-700">{ticket.company?.name ?? '—'}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Company</p>
+            <p className="text-foreground">{ticket.company?.name ?? '—'}</p>
           </div>
 
-          <hr className="my-4 border-slate-200" />
+          <hr className="my-4 border-border" />
 
           {/* SLA Tracking */}
           <div className="space-y-3">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">SLA Tracking</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">SLA Tracking</p>
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Response</span>
+                <span className="text-xs text-muted-foreground">Response</span>
                 <SlaStatus dueAt={ticket.response_due_at} completedAt={ticket.first_responded_at} />
               </div>
               <SlaProgressBar dueAt={ticket.response_due_at} completedAt={ticket.first_responded_at} />
@@ -202,7 +202,7 @@ export default function TicketDetailPage() {
 
             <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-500">Resolution</span>
+                <span className="text-xs text-muted-foreground">Resolution</span>
                 <SlaStatus dueAt={ticket.resolution_due_at} completedAt={ticket.resolved_at} />
               </div>
               <SlaProgressBar dueAt={ticket.resolution_due_at} completedAt={ticket.resolved_at} />

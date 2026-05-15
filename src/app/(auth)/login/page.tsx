@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/contexts/auth-context'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -44,7 +43,7 @@ export default function LoginPage() {
           .eq('id', user.id)
           .single()
         if (profileData?.role === 'customer') {
-          router.replace('/home')
+          router.replace('/portal/home')
         } else {
           router.replace('/dashboard')
         }
@@ -71,13 +70,11 @@ export default function LoginPage() {
       {/* Left panel — branded */}
       <div className="hidden lg:flex lg:w-1/2 bg-[var(--brand-primary)] flex-col justify-between p-16 text-white">
         <div>
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
             src="/logos/ithealth-logo-white.svg"
             alt="Logo"
-            width={120}
-            height={32}
             className="h-8 w-auto mb-16"
-            style={{ width: 'auto' }}
           />
           <h1 className="text-4xl font-bold leading-tight mb-6">
             Your Free IT<br />
@@ -111,11 +108,10 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden mb-8">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/logos/ithealth-logo.svg"
               alt="Logo"
-              width={120}
-              height={32}
               className="h-8 w-auto"
             />
           </div>

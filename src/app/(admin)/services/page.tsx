@@ -1,42 +1,34 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase-client'
-import { Service, ServiceStatus } from '@/lib/types'
+import { ServiceStatus } from '@/lib/types'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
-import { Add, Edit, TrashCan } from '@carbon/icons-react'
+import { Add } from '@carbon/icons-react'
+import { ServiceGridCard } from '@/components/services/service-grid-card'
+import { ServicesListPanel } from '@/components/services/services-list-panel'
+import { ServiceEditorWorkspace } from '@/components/services/service-editor-workspace'
 
-interface ServiceWithDetails extends Service {
-  product_count: number
+// Only the fields the catalog grid + list panel actually need. The editor
+// workspace fetches the full Service row separately by id, so we don't carry
+// every Service column on this page.
+interface ServiceSummary {
+  id: string
+  name: string
+  description: string | null
+  status: ServiceStatus
   phase_name: string | null
-}
-
-function statusBadgeVariant(status: ServiceStatus) {
-  switch (status) {
-    case 'active':
-      return 'default'
-    case 'draft':
-      return 'secondary'
-    case 'archived':
-      return 'outline'
-  }
+  product_count: number
 }
 
 export default function ServicesPage() {
-  const router = useRouter()
-  const [services, setServices] = useState<ServiceWithDetails[]>([])
+  const [services, setServices] = useState<ServiceSummary[]>([])
   const [loading, setLoading] = useState(true)
+  // null in workspace mode means "new service draft". `mode` keeps us out of the
+  // workspace until the user actually clicks a card or "Add Service".
+  const [mode, setMode] = useState<'grid' | 'workspace'>('grid')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const fetchServices = useCallback(async () => {
     setLoading(true)
@@ -51,27 +43,15 @@ export default function ServicesPage() {
       return
     }
 
-    const mapped: ServiceWithDetails[] = (data ?? []).map(
-      (s: Record<string, unknown>) => ({
-        id: s.id as string,
-        name: s.name as string,
-        description: s.description as string | null,
-        long_description: s.long_description as string | null,
-        phase_id: s.phase_id as string,
-        status: s.status as ServiceStatus,
-        hero_image_url: s.hero_image_url as string | null,
-        thumbnail_url: s.thumbnail_url as string | null,
-        is_active: s.is_active as boolean,
-        created_at: s.created_at as string,
-        updated_at: s.updated_at as string,
-        phase_name:
-          (s.phase as { name: string } | null)?.name ?? null,
-        product_count:
-          (
-            s.service_products as Array<{ count: number }> | undefined
-          )?.[0]?.count ?? 0,
-      })
-    )
+    const mapped: ServiceSummary[] = (data ?? []).map((s: Record<string, unknown>) => ({
+      id: s.id as string,
+      name: s.name as string,
+      description: (s.description as string | null) ?? null,
+      status: s.status as ServiceStatus,
+      phase_name: (s.phase as { name: string } | null)?.name ?? null,
+      product_count:
+        (s.service_products as Array<{ count: number }> | undefined)?.[0]?.count ?? 0,
+    }))
 
     setServices(mapped)
     setLoading(false)
@@ -81,98 +61,102 @@ export default function ServicesPage() {
     fetchServices()
   }, [fetchServices])
 
-  const handleDelete = useCallback(
-    async (id: string, name: string) => {
-      if (!confirm(`Are you sure you want to delete "${name}"?`)) return
+  const phaseOptions = useMemo(() => {
+    const set = new Set<string>()
+    for (const s of services) {
+      if (s.phase_name) set.add(s.phase_name)
+    }
+    return Array.from(set).sort()
+  }, [services])
 
-      const { error } = await supabase
-        .from('services')
-        .delete()
-        .eq('id', id)
-
-      if (error) {
-        toast.error('Failed to delete service')
-        return
-      }
-
-      toast.success('Service deleted successfully')
-      fetchServices()
-    },
-    [fetchServices]
+  const listItems = useMemo(
+    () =>
+      services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        phaseName: s.phase_name,
+        status: s.status,
+      })),
+    [services],
   )
+
+  const openWorkspace = (id: string | null) => {
+    setSelectedId(id)
+    setMode('workspace')
+  }
+
+  const backToGrid = () => {
+    setMode('grid')
+    setSelectedId(null)
+    // Pick up any edits the user made in the workspace.
+    fetchServices()
+  }
+
+  if (mode === 'workspace') {
+    return (
+      <div className="-m-6 flex h-full">
+        <ServicesListPanel
+          services={listItems}
+          selectedId={selectedId}
+          phaseOptions={phaseOptions}
+          onSelect={(id) => setSelectedId(id)}
+          onBack={backToGrid}
+          onNew={() => openWorkspace(null)}
+        />
+        <ServiceEditorWorkspace
+          // Force a remount when the selected service changes so each editor
+          // boots cleanly without leaking tab state between services.
+          key={selectedId ?? 'new'}
+          serviceId={selectedId}
+          onServiceCreated={(newId) => {
+            setSelectedId(newId)
+            fetchServices()
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div>
-      <div className="flex justify-end mb-6">
-        <Button onClick={() => router.push('/services/new/edit')}>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Services</p>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">Catalog</h1>
+        </div>
+        <Button onClick={() => openWorkspace(null)}>
           <Add size={16} />
           Add Service
         </Button>
       </div>
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead className="w-[140px]">Phase</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[100px]">Products</TableHead>
-              <TableHead className="w-[120px]">Created</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : services.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No services found
-                </TableCell>
-              </TableRow>
-            ) : (
-              services.map((service) => (
-                <TableRow key={service.id}>
-                  <TableCell className="font-medium">{service.name}</TableCell>
-                  <TableCell>{service.phase_name ?? '—'}</TableCell>
-                  <TableCell>
-                    <Badge variant={statusBadgeVariant(service.status)}>
-                      {service.status.charAt(0).toUpperCase() + service.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{service.product_count}</TableCell>
-                  <TableCell>
-                    {new Date(service.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => router.push(`/services/${service.id}/edit`)}
-                      >
-                        <Edit size={16} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => handleDelete(service.id, service.name)}
-                      >
-                        <TrashCan size={16} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {loading ? (
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-48 animate-pulse rounded-2xl bg-muted" />
+          ))}
+        </div>
+      ) : services.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-white p-12 text-center">
+          <p className="text-sm text-muted-foreground">
+            No services yet. Click <strong>Add Service</strong> to create your first one.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4">
+          {services.map((s) => (
+            <ServiceGridCard
+              key={s.id}
+              name={s.name}
+              description={s.description}
+              phaseName={s.phase_name}
+              status={s.status}
+              productCount={s.product_count}
+              onClick={() => openWorkspace(s.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

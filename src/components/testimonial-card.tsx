@@ -1,7 +1,13 @@
 'use client'
 
 import { motion } from 'motion/react'
-import { Testimonial } from '@/lib/types'
+
+interface Testimonial {
+  name: string
+  quote: string
+  role?: string | null
+  company?: string | null
+}
 
 export function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   const initial = testimonial.name.charAt(0).toUpperCase()

@@ -62,8 +62,8 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                   className={cn(
                     'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-slate-100 text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-muted text-foreground'
+                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   )}
                 >
                   {l3.label}
@@ -72,7 +72,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
             })}
           </div>
         )}
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</div>
+        <div className="flex-1 overflow-y-auto bg-muted/50 p-6">{children}</div>
       </div>
     </div>
   )

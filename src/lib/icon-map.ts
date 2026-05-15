@@ -32,6 +32,11 @@ import {
   FolderOpen,
   Document,
   DocumentBlank,
+  Template,
+  Share,
+  LogoLinkedin,
+  LogoX,
+  LogoInstagram,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -69,4 +74,9 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'folder-open': FolderOpen,
   'document': Document,
   'document-blank': DocumentBlank,
+  'template': Template,
+  'share': Share,
+  'logo--linkedin': LogoLinkedin,
+  'logo--x': LogoX,
+  'logo--instagram': LogoInstagram,
 }

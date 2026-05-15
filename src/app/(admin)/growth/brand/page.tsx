@@ -108,32 +108,32 @@ export default function BrandManagementPage() {
     return (
       <div className="space-y-6">
         {/* Logos skeleton */}
-        <div className="bg-white rounded-lg border p-6">
-          <div className="h-5 w-24 bg-gray-200 rounded animate-pulse mb-1" />
-          <div className="h-4 w-64 bg-gray-100 rounded animate-pulse mb-6" />
+        <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+          <div className="h-5 w-24 bg-muted rounded animate-pulse mb-1" />
+          <div className="h-4 w-64 bg-muted rounded animate-pulse mb-6" />
           <div className="grid grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-40 bg-gray-100 rounded-lg animate-pulse" />
+              <div key={i} className="h-40 bg-muted rounded-lg animate-pulse" />
             ))}
           </div>
         </div>
 
         {/* Colours skeleton */}
-        <div className="bg-white rounded-lg border p-6">
-          <div className="h-5 w-20 bg-gray-200 rounded animate-pulse mb-6" />
+        <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+          <div className="h-5 w-20 bg-muted rounded animate-pulse mb-6" />
           <div className="grid grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-100 rounded animate-pulse" />
+              <div key={i} className="h-20 bg-muted rounded animate-pulse" />
             ))}
           </div>
         </div>
 
         {/* Typography skeleton */}
-        <div className="bg-white rounded-lg border p-6">
-          <div className="h-5 w-28 bg-gray-200 rounded animate-pulse mb-6" />
+        <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+          <div className="h-5 w-28 bg-muted rounded animate-pulse mb-6" />
           <div className="grid grid-cols-2 gap-6">
             {[...Array(2)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-100 rounded animate-pulse" />
+              <div key={i} className="h-20 bg-muted rounded animate-pulse" />
             ))}
           </div>
         </div>
@@ -144,9 +144,9 @@ export default function BrandManagementPage() {
   return (
     <div className="space-y-6">
       {/* Section 1: Logos */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="font-poppins text-base font-semibold text-gray-900 mb-1">Logos</h2>
-        <p className="font-poppins text-sm text-gray-500 mb-6">
+      <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+        <h2 className="font-poppins text-base font-semibold text-foreground mb-1">Logos</h2>
+        <p className="font-poppins text-sm text-muted-foreground mb-6">
           Upload your brand logos. SVG, PNG or JPG — max 2 MB each.
         </p>
         <div className="grid grid-cols-3 gap-6">
@@ -175,8 +175,8 @@ export default function BrandManagementPage() {
       </div>
 
       {/* Section 2: Colours */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="font-poppins text-base font-semibold text-gray-900 mb-6">Colours</h2>
+      <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+        <h2 className="font-poppins text-base font-semibold text-foreground mb-6">Colours</h2>
         <div className="grid grid-cols-3 gap-6">
           <ColourPicker
             label="Primary Colour"
@@ -198,8 +198,8 @@ export default function BrandManagementPage() {
       </div>
 
       {/* Section 3: Typography */}
-      <div className="bg-white rounded-lg border p-6">
-        <h2 className="font-poppins text-base font-semibold text-gray-900 mb-6">Typography</h2>
+      <div className="bg-white rounded-lg p-6 ring-1 ring-foreground/10">
+        <h2 className="font-poppins text-base font-semibold text-foreground mb-6">Typography</h2>
         <div className="grid grid-cols-2 gap-6">
           <FontSelector
             label="Heading Font"

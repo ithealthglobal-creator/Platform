@@ -6,20 +6,15 @@ import { useMenu } from '@/contexts/menu-context'
 import { useAuth } from '@/contexts/auth-context'
 import { useBranding } from '@/contexts/branding-context'
 import { usePathname, useRouter } from 'next/navigation'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { iconMap } from '@/lib/icon-map'
 
-function getIcon(iconName: string | null) {
+function getIcon(iconName: string | null, size = 20) {
   if (!iconName) {
     const Fallback = iconMap['circle-dash']
-    return <Fallback size={20} />
+    return <Fallback size={size} />
   }
-  const Icon = iconMap[iconName]
-  if (!Icon) {
-    const Fallback = iconMap['circle-dash']
-    return <Fallback size={20} />
-  }
-  return <Icon size={20} />
+  const Icon = iconMap[iconName] ?? iconMap['circle-dash']
+  return <Icon size={size} />
 }
 
 export function Sidebar() {
@@ -37,7 +32,6 @@ export function Sidebar() {
     ? profile.display_name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '?'
 
-  // Close menu on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
@@ -47,102 +41,97 @@ export function Sidebar() {
   }, [menuOpen])
 
   return (
-    <TooltipProvider>
-      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] pb-6">
-        {/* Logo row — same height as MegaMenu (h-12) so the logo aligns with the header tab text */}
-        <div className="flex h-12 w-full items-center justify-center">
-          <Image
-            src={branding?.icon_url ?? branding?.logo_light_url ?? '/logos/ithealth-icon-white.svg'}
-            alt="Logo"
-            width={28}
-            height={28}
-            className="h-7 w-7"
-          />
-        </div>
+    <aside className="flex h-screen w-[76px] flex-col bg-[var(--brand-secondary)] text-white flex-shrink-0">
+      {/* Logo cell — h-12 to match the mega-menu bar */}
+      <div className="flex h-12 w-full items-center justify-center border-b border-white/[0.18]">
+        <Image
+          src={branding?.icon_url ?? branding?.logo_light_url ?? '/logos/ithealth-icon-white.svg'}
+          alt="Logo"
+          width={28}
+          height={28}
+          className="h-7 w-7"
+        />
+      </div>
 
-        {/* Nav items */}
-        <nav className="flex flex-1 flex-col items-center gap-1 pt-4">
-          {l1Items.map(item => {
-            const isActive = item.route ? (pathname === item.route || pathname.startsWith(item.route + '/')) : false
-            return (
-              <Tooltip key={item.id}>
-                <TooltipTrigger
-                  delay={0}
-                  onClick={() => {
-                    const firstChild = item.children?.[0]
-                    router.push(firstChild?.route || item.route || '/')
-                  }}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/70 hover:bg-white/10 hover:text-white'
-                  }`}
-                >
-                  {getIcon(item.icon)}
-                </TooltipTrigger>
-                <TooltipContent side="right">
-                  {item.label}
-                </TooltipContent>
-              </Tooltip>
-            )
-          })}
-        </nav>
-
-        {/* Avatar & dropdown */}
-        <div className="relative" ref={menuRef}>
-          <Tooltip>
-            <TooltipTrigger
-              delay={0}
-              onClick={() => setMenuOpen((o) => !o)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-white/10"
+      {/* Nav items — icon over label, full-width square cells */}
+      <nav className="flex flex-1 flex-col overflow-y-auto">
+        {l1Items.map(item => {
+          const isActive = item.route ? (pathname === item.route || pathname.startsWith(item.route + '/')) : false
+          return (
+            <button
+              key={item.id}
+              type="button"
+              title={item.label}
+              onClick={() => {
+                const firstChild = item.children?.[0]
+                router.push(firstChild?.route || item.route || '/')
+              }}
+              className={`flex w-full flex-col items-center justify-center gap-2 px-1 pt-[18px] pb-4 transition-colors ${
+                isActive ? 'bg-white/[0.22]' : 'hover:bg-white/[0.10]'
+              }`}
             >
-              {profile?.avatar_url ? (
-                <Image
-                  src={profile.avatar_url}
-                  alt={profile.display_name ?? ''}
-                  width={28}
-                  height={28}
-                  className="h-7 w-7 rounded-full object-cover"
-                />
-              ) : (
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-[10px] font-semibold text-white">
-                  {initials}
-                </div>
-              )}
-            </TooltipTrigger>
-            {!menuOpen && (
-              <TooltipContent side="right">
-                {profile?.display_name ?? 'Account'}
-              </TooltipContent>
-            )}
-          </Tooltip>
+              {getIcon(item.icon, 20)}
+              <span
+                className="text-[10px] leading-[1.1] text-white"
+                style={{
+                  fontWeight: isActive ? 600 : 500,
+                  letterSpacing: '-0.005em',
+                }}
+              >
+                {item.label}
+              </span>
+            </button>
+          )
+        })}
+      </nav>
 
-          {/* Dropdown menu */}
-          {menuOpen && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-lg bg-white py-1 shadow-lg z-50">
-              <div className="px-3 py-2 border-b border-slate-100">
-                <p className="text-sm font-medium text-slate-800 truncate">{profile?.display_name}</p>
-                <p className="text-xs text-slate-400 truncate">{profile?.email}</p>
-              </div>
-              <button
-                onClick={() => { setMenuOpen(false); router.push('/settings') }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
-              >
-                {iconMap['user-avatar'] ? (() => { const I = iconMap['user-avatar']; return <I size={16} /> })() : null}
-                Profile & Settings
-              </button>
-              <div className="mx-3 my-0.5 border-t border-slate-100" />
-              <button
-                onClick={async () => { await signOut(); router.replace('/login') }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                {iconMap['logout'] ? (() => { const I = iconMap['logout']; return <I size={16} /> })() : null}
-                Logout
-              </button>
+      {/* Avatar cell with top border */}
+      <div className="relative border-t border-white/[0.18]" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(o => !o)}
+          className="flex h-16 w-full items-center justify-center transition-colors hover:bg-white/[0.10]"
+          title={profile?.display_name ?? 'Account'}
+        >
+          {profile?.avatar_url ? (
+            <Image
+              src={profile.avatar_url}
+              alt={profile.display_name ?? ''}
+              width={32}
+              height={32}
+              className="h-8 w-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-[11px] font-semibold text-white">
+              {initials}
             </div>
           )}
-        </div>
+        </button>
+
+        {menuOpen && (
+          <div className="absolute bottom-full left-1/2 z-50 mb-2 w-48 -translate-x-1/2 rounded-lg bg-popover py-1 shadow-lg ring-1 ring-foreground/10">
+            <div className="border-b border-border px-3 py-2">
+              <p className="truncate text-sm font-medium text-foreground">{profile?.display_name}</p>
+              <p className="truncate text-xs text-muted-foreground">{profile?.email}</p>
+            </div>
+            <button
+              onClick={() => { setMenuOpen(false); router.push('/settings') }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              {iconMap['user-avatar'] ? (() => { const I = iconMap['user-avatar']; return <I size={16} /> })() : null}
+              Profile & Settings
+            </button>
+            <div className="mx-3 my-0.5 border-t border-border" />
+            <button
+              onClick={async () => { await signOut(); router.replace('/login') }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+            >
+              {iconMap['logout'] ? (() => { const I = iconMap['logout']; return <I size={16} /> })() : null}
+              Logout
+            </button>
+          </div>
+        )}
       </div>
-    </TooltipProvider>
+    </aside>
   )
 }

@@ -92,30 +92,27 @@ export function DashboardTabs({
                   'group flex items-center gap-1 rounded-md border px-2 py-1 text-sm transition-colors',
                   isActive
                     ? 'border-primary bg-primary/5 text-primary'
-                    : 'border-transparent hover:bg-gray-100',
+                    : 'border-transparent hover:bg-muted',
                 )}
               >
+                <button
+                  type="button"
+                  className="flex items-center"
+                  onClick={() => onSetDefault(isDefault ? null : d.id)}
+                  title={isDefault ? 'Default — click to unset' : 'Set as default'}
+                >
+                  {isDefault ? (
+                    <StarFilled size={14} className="text-yellow-500" />
+                  ) : (
+                    <Star size={14} className="text-muted-foreground group-hover:text-muted-foreground" />
+                  )}
+                </button>
                 <button
                   type="button"
                   className="flex items-center gap-1.5"
                   onClick={() => onSelect(d.id)}
                   title={`Open "${d.name}"`}
                 >
-                  <button
-                    type="button"
-                    className="flex items-center"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onSetDefault(isDefault ? null : d.id)
-                    }}
-                    title={isDefault ? 'Default — click to unset' : 'Set as default'}
-                  >
-                    {isDefault ? (
-                      <StarFilled size={14} className="text-yellow-500" />
-                    ) : (
-                      <Star size={14} className="text-gray-400 group-hover:text-gray-600" />
-                    )}
-                  </button>
                   <span className="max-w-[160px] truncate">{d.name}</span>
                   {d.visibility === 'company' ? (
                     <GroupAccount size={12} className="text-muted-foreground" />
@@ -125,7 +122,7 @@ export function DashboardTabs({
                 </button>
                 <DropdownMenu>
                   <DropdownMenuTrigger
-                    className="rounded px-1 text-xs text-gray-400 hover:bg-gray-200 hover:text-gray-700"
+                    className="rounded px-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground"
                     onClick={(e) => e.stopPropagation()}
                   >
                     …
@@ -147,7 +144,7 @@ export function DashboardTabs({
           <button
             type="button"
             className={cn(
-              'flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-sm text-muted-foreground hover:bg-gray-50',
+              'flex items-center gap-1 rounded-md border border-dashed px-2 py-1 text-sm text-muted-foreground hover:bg-muted/50',
               activeId === null && 'border-primary text-primary',
             )}
             onClick={onNew}
@@ -163,7 +160,7 @@ export function DashboardTabs({
             <select
               value={visibility}
               onChange={(e) => onChangeVisibility(e.target.value as DashboardVisibility)}
-              className="rounded border border-gray-200 bg-white px-2 py-1 text-xs"
+              className="rounded border border-border bg-white px-2 py-1 text-xs"
               title="Visibility"
             >
               <option value="private">Private</option>
@@ -202,7 +199,7 @@ export function DashboardTabs({
               <select
                 value={newVisibility}
                 onChange={(e) => setNewVisibility(e.target.value as DashboardVisibility)}
-                className="mt-1 w-full rounded border border-gray-200 bg-white px-2 py-1.5 text-sm"
+                className="mt-1 w-full rounded border border-border bg-white px-2 py-1.5 text-sm"
               >
                 <option value="private">Private (only you)</option>
                 <option value="company">Company (everyone in your company)</option>

@@ -1,5 +1,9 @@
 import json
+import logging
+import traceback
 from collections.abc import AsyncGenerator
+
+logger = logging.getLogger(__name__)
 
 
 async def stream_graph_events(graph, input_state: dict, config: dict) -> AsyncGenerator[str, None]:
@@ -18,10 +22,12 @@ async def stream_graph_events(graph, input_state: dict, config: dict) -> AsyncGe
             kind = event["event"]
 
             if kind == "on_chat_model_stream":
-                # Streaming tokens from the LLM
-                content = event["data"]["chunk"].content
-                if content:
-                    yield f"event: token\ndata: {json.dumps({'content': content})}\n\n"
+                # Streaming tokens from the LLM. chunk.content can be a plain
+                # string OR a list of content blocks (Gemini multimodal / tool-
+                # use responses). Always emit a string to the client.
+                text = _extract_text(event["data"]["chunk"].content)
+                if text:
+                    yield f"event: token\ndata: {json.dumps({'content': text})}\n\n"
 
             elif kind == "on_tool_start":
                 tool_name = event.get("name", "unknown")
@@ -47,7 +53,34 @@ async def stream_graph_events(graph, input_state: dict, config: dict) -> AsyncGe
             # The interrupt value is the payload passed to interrupt()
             yield f"event: interrupt\ndata: {json.dumps({'type': 'approval_required'})}\n\n"
         else:
+            logger.exception("stream_graph_events failed: %s", e)
+            print(f"[stream_graph_events] {type(e).__name__}: {e}\n{traceback.format_exc()}", flush=True)
             yield f"event: error\ndata: {json.dumps({'code': 'EXECUTION_ERROR', 'message': str(e)[:500]})}\n\n"
+
+
+def _extract_text(content) -> str:
+    """Coerce a chat-model chunk's content into a plain string.
+
+    LangChain returns either str or list[ContentBlock]. Block dicts may be
+    {"type": "text", "text": "..."} (Gemini, Anthropic) or carry plain text.
+    Tool-use blocks have no text and are skipped.
+    """
+    if content is None:
+        return ""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict):
+                if block.get("type") == "text" and isinstance(block.get("text"), str):
+                    parts.append(block["text"])
+                elif isinstance(block.get("text"), str):
+                    parts.append(block["text"])
+        return "".join(parts)
+    return str(content)
 
 
 def _safe_serialize(obj) -> dict | str | list:

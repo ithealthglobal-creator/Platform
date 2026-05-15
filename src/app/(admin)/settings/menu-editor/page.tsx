@@ -243,7 +243,7 @@ export default function MenuEditorPage() {
         <div key={item.id}>
           <div
             style={{ paddingLeft: `${depth * 24 + 12}px` }}
-            className="flex items-center gap-2 py-2 px-3 hover:bg-slate-50 rounded"
+            className="flex items-center gap-2 py-2 px-3 hover:bg-muted/50 rounded"
           >
             {hasChildren ? (
               <button

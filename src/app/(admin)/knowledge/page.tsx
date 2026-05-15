@@ -178,7 +178,7 @@ export default function KnowledgePage() {
       <PanelGroup direction="horizontal" className="flex-1">
         <Panel defaultSize={20} minSize={14} className="border-r bg-white">
           {loading ? (
-            <div className="flex h-full items-center justify-center text-xs text-slate-400">
+            <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
               Loading…
             </div>
           ) : (
@@ -198,13 +198,29 @@ export default function KnowledgePage() {
             />
           )}
         </Panel>
-        <PanelResizeHandle className="w-1 bg-slate-100 hover:bg-blue-300 transition-colors" />
+        <PanelResizeHandle className="w-1 bg-muted hover:bg-blue-300 transition-colors" />
         <Panel defaultSize={50} minSize={25} className="bg-white">
           <MarkdownEditor document={activeDocument} onChange={handleEditorChange} />
         </Panel>
-        <PanelResizeHandle className="w-1 bg-slate-100 hover:bg-blue-300 transition-colors" />
+        <PanelResizeHandle className="w-1 bg-muted hover:bg-blue-300 transition-colors" />
         <Panel defaultSize={30} minSize={20}>
-          <AgentChat selectedDocumentId={selectedDocumentId} />
+          <AgentChat
+            selectedDocumentId={selectedDocumentId}
+            onChatComplete={async () => {
+              await refreshTree()
+              if (selectedDocumentId) {
+                try {
+                  const res = await authedFetch(`/api/admin/knowledge/documents/${selectedDocumentId}`)
+                  if (res.ok) {
+                    const json = await res.json()
+                    setActiveDocument(json.document)
+                  }
+                } catch {
+                  // best-effort refresh
+                }
+              }
+            }}
+          />
         </Panel>
       </PanelGroup>
     </div>

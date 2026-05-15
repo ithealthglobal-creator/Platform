@@ -103,42 +103,6 @@ export interface CostVariable {
   updated_at: string
 }
 
-export interface Vertical {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Persona {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Pain {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface Gain {
-  id: string
-  name: string
-  description: string | null
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
 export interface Skill {
   id: string
   name: string
@@ -541,19 +505,6 @@ export interface BlogPost {
   updated_at: string
 }
 
-export interface Testimonial {
-  id: string
-  name: string
-  company: string | null
-  role: string | null
-  quote: string
-  avatar_url: string | null
-  sort_order: number
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
 export interface ContactSubmission {
   id: string
   name: string
@@ -605,10 +556,21 @@ export interface SalesLead {
   contact_name: string
   contact_email: string
   notes: string | null
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  utm_term: string | null
+  landing_path: string | null
+  referrer: string | null
+  meta_campaign_id: string | null
+  meta_ad_id: string | null
   created_at: string
   updated_at: string
   company?: Company
   assessment_attempt?: AssessmentAttempt
+  meta_campaign?: { id: string; name: string } | null
+  meta_ad?: { id: string; name: string; creative_thumbnail_url: string | null } | null
 }
 
 // Meta Ads types
@@ -956,4 +918,138 @@ export interface ContactInfoContent {
   email: string
   phone?: string | null
   address?: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Funnel (Growth → Funnel)
+// ---------------------------------------------------------------------------
+
+export type SocialPlatform = 'linkedin' | 'x' | 'facebook' | 'instagram'
+export type SocialPostStatus = 'draft' | 'approved' | 'scheduled' | 'published'
+
+export interface SocialPost {
+  id: string
+  company_id: string | null
+  blog_post_id: string | null
+  platform: SocialPlatform
+  title: string | null
+  content: string | null
+  external_url: string | null
+  external_post_id: string | null
+  status: SocialPostStatus
+  published_at: string | null
+  impressions: number
+  clicks: number
+  reach: number
+  engagement: number
+  is_active: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type AwarenessSourceType = 'paid' | 'social' | 'blog' | 'organic' | 'direct'
+export type FunnelStepKey = 'welcome' | 'assessment' | 'details' | 'confirmation'
+export type FunnelEventType =
+  | 'page_view'
+  | 'content_view'
+  | 'step_entered'
+  | 'step_completed'
+  | 'lead_created'
+  | 'phase_assigned'
+
+export interface FunnelEvent {
+  id: string
+  session_id: string
+  lead_id: string | null
+  assessment_attempt_id: string | null
+  event_type: FunnelEventType
+  step_key: FunnelStepKey | null
+  page_path: string | null
+  awareness_source_type: AwarenessSourceType | null
+  awareness_source_id: string | null
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  utm_term: string | null
+  referrer: string | null
+  meta_campaign_id: string | null
+  phase_id: string | null
+  properties: Record<string, unknown>
+  occurred_at: string
+}
+
+export interface FunnelMetricsPaidNode {
+  id: string
+  name: string
+  spend: number
+  impressions: number
+  clicks: number
+  sessions: number
+}
+
+export interface FunnelMetricsSocialNode {
+  id: string
+  platform: SocialPlatform
+  title: string | null
+  impressions: number
+  clicks: number
+  sessions: number
+}
+
+export interface FunnelMetricsBlogNode {
+  id: string
+  title: string
+  slug: string
+  views: number
+  sessions: number
+}
+
+export interface FunnelMetricsStep {
+  key: FunnelStepKey
+  entered: number
+  completed: number
+}
+
+export interface FunnelMetricsPhase {
+  id: string
+  name: string
+  leads: number
+}
+
+export interface FunnelMetrics {
+  date_from: string
+  date_to: string
+  awareness: {
+    paid: FunnelMetricsPaidNode[]
+    social: FunnelMetricsSocialNode[]
+    blog: FunnelMetricsBlogNode[]
+  }
+  website: { sessions: number }
+  steps: FunnelMetricsStep[]
+  phases: FunnelMetricsPhase[]
+}
+
+export interface FunnelCanvasLayout {
+  nodes: { id: string; x: number; y: number }[]
+  edges: { id: string; source: string; target: string }[]
+}
+
+export interface FunnelCanvasFilters {
+  date_from?: string | null
+  date_to?: string | null
+  source_types?: AwarenessSourceType[]
+}
+
+export interface FunnelCanvas {
+  id: string
+  company_id: string
+  owner_user_id: string | null
+  name: string
+  layout: FunnelCanvasLayout
+  filters: FunnelCanvasFilters
+  is_default: boolean
+  created_at: string
+  updated_at: string
 }

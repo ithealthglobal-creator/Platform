@@ -33,7 +33,7 @@ export function CustomerSidebar() {
   }, [menuOpen])
 
   return (
-    <aside className="flex h-screen w-60 flex-col bg-[#1175E4] text-white flex-shrink-0">
+    <aside className="flex h-screen w-60 flex-col bg-[var(--brand-primary)] text-white flex-shrink-0">
       {/* Logo */}
       <div className="border-b border-white/15 px-5 py-7">
         <Image
@@ -130,18 +130,18 @@ export function CustomerSidebar() {
 
         {/* Dropdown */}
         {menuOpen && (
-          <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg bg-white py-1 shadow-lg">
+          <div className="absolute bottom-full left-3 right-3 mb-1 rounded-lg bg-popover py-1 shadow-lg ring-1 ring-foreground/10">
             <button
               onClick={() => { setMenuOpen(false); router.push('/portal/settings') }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
             >
               {iconMap['user-avatar'] ? (() => { const I = iconMap['user-avatar']; return <I size={16} /> })() : null}
               Profile & Settings
             </button>
-            <div className="mx-3 my-1 border-t border-slate-100" />
+            <div className="mx-3 my-1 border-t border-border" />
             <button
               onClick={async () => { await signOut(); router.replace('/login') }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
             >
               {iconMap['logout'] ? (() => { const I = iconMap['logout']; return <I size={16} /> })() : null}
               Logout

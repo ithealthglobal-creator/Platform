@@ -362,7 +362,7 @@ export default function SlaTemplatesPage() {
                 type="checkbox"
                 checked={form.is_active}
                 onChange={(e) => updateField('is_active', e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-border"
               />
               <Label htmlFor="sla-active">Active</Label>
             </div>

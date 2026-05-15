@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { name, company_name, email, assessment_id, answers } = body
+    const { name, company_name, email, assessment_id, answers, lead_source } = body
 
     // 1. Validate required fields
     if (!name || !company_name || !email || !assessment_id || !answers) {
@@ -173,7 +173,45 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 9. Create sales lead in the first active sales stage
+    // 9. Resolve Meta ad/campaign FKs from URL params (best-effort)
+    const source = (lead_source ?? {}) as {
+      utm_source?: string | null
+      utm_medium?: string | null
+      utm_campaign?: string | null
+      utm_content?: string | null
+      utm_term?: string | null
+      meta_ad_id?: string | null
+      meta_campaign_id?: string | null
+      landing_path?: string | null
+      referrer?: string | null
+    }
+
+    let resolvedMetaAdId: string | null = null
+    let resolvedMetaCampaignId: string | null = null
+
+    if (source.meta_ad_id) {
+      const { data: ad } = await supabaseAdmin
+        .from('meta_ads')
+        .select('id, ad_set:meta_ad_sets(campaign_id)')
+        .eq('meta_ad_id', source.meta_ad_id)
+        .maybeSingle()
+      if (ad) {
+        resolvedMetaAdId = ad.id
+        const adSet = (ad as unknown as { ad_set?: { campaign_id?: string } }).ad_set
+        if (adSet?.campaign_id) resolvedMetaCampaignId = adSet.campaign_id
+      }
+    }
+
+    if (!resolvedMetaCampaignId && source.meta_campaign_id) {
+      const { data: campaign } = await supabaseAdmin
+        .from('meta_campaigns')
+        .select('id')
+        .eq('meta_campaign_id', source.meta_campaign_id)
+        .maybeSingle()
+      if (campaign) resolvedMetaCampaignId = campaign.id
+    }
+
+    // 10. Create sales lead in the first active sales stage
     const { data: firstStage } = await supabaseAdmin
       .from('sales_stages')
       .select('id')
@@ -189,6 +227,15 @@ export async function POST(request: NextRequest) {
         assessment_attempt_id: attempt.id,
         contact_name: name,
         contact_email: email,
+        utm_source: source.utm_source ?? null,
+        utm_medium: source.utm_medium ?? null,
+        utm_campaign: source.utm_campaign ?? null,
+        utm_content: source.utm_content ?? null,
+        utm_term: source.utm_term ?? null,
+        landing_path: source.landing_path ?? null,
+        referrer: source.referrer ?? null,
+        meta_ad_id: resolvedMetaAdId,
+        meta_campaign_id: resolvedMetaCampaignId,
       })
     }
 

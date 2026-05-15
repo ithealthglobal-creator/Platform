@@ -195,7 +195,7 @@ export default function NewAssessmentPage() {
             value={formJourneyThreshold}
             onChange={(e) => setFormJourneyThreshold(e.target.value)}
           />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-muted-foreground">
             Services scoring below this % appear in the customer journey
           </p>
         </div>

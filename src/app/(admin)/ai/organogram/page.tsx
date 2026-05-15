@@ -35,6 +35,13 @@ interface SelectedAgent {
   ai_agent_tools?: Array<{ tool_name: string; operations: string[] | null }>
 }
 
+const LEGEND: Array<{ label: string; accent: string }> = [
+  { label: 'King', accent: '#F59E0B' },
+  { label: 'Department', accent: '#3B82F6' },
+  { label: 'Manager', accent: '#EC4899' },
+  { label: 'Worker', accent: '#475569' },
+]
+
 export default function OrganogramPage() {
   const [agents, setAgents] = useState<AgentWithHierarchy[]>([])
   const [loading, setLoading] = useState(true)
@@ -46,7 +53,9 @@ export default function OrganogramPage() {
 
       const { data, error } = await supabase
         .from('ai_agents')
-        .select('*, ai_agent_hierarchy(*), ai_agent_tools(tool_name, operations)')
+        .select(
+          '*, ai_agent_hierarchy!ai_agent_hierarchy_agent_id_fkey(*), ai_agent_tools(tool_name, operations)'
+        )
         .order('name')
 
       if (error) {
@@ -55,9 +64,11 @@ export default function OrganogramPage() {
         return
       }
 
-      // Normalise the hierarchy relation (comes back as array from supabase)
       const normalised: AgentWithHierarchy[] = (data ?? []).map((row: any) => {
-        const hierarchyRows: any[] = row.ai_agent_hierarchy ?? []
+        // With the explicit !ai_agent_hierarchy_agent_id_fkey hint, PostgREST
+        // returns the row as a single object on a one-to-one embed (or null).
+        const h = row.ai_agent_hierarchy
+        const hierarchyRow = Array.isArray(h) ? h[0] : h
         return {
           id: row.id,
           name: row.name,
@@ -67,11 +78,11 @@ export default function OrganogramPage() {
           system_prompt: row.system_prompt,
           icon: row.icon,
           is_default: row.is_default,
-          hierarchy: hierarchyRows.length > 0
+          hierarchy: hierarchyRow
             ? {
-                parent_agent_id: hierarchyRows[0].parent_agent_id,
-                hierarchy_level: hierarchyRows[0].hierarchy_level,
-                sort_order: hierarchyRows[0].sort_order ?? 0,
+                parent_agent_id: hierarchyRow.parent_agent_id,
+                hierarchy_level: hierarchyRow.hierarchy_level,
+                sort_order: hierarchyRow.sort_order ?? 0,
               }
             : undefined,
           ai_agent_tools: row.ai_agent_tools ?? [],
@@ -89,43 +100,38 @@ export default function OrganogramPage() {
     setSelectedAgent(agent)
   }
 
+  const assignedCount = agents.filter((a) => a.hierarchy).length
+  const unassignedCount = agents.length - assignedCount
+
   return (
-    <div className="-m-6 h-[calc(100vh-64px)] flex flex-col bg-slate-50 relative overflow-hidden">
+    <div className="-m-6 h-[calc(100vh-64px)] flex flex-col bg-muted/50 relative overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-6 py-3 bg-white border-b flex-shrink-0">
         <div>
-          <h1 className="text-base font-semibold text-slate-900">Agent Organogram</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Visual hierarchy of your AI agents. Manage assignments via the agent edit page.
+          <h1 className="text-base font-semibold text-foreground">Agent Organogram</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {loading
+              ? 'Loading…'
+              : `${assignedCount} assigned · ${unassignedCount} unassigned · drag to pan, ⌘/Ctrl + scroll to zoom`}
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#FFB800' }} />
-            King
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#4A90D9' }} />
-            Department
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#E8578A' }} />
-            Manager
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#2D3A5C' }} />
-            Worker
-          </span>
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          {LEGEND.map((item) => (
+            <span key={item.label} className="flex items-center gap-1.5">
+              <span
+                className="w-1 h-3.5 rounded-sm inline-block"
+                style={{ background: item.accent }}
+              />
+              {item.label}
+            </span>
+          ))}
         </div>
       </div>
 
       {/* Chart area */}
-      <div
-        className="flex-1 overflow-auto p-6"
-        style={{ marginRight: selectedAgent ? 350 : 0, transition: 'margin-right 0.3s ease' }}
-      >
+      <div className="flex-1 relative overflow-hidden">
         {loading ? (
-          <div className="flex items-center justify-center h-full text-sm text-slate-500">
+          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
             Loading agents…
           </div>
         ) : (
