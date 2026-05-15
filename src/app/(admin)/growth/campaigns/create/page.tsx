@@ -1,4 +1,4 @@
-// src/app/(admin)/growth/ads/create/page.tsx
+// src/app/(admin)/growth/campaigns/create/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -105,7 +105,7 @@ export default function CreateWizardPage() {
           return
         }
         toast.success('Campaign updated')
-        router.push('/growth/ads')
+        router.push('/growth/campaigns')
       } catch {
         toast.error('Failed to update campaign')
       } finally {
@@ -228,7 +228,7 @@ export default function CreateWizardPage() {
       }
 
       toast.success('Campaign, ad set, and ad created successfully')
-      router.push('/growth/ads')
+      router.push('/growth/campaigns')
     } catch {
       toast.error('An error occurred during creation')
     } finally {
@@ -251,7 +251,7 @@ export default function CreateWizardPage() {
         <CampaignForm
           initialData={initialCampaignData}
           onSubmit={handleCampaignSubmit}
-          onCancel={() => router.push('/growth/ads')}
+          onCancel={() => router.push('/growth/campaigns')}
           nextLabel={isEdit ? 'Save Changes' : 'Next: Ad Set'}
         />
       )}
@@ -259,7 +259,7 @@ export default function CreateWizardPage() {
         <AdSetForm
           onSubmit={handleAdSetSubmit}
           onBack={() => setStep(0)}
-          onCancel={() => router.push('/growth/ads')}
+          onCancel={() => router.push('/growth/campaigns')}
         />
       )}
       {step === 2 && (
@@ -267,7 +267,7 @@ export default function CreateWizardPage() {
           <AdForm
             onSubmit={handleAdSubmit}
             onBack={() => setStep(1)}
-            onCancel={() => router.push('/growth/ads')}
+            onCancel={() => router.push('/growth/campaigns')}
             submitLabel={submitting ? 'Creating...' : 'Create Campaign'}
           />
         </div>

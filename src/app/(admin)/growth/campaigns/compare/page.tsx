@@ -1,4 +1,4 @@
-// src/app/(admin)/growth/ads/compare/page.tsx
+// src/app/(admin)/growth/campaigns/compare/page.tsx
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
@@ -110,7 +110,7 @@ export default function ComparePage() {
     <div>
       {/* Breadcrumb */}
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-6">
-        <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/ads')}>Ads</span>
+        <span className="cursor-pointer hover:text-foreground" onClick={() => router.push('/growth/campaigns')}>Campaigns</span>
         <ChevronRight size={14} />
         <span className="text-foreground font-medium">Compare ({ads.length} ads)</span>
       </div>
