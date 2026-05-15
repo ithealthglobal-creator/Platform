@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useRef, useState, useCallback, useEffect } from 'react'
+import { Add, Subtract, FitToScreen } from '@carbon/icons-react'
 import { OrgNode, OrgNodeAgent } from './org-node'
 
 type HierarchyLevel = 'king' | 'department' | 'manager' | 'worker'
@@ -18,197 +19,384 @@ interface OrgChartProps {
   onNodeClick: (agent: AgentWithHierarchy) => void
 }
 
-interface PositionedNode {
+interface TreeNode {
   agent: AgentWithHierarchy
+  level: HierarchyLevel
+  children: TreeNode[]
+  width: number
   x: number
   y: number
-  level: HierarchyLevel
+  depth: number
 }
 
-const H_SPACING = 200
-const V_SPACING = 120
-const NODE_WIDTH = 180
-const NODE_HEIGHT = 60
+const NODE_WIDTH = 200
+const NODE_HEIGHT = 64
+const H_GAP = 32
+const V_GAP = 80
 const PADDING = 60
-const TRAY_LABEL_HEIGHT = 28
+const TRAY_LABEL_HEIGHT = 32
 
-function getHierarchyLevel(levelStr: string): HierarchyLevel {
+function getHierarchyLevel(levelStr: string | undefined): HierarchyLevel {
   switch (levelStr) {
-    case 'king': return 'king'
-    case 'department': return 'department'
-    case 'manager': return 'manager'
-    case 'worker': return 'worker'
-    default: return 'worker'
+    case 'king':
+    case 'department':
+    case 'manager':
+    case 'worker':
+      return levelStr
+    default:
+      return 'worker'
   }
 }
 
+function levelFromDepth(depth: number): HierarchyLevel {
+  // Fallback when hierarchy_level is missing or inconsistent
+  if (depth === 0) return 'king'
+  if (depth === 1) return 'department'
+  if (depth === 2) return 'manager'
+  return 'worker'
+}
+
 export function OrgChart({ agents, onNodeClick }: OrgChartProps) {
-  const { positions, connections, unassigned, viewBox } = useMemo(() => {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 })
+  const [isPanning, setIsPanning] = useState(false)
+  const panStart = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null)
+
+  const { trees, unassigned, svgWidth, svgHeight, trayY, trayNodesPerRow } = useMemo(() => {
     const assigned = agents.filter((a) => a.hierarchy)
     const unassigned = agents.filter((a) => !a.hierarchy)
 
-    // Sort assigned agents by sort_order
-    assigned.sort((a, b) => (a.hierarchy!.sort_order ?? 0) - (b.hierarchy!.sort_order ?? 0))
-
-    // Build a map: id -> agent
-    const agentMap = new Map(assigned.map((a) => [a.id, a]))
-
-    // Group by level
-    const byLevel: Record<HierarchyLevel, AgentWithHierarchy[]> = {
-      king: [],
-      department: [],
-      manager: [],
-      worker: [],
-    }
+    // Build child map
+    const childMap = new Map<string | null, AgentWithHierarchy[]>()
     for (const a of assigned) {
-      const lvl = getHierarchyLevel(a.hierarchy!.hierarchy_level)
-      byLevel[lvl].push(a)
+      const pid = a.hierarchy!.parent_agent_id
+      if (!childMap.has(pid)) childMap.set(pid, [])
+      childMap.get(pid)!.push(a)
+    }
+    // Sort children by sort_order then name
+    for (const arr of childMap.values()) {
+      arr.sort((a, b) => {
+        const so = (a.hierarchy!.sort_order ?? 0) - (b.hierarchy!.sort_order ?? 0)
+        if (so !== 0) return so
+        return a.name.localeCompare(b.name)
+      })
     }
 
-    // Determine level row indices
-    const levelOrder: HierarchyLevel[] = ['king', 'department', 'manager', 'worker']
-    const activeLevels = levelOrder.filter((l) => byLevel[l].length > 0)
-
-    // Position nodes row by row, grouping children under parents
-    const positions: PositionedNode[] = []
-    const posMap = new Map<string, PositionedNode>()
-
-    // Place each level
-    activeLevels.forEach((lvl, rowIdx) => {
-      const nodes = byLevel[lvl]
-      const y = PADDING + rowIdx * (NODE_HEIGHT + V_SPACING) + NODE_HEIGHT / 2
-
-      // For each node in this level, try to center under parent
-      // First pass: assign tentative x based on sorted order
-      const count = nodes.length
-      const totalWidth = (count - 1) * H_SPACING
-      const startX = PADDING + NODE_WIDTH / 2 + totalWidth / 2
-
-      // Center the whole row
-      nodes.forEach((agent, colIdx) => {
-        const x = PADDING + NODE_WIDTH / 2 + colIdx * H_SPACING
-        const positioned: PositionedNode = { agent, x, y, level: lvl }
-        positions.push(positioned)
-        posMap.set(agent.id, positioned)
-      })
+    // Roots = anything whose parent_agent_id is null OR whose parent isn't in the set
+    const assignedIds = new Set(assigned.map((a) => a.id))
+    const rootAgents = assigned.filter((a) => {
+      const pid = a.hierarchy!.parent_agent_id
+      return pid === null || !assignedIds.has(pid)
+    })
+    rootAgents.sort((a, b) => {
+      const so = (a.hierarchy!.sort_order ?? 0) - (b.hierarchy!.sort_order ?? 0)
+      if (so !== 0) return so
+      return a.name.localeCompare(b.name)
     })
 
-    // Compute connections
-    const connections: Array<{ x1: number; y1: number; x2: number; y2: number }> = []
-    for (const agent of assigned) {
-      const parentId = agent.hierarchy!.parent_agent_id
-      if (!parentId) continue
-      const parentPos = posMap.get(parentId)
-      const childPos = posMap.get(agent.id)
-      if (!parentPos || !childPos) continue
-      connections.push({
-        x1: parentPos.x,
-        y1: parentPos.y + NODE_HEIGHT / 2,
-        x2: childPos.x,
-        y2: childPos.y - NODE_HEIGHT / 2,
-      })
+    // Build tree recursively with cycle guard
+    function buildTree(agent: AgentWithHierarchy, depth: number, seen: Set<string>): TreeNode {
+      if (seen.has(agent.id)) {
+        return {
+          agent,
+          level: getHierarchyLevel(agent.hierarchy?.hierarchy_level) || levelFromDepth(depth),
+          children: [],
+          width: NODE_WIDTH,
+          x: 0,
+          y: 0,
+          depth,
+        }
+      }
+      const nextSeen = new Set(seen)
+      nextSeen.add(agent.id)
+      const kids = (childMap.get(agent.id) ?? []).map((c) => buildTree(c, depth + 1, nextSeen))
+      const childrenWidth = kids.reduce((sum, k) => sum + k.width, 0) + Math.max(0, kids.length - 1) * H_GAP
+      const width = Math.max(NODE_WIDTH, childrenWidth)
+      const level = agent.hierarchy?.hierarchy_level
+        ? getHierarchyLevel(agent.hierarchy.hierarchy_level)
+        : levelFromDepth(depth)
+      return { agent, level, children: kids, width, x: 0, y: 0, depth }
     }
 
-    // Compute viewBox dimensions
-    const allX = positions.map((p) => p.x)
-    const allY = positions.map((p) => p.y)
+    const trees: TreeNode[] = rootAgents.map((r) => buildTree(r, 0, new Set()))
 
-    const maxTreeX = allX.length > 0 ? Math.max(...allX) + NODE_WIDTH / 2 + PADDING : PADDING * 2 + NODE_WIDTH
-    const maxTreeY = allY.length > 0 ? Math.max(...allY) + NODE_HEIGHT / 2 + PADDING : PADDING * 2 + NODE_HEIGHT
+    // Assign coordinates (DFS): parent centered above its children span
+    function layout(node: TreeNode, leftX: number, depth: number) {
+      node.y = PADDING + depth * (NODE_HEIGHT + V_GAP) + NODE_HEIGHT / 2
+      if (node.children.length === 0) {
+        node.x = leftX + node.width / 2
+        return
+      }
+      let cursor = leftX
+      for (const child of node.children) {
+        layout(child, cursor, depth + 1)
+        cursor += child.width + H_GAP
+      }
+      const first = node.children[0]
+      const last = node.children[node.children.length - 1]
+      node.x = (first.x + last.x) / 2
+    }
 
-    // Unassigned tray occupies its own row at the bottom
-    const trayY = maxTreeY + (unassigned.length > 0 ? TRAY_LABEL_HEIGHT + V_SPACING : 0)
-    const trayTotalWidth = unassigned.length > 0
-      ? (unassigned.length - 1) * H_SPACING + NODE_WIDTH + PADDING * 2
+    let forestLeft = PADDING
+    let maxDepth = 0
+    for (const t of trees) {
+      layout(t, forestLeft, 0)
+      forestLeft += t.width + H_GAP * 2
+      const dive = (n: TreeNode) => {
+        if (n.depth > maxDepth) maxDepth = n.depth
+        n.children.forEach(dive)
+      }
+      dive(t)
+    }
+
+    const treeTotalWidth = trees.length > 0
+      ? trees.reduce((sum, t) => sum + t.width, 0) + Math.max(0, trees.length - 1) * H_GAP * 2 + PADDING * 2
+      : PADDING * 2 + NODE_WIDTH
+
+    const treeBottom = trees.length > 0
+      ? PADDING + (maxDepth + 1) * (NODE_HEIGHT + V_GAP) - V_GAP + PADDING
+      : PADDING * 2 + NODE_HEIGHT
+
+    // Unassigned tray: wrap across rows if needed
+    const trayNodesPerRow = Math.max(
+      1,
+      Math.floor((treeTotalWidth - PADDING * 2 + H_GAP) / (NODE_WIDTH + H_GAP))
+    )
+    const trayRows = Math.ceil(unassigned.length / trayNodesPerRow)
+    const trayHeight = unassigned.length > 0
+      ? TRAY_LABEL_HEIGHT + trayRows * NODE_HEIGHT + Math.max(0, trayRows - 1) * (V_GAP / 2) + PADDING
       : 0
-    const svgWidth = Math.max(maxTreeX, trayTotalWidth)
-    const svgHeight = unassigned.length > 0 ? trayY + NODE_HEIGHT + PADDING : maxTreeY
 
-    const viewBox = `0 0 ${svgWidth} ${svgHeight}`
+    const trayY = treeBottom
 
-    return { positions, connections, unassigned, viewBox, trayY }
+    const svgWidth = Math.max(
+      treeTotalWidth,
+      unassigned.length > 0
+        ? PADDING * 2 + Math.min(unassigned.length, trayNodesPerRow) * NODE_WIDTH + Math.max(0, Math.min(unassigned.length, trayNodesPerRow) - 1) * H_GAP
+        : 0
+    )
+    const svgHeight = treeBottom + trayHeight
+
+    return { trees, unassigned, svgWidth, svgHeight, trayY, trayNodesPerRow }
   }, [agents])
 
-  // Recalculate trayY for render
-  const trayY = useMemo(() => {
-    const allY = positions.map((p) => p.y)
-    const maxTreeY = allY.length > 0 ? Math.max(...allY) + NODE_HEIGHT / 2 + PADDING : PADDING * 2 + NODE_HEIGHT
-    return maxTreeY + (unassigned.length > 0 ? TRAY_LABEL_HEIGHT + V_SPACING : 0)
-  }, [positions, unassigned])
+  // Flatten trees into render lists
+  const { nodes, connections } = useMemo(() => {
+    const nodes: TreeNode[] = []
+    const connections: Array<{ id: string; d: string }> = []
+
+    const walk = (n: TreeNode) => {
+      nodes.push(n)
+      for (const c of n.children) {
+        // Orthogonal elbow: down from parent, horizontal at midline, down to child
+        const startX = n.x
+        const startY = n.y + NODE_HEIGHT / 2
+        const endX = c.x
+        const endY = c.y - NODE_HEIGHT / 2
+        const midY = startY + (endY - startY) / 2
+        const d = `M ${startX} ${startY} L ${startX} ${midY} L ${endX} ${midY} L ${endX} ${endY}`
+        connections.push({ id: `${n.agent.id}->${c.agent.id}`, d })
+        walk(c)
+      }
+    }
+    for (const t of trees) walk(t)
+    return { nodes, connections }
+  }, [trees])
+
+  // Pan handlers
+  const onMouseDown = useCallback((e: React.MouseEvent) => {
+    if (e.button !== 0) return
+    const target = e.target as HTMLElement
+    if (target.closest('.org-node')) return // don't pan when clicking a node
+    setIsPanning(true)
+    panStart.current = { x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y }
+  }, [transform.x, transform.y])
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isPanning || !panStart.current) return
+    const dx = e.clientX - panStart.current.x
+    const dy = e.clientY - panStart.current.y
+    setTransform((t) => ({ ...t, x: panStart.current!.tx + dx, y: panStart.current!.ty + dy }))
+  }, [isPanning])
+
+  const onMouseUp = useCallback(() => {
+    setIsPanning(false)
+    panStart.current = null
+  }, [])
+
+  const onWheel = useCallback((e: React.WheelEvent) => {
+    if (!e.ctrlKey && !e.metaKey) return
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? 0.9 : 1.1
+    setTransform((t) => {
+      const next = Math.min(2, Math.max(0.3, t.scale * delta))
+      return { ...t, scale: next }
+    })
+  }, [])
+
+  const zoomIn = () => setTransform((t) => ({ ...t, scale: Math.min(2, t.scale * 1.2) }))
+  const zoomOut = () => setTransform((t) => ({ ...t, scale: Math.max(0.3, t.scale / 1.2) }))
+
+  const fitToScreen = useCallback(() => {
+    const el = containerRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const scaleX = (rect.width - 80) / svgWidth
+    const scaleY = (rect.height - 80) / svgHeight
+    const scale = Math.min(1, Math.min(scaleX, scaleY))
+    const x = (rect.width - svgWidth * scale) / 2
+    const y = 40
+    setTransform({ x, y, scale })
+  }, [svgWidth, svgHeight])
+
+  // Initial fit once data is laid out
+  useEffect(() => {
+    if (agents.length === 0) return
+    const id = window.requestAnimationFrame(() => fitToScreen())
+    return () => window.cancelAnimationFrame(id)
+  }, [agents.length, fitToScreen])
 
   if (agents.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground text-sm">
+      <div className="flex items-center justify-center h-full text-sm text-slate-500">
         No agents to display
       </div>
     )
   }
 
   return (
-    <svg
-      viewBox={viewBox}
-      style={{ width: '100%', height: '100%', minHeight: 400 }}
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden bg-slate-50"
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onMouseLeave={onMouseUp}
+      onWheel={onWheel}
+      style={{ cursor: isPanning ? 'grabbing' : 'grab' }}
     >
-      {/* Connection lines */}
-      {connections.map((c, i) => (
-        <line
-          key={i}
-          x1={c.x1}
-          y1={c.y1}
-          x2={c.x2}
-          y2={c.y2}
-          stroke="#CBD5E1"
-          strokeWidth={2}
-          strokeLinecap="round"
-        />
-      ))}
+      {/* Dot grid background */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'radial-gradient(circle, #CBD5E1 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+          opacity: 0.35,
+        }}
+      />
 
-      {/* Positioned nodes */}
-      {positions.map((pos) => (
-        <OrgNode
-          key={pos.agent.id}
-          agent={pos.agent}
-          level={pos.level}
-          x={pos.x}
-          y={pos.y}
-          onClick={onNodeClick}
-        />
-      ))}
-
-      {/* Unassigned tray */}
-      {unassigned.length > 0 && (
-        <>
-          <text
-            x={PADDING}
-            y={trayY - TRAY_LABEL_HEIGHT}
-            fontSize={12}
-            fontFamily="Poppins, sans-serif"
-            fill="#94A3B8"
-            fontWeight={500}
-          >
-            Unassigned
-          </text>
-          <line
-            x1={PADDING}
-            y1={trayY - TRAY_LABEL_HEIGHT + 18}
-            x2={PADDING + 100}
-            y2={trayY - TRAY_LABEL_HEIGHT + 18}
-            stroke="#E2E8F0"
-            strokeWidth={1}
-          />
-          {unassigned.map((agent, idx) => (
-            <OrgNode
-              key={agent.id}
-              agent={agent}
-              level="worker"
-              x={PADDING + NODE_WIDTH / 2 + idx * H_SPACING}
-              y={trayY + NODE_HEIGHT / 2}
-              onClick={onNodeClick}
-            />
+      <svg
+        width={svgWidth}
+        height={svgHeight}
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+          transformOrigin: '0 0',
+          transition: isPanning ? 'none' : 'transform 0.15s ease-out',
+        }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* Connections */}
+        <g fill="none" stroke="#94A3B8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+          {connections.map((c) => (
+            <path key={c.id} d={c.d} />
           ))}
-        </>
-      )}
-    </svg>
+        </g>
+
+        {/* Nodes */}
+        {nodes.map((n) => (
+          <OrgNode
+            key={n.agent.id}
+            agent={n.agent}
+            level={n.level}
+            x={n.x}
+            y={n.y}
+            onClick={onNodeClick}
+          />
+        ))}
+
+        {/* Unassigned tray */}
+        {unassigned.length > 0 && (
+          <g>
+            <line
+              x1={PADDING}
+              y1={trayY + TRAY_LABEL_HEIGHT / 2}
+              x2={svgWidth - PADDING}
+              y2={trayY + TRAY_LABEL_HEIGHT / 2}
+              stroke="#E2E8F0"
+              strokeWidth={1}
+              strokeDasharray="4 4"
+            />
+            <text
+              x={PADDING}
+              y={trayY + TRAY_LABEL_HEIGHT / 2 - 6}
+              fontSize={11}
+              fontFamily="Poppins, sans-serif"
+              fill="#94A3B8"
+              fontWeight={500}
+              textTransform="uppercase"
+              letterSpacing="0.05em"
+            >
+              Unassigned ({unassigned.length})
+            </text>
+            {unassigned.map((agent, idx) => {
+              const row = Math.floor(idx / trayNodesPerRow)
+              const col = idx % trayNodesPerRow
+              const x = PADDING + NODE_WIDTH / 2 + col * (NODE_WIDTH + H_GAP)
+              const y = trayY + TRAY_LABEL_HEIGHT + NODE_HEIGHT / 2 + row * (NODE_HEIGHT + V_GAP / 2)
+              return (
+                <OrgNode
+                  key={agent.id}
+                  agent={agent}
+                  level="worker"
+                  x={x}
+                  y={y}
+                  onClick={onNodeClick}
+                  muted
+                />
+              )
+            })}
+          </g>
+        )}
+      </svg>
+
+      {/* Zoom controls */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-white border border-slate-200 rounded-md shadow-sm">
+        <button
+          type="button"
+          onClick={zoomIn}
+          className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-label="Zoom in"
+        >
+          <Add size={16} />
+        </button>
+        <div className="border-t border-slate-200" />
+        <button
+          type="button"
+          onClick={zoomOut}
+          className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-label="Zoom out"
+        >
+          <Subtract size={16} />
+        </button>
+        <div className="border-t border-slate-200" />
+        <button
+          type="button"
+          onClick={fitToScreen}
+          className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+          aria-label="Fit to screen"
+        >
+          <FitToScreen size={16} />
+        </button>
+      </div>
+
+      {/* Zoom indicator */}
+      <div className="absolute bottom-4 left-4 text-xs text-slate-500 bg-white border border-slate-200 rounded-md px-2 py-1 shadow-sm">
+        {Math.round(transform.scale * 100)}%
+      </div>
+    </div>
   )
 }
