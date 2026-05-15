@@ -3,6 +3,7 @@ from tools.supabase_crud import generate_crud_tools, ALLOWED_TABLES
 from tools.web_search import web_search
 from tools.knowledge import build_knowledge_tools
 from tools.dashboard import build_dashboard_tools
+from tools.agent_admin import generate_agent_admin_tool
 
 
 def build_tools_for_agent(
@@ -33,6 +34,10 @@ def build_tools_for_agent(
             knowledge_tool_names.append(row["tool_name"])
         elif row["tool_type"] == "dashboard":
             dashboard_tool_names.append(row["tool_name"])
+        elif row["tool_type"] == "agent_admin":
+            t = generate_agent_admin_tool(row["tool_name"])
+            if t is not None:
+                tools.append(t)
 
     if knowledge_tool_names and company_id:
         tools.extend(

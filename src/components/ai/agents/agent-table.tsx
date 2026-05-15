@@ -19,6 +19,7 @@ export interface AgentRow {
   description: string | null
   agent_type: 'specialist' | 'orchestrator'
   model: string | null
+  icon: string | null
   is_active: boolean
   is_default: boolean
   ai_agent_tools: { count: number }[]
