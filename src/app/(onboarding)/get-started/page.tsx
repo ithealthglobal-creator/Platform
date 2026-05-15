@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Assessment, AssessmentQuestion, Phase } from '@/lib/types'
+import { captureUtmFromUrl, trackEvent } from '@/lib/funnel-tracking'
 
 type WizardStep = 'loading' | 'welcome' | 'assessment' | 'details' | 'confirmation' | 'error'
 
@@ -32,6 +33,34 @@ export default function GetStartedPage() {
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmedEmail, setConfirmedEmail] = useState('')
+  const previousStep = useRef<WizardStep | null>(null)
+
+  useEffect(() => {
+    captureUtmFromUrl()
+    trackEvent({ eventType: 'page_view' }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    if (step === 'loading' || step === 'error') {
+      previousStep.current = step
+      return
+    }
+
+    const prev = previousStep.current
+    if (prev && prev !== 'loading' && prev !== 'error' && prev !== step) {
+      trackEvent({
+        eventType: 'step_completed',
+        stepKey: prev as 'welcome' | 'assessment' | 'details' | 'confirmation',
+      }).catch(() => {})
+    }
+
+    trackEvent({
+      eventType: 'step_entered',
+      stepKey: step as 'welcome' | 'assessment' | 'details' | 'confirmation',
+    }).catch(() => {})
+
+    previousStep.current = step
+  }, [step])
 
   useEffect(() => {
     async function fetchData() {
@@ -170,6 +199,14 @@ export default function GetStartedPage() {
         const data = await res.json().catch(() => ({}))
         toast.error(data.error ?? 'Something went wrong. Please try again.')
         return
+      }
+
+      trackEvent({ eventType: 'lead_created' }).catch(() => {})
+      const dominantPhase = liveScores.phaseScores.length > 0
+        ? liveScores.phaseScores.reduce((min, p) => (p.score < min.score ? p : min), liveScores.phaseScores[0])
+        : null
+      if (dominantPhase) {
+        trackEvent({ eventType: 'phase_assigned', phaseId: dominantPhase.id }).catch(() => {})
       }
 
       setConfirmedEmail(email)
