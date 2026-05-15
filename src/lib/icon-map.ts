@@ -32,6 +32,7 @@ import {
   FolderOpen,
   Document,
   DocumentBlank,
+  Template,
 } from '@carbon/icons-react'
 import { ComponentType } from 'react'
 
@@ -69,4 +70,5 @@ export const iconMap: Record<string, ComponentType<{ size?: number; className?: 
   'folder-open': FolderOpen,
   'document': Document,
   'document-blank': DocumentBlank,
+  'template': Template,
 }
