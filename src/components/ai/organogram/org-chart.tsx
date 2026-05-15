@@ -63,8 +63,28 @@ export function OrgChart({ agents, onNodeClick }: OrgChartProps) {
   const panStart = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null)
 
   const { trees, unassigned, svgWidth, svgHeight, trayY, trayNodesPerRow } = useMemo(() => {
-    const assigned = agents.filter((a) => a.hierarchy)
-    const unassigned = agents.filter((a) => !a.hierarchy)
+    // Hoist orphan parents: if an agent's hierarchy.parent_agent_id points to
+    // another agent that exists in ai_agents but has no hierarchy row, synthesize
+    // a hierarchy entry for the parent so it appears in the tree instead of its
+    // children popping up as orphan roots.
+    const hoisted: AgentWithHierarchy[] = agents.map((a) => {
+      if (a.hierarchy) return a
+      const referencedAsParent = agents.some(
+        (c) => c.hierarchy?.parent_agent_id === a.id
+      )
+      if (!referencedAsParent) return a
+      return {
+        ...a,
+        hierarchy: {
+          parent_agent_id: null,
+          hierarchy_level: 'department',
+          sort_order: 999,
+        },
+      }
+    })
+
+    const assigned = hoisted.filter((a) => a.hierarchy)
+    const unassigned = hoisted.filter((a) => !a.hierarchy)
 
     // Build child map
     const childMap = new Map<string | null, AgentWithHierarchy[]>()
