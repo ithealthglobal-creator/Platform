@@ -26,9 +26,15 @@ export function MegaMenu() {
 
   if (pathname.startsWith('/settings')) return null
 
-  const activeL1 = menuTree.find(item =>
-    item.level === 1 && pathname.startsWith(item.route || '')
-  )
+  const routeMatches = (route: string | null | undefined) =>
+    !!route && (pathname === route || pathname.startsWith(route + '/'))
+
+  const subtreeMatches = (node: MenuItem): boolean => {
+    if (routeMatches(node.route)) return true
+    return (node.children ?? []).some(subtreeMatches)
+  }
+
+  const activeL1 = menuTree.find(item => item.level === 1 && subtreeMatches(item))
 
   if (!activeL1) return <div className="h-12 border-b bg-white" />
 
