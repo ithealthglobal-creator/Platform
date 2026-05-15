@@ -1,4 +1,4 @@
-// src/app/(admin)/growth/ads/[campaignId]/[adSetId]/create-ad/page.tsx
+// src/app/(admin)/growth/campaigns/[campaignId]/[adSetId]/create-ad/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -108,7 +108,7 @@ export default function CreateAdPage() {
         toast.success('Ad created')
       }
 
-      router.push(`/growth/ads/${campaignId}/${adSetId}`)
+      router.push(`/growth/campaigns/${campaignId}/${adSetId}`)
     } catch {
       toast.error('An error occurred')
     } finally {
@@ -129,7 +129,7 @@ export default function CreateAdPage() {
         <AdForm
           initialData={initialAdData}
           onSubmit={handleSubmit}
-          onCancel={() => router.push(`/growth/ads/${campaignId}/${adSetId}`)}
+          onCancel={() => router.push(`/growth/campaigns/${campaignId}/${adSetId}`)}
           submitLabel={submitting ? (isEdit ? 'Saving...' : 'Creating...') : (isEdit ? 'Save Changes' : 'Create Ad')}
         />
       </div>

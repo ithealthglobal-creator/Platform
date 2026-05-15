@@ -160,7 +160,7 @@ export default function CampaignsPage() {
               Last synced {timeAgo(lastSynced)}
             </div>
           )}
-          <Button onClick={() => router.push('/growth/ads/create')}>
+          <Button onClick={() => router.push('/growth/campaigns/create')}>
             <Add size={16} />
             Create Campaign
           </Button>
@@ -243,7 +243,7 @@ export default function CampaignsPage() {
                       )}
                       <button
                         title="Edit"
-                        onClick={() => router.push(`/growth/ads/create?edit=${campaign.id}`)}
+                        onClick={() => router.push(`/growth/campaigns/create?edit=${campaign.id}`)}
                         className="p-1.5 rounded hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                       >
                         <Edit size={16} />
