@@ -121,7 +121,7 @@ export default function SalesDealsPage() {
             Leads captured from landing pages, moving through your sales funnel.
           </p>
         </div>
-        <Button variant="outline" render={<Link href="/settings/sales-funnel" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/settings/sales-funnel" />}>
           <Settings size={16} />
           Edit Funnel
         </Button>
