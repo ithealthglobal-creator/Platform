@@ -40,7 +40,7 @@ export default function AiToolsLayout({ children }: { children: React.ReactNode 
         </ul>
       </nav>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50 p-6">{children}</div>
+      <div className="flex-1 overflow-y-auto bg-muted/50 p-6">{children}</div>
     </div>
   )
 }

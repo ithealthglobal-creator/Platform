@@ -90,16 +90,16 @@ export default function OrganogramPage() {
   }
 
   return (
-    <div className="-m-6 h-[calc(100vh-64px)] flex flex-col bg-slate-50 relative overflow-hidden">
+    <div className="-m-6 h-[calc(100vh-64px)] flex flex-col bg-muted/50 relative overflow-hidden">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-6 py-3 bg-white border-b flex-shrink-0">
         <div>
-          <h1 className="text-base font-semibold text-slate-900">Agent Organogram</h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h1 className="text-base font-semibold text-foreground">Agent Organogram</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Visual hierarchy of your AI agents. Manage assignments via the agent edit page.
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#FFB800' }} />
             King
@@ -125,7 +125,7 @@ export default function OrganogramPage() {
         style={{ marginRight: selectedAgent ? 350 : 0, transition: 'margin-right 0.3s ease' }}
       >
         {loading ? (
-          <div className="flex items-center justify-center h-full text-sm text-slate-500">
+          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
             Loading agents…
           </div>
         ) : (

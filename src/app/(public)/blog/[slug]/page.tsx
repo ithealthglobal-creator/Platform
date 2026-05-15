@@ -73,7 +73,7 @@ export default async function BlogPostPage({
       <ScrollReveal>
       <article className="max-w-3xl mx-auto px-8 py-24">
         {/* Title */}
-        <h1 className="text-3xl md:text-4xl font-bold mb-8">{post.title}</h1>
+        <h1 className="text-3xl md:text-4xl font-light mb-8">{post.title}</h1>
 
         {/* Meta row */}
         <div className="flex items-center gap-8 mb-16">

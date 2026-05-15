@@ -475,11 +475,11 @@ export default function ChatPage() {
       />
 
       {/* Center panel: messages + input */}
-      <div className="flex flex-1 flex-col min-w-0 bg-slate-50">
+      <div className="flex flex-1 flex-col min-w-0 bg-muted/50">
         {/* Agent selector for new chats */}
         {isNewChat && (
           <div className="border-b bg-white px-6 py-3 flex items-center gap-3">
-            <span className="text-sm font-medium text-slate-600 shrink-0">Agent:</span>
+            <span className="text-sm font-medium text-muted-foreground shrink-0">Agent:</span>
             <div className="max-w-xs w-full">
               <AgentSelector value={selectedAgentId} onChange={setSelectedAgentId} />
             </div>

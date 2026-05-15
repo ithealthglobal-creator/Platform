@@ -108,8 +108,8 @@ export default function ExecutionPage() {
             onClick={() => setActiveTab(tab)}
             className={`px-5 py-2.5 text-sm font-medium border-b-2 transition-colors capitalize ${
               activeTab === tab
-                ? 'border-slate-900 text-slate-900'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+                ? 'border-foreground/40 text-foreground'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
             }`}
           >
             {tab === 'live' ? 'Live' : 'History'}
@@ -139,15 +139,15 @@ export default function ExecutionPage() {
           {/* Right: timeline detail */}
           <div className="w-[420px] shrink-0">
             {selectedRunId ? (
-              <div className="rounded-lg border bg-slate-50 p-4 overflow-auto max-h-[calc(100vh-220px)]">
-                <h3 className="text-sm font-semibold text-slate-700 mb-4">
+              <div className="rounded-lg border bg-muted/50 p-4 overflow-auto max-h-[calc(100vh-220px)]">
+                <h3 className="text-sm font-semibold text-foreground mb-4">
                   Execution Steps
                 </h3>
                 <ExecutionTimeline steps={steps} loading={stepsLoading} />
               </div>
             ) : (
-              <div className="rounded-lg border bg-slate-50 p-6 flex items-center justify-center h-48">
-                <p className="text-sm text-slate-400">
+              <div className="rounded-lg border bg-muted/50 p-6 flex items-center justify-center h-48">
+                <p className="text-sm text-muted-foreground">
                   Select a run to view its steps
                 </p>
               </div>

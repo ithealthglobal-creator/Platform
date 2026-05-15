@@ -109,7 +109,7 @@ export default async function BlogPage({
                       {featured.category}
                     </span>
                   )}
-                  <h2 className="text-2xl md:text-3xl font-bold mb-3">
+                  <h2 className="text-2xl md:text-3xl font-light mb-3">
                     {featured.title}
                   </h2>
                   {featured.excerpt && (
