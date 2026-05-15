@@ -59,8 +59,8 @@ export function MegaMenu() {
               }}
               className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-slate-100 text-slate-900'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
               {item.label}
@@ -86,13 +86,13 @@ function MegaMenuDropdown({ l2Item, onNavigate }: { l2Item: MenuItem; onNavigate
   if (!l2Item.children || l2Item.children.length === 0) return null
 
   return (
-    <div className="absolute left-0 right-0 top-12 z-50 border-b bg-white p-4 shadow-lg">
+    <div className="absolute left-0 right-0 top-12 z-50 border-b border-border bg-popover p-4 shadow-lg">
       <div className="flex gap-8">
         {l2Item.children.map(l3 => (
           <div key={l3.id} className="space-y-2">
             <button
               onClick={() => l3.route && onNavigate(l3.route)}
-              className="text-sm font-semibold text-slate-900 hover:underline"
+              className="text-sm font-semibold text-foreground hover:underline"
             >
               {l3.label}
             </button>
@@ -102,7 +102,7 @@ function MegaMenuDropdown({ l2Item, onNavigate }: { l2Item: MenuItem; onNavigate
                   <li key={l4.id}>
                     <button
                       onClick={() => l4.route && onNavigate(l4.route)}
-                      className="text-sm text-slate-600 hover:text-slate-900 hover:underline"
+                      className="text-sm text-muted-foreground hover:text-foreground hover:underline"
                     >
                       {l4.label}
                     </button>

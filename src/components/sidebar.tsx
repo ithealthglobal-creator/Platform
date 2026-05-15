@@ -48,7 +48,7 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] pb-6">
+      <div className="flex h-screen w-[60px] flex-col items-center bg-[var(--sidebar-admin)] pb-6">
         {/* Logo row — same height as MegaMenu (h-12) so the logo aligns with the header tab text */}
         <div className="flex h-12 w-full items-center justify-center">
           <Image
@@ -119,22 +119,22 @@ export function Sidebar() {
 
           {/* Dropdown menu */}
           {menuOpen && (
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-lg bg-white py-1 shadow-lg z-50">
-              <div className="px-3 py-2 border-b border-slate-100">
-                <p className="text-sm font-medium text-slate-800 truncate">{profile?.display_name}</p>
-                <p className="text-xs text-slate-400 truncate">{profile?.email}</p>
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 rounded-lg bg-popover py-1 shadow-lg ring-1 ring-foreground/10 z-50">
+              <div className="px-3 py-2 border-b border-border">
+                <p className="text-sm font-medium text-foreground truncate">{profile?.display_name}</p>
+                <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
               </div>
               <button
                 onClick={() => { setMenuOpen(false); router.push('/settings') }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-muted"
               >
                 {iconMap['user-avatar'] ? (() => { const I = iconMap['user-avatar']; return <I size={16} /> })() : null}
                 Profile & Settings
               </button>
-              <div className="mx-3 my-0.5 border-t border-slate-100" />
+              <div className="mx-3 my-0.5 border-t border-border" />
               <button
                 onClick={async () => { await signOut(); router.replace('/login') }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
               >
                 {iconMap['logout'] ? (() => { const I = iconMap['logout']; return <I size={16} /> })() : null}
                 Logout

@@ -5,6 +5,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* =============================================================
+   IThealth Design System — Colours, Type, Radius, Shadow tokens
+   Source of truth: ithealth-design-system/colors_and_type.css
+   ============================================================= */
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -40,6 +45,8 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
+  /* Radii */
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -47,100 +54,258 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Brand colours surfaced as Tailwind utilities (bg-brand-primary etc) */
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-gold: var(--brand-gold);
   --color-brand-dark: var(--brand-dark);
   --color-brand-footer: var(--brand-footer);
+
+  /* Phase colours (Operate → Secure → Streamline → Accelerate) */
+  --color-phase-operate: var(--phase-operate);
+  --color-phase-secure: var(--phase-secure);
+  --color-phase-streamline: var(--phase-streamline);
+  --color-phase-accelerate: var(--phase-accelerate);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-  /* Brand colour fallbacks */
-  --brand-primary: #1175E4;
-  --brand-secondary: #FF246B;
-  --brand-gold: #EDB600;
-  --brand-dark: #1a1a2e;
-  --brand-footer: #0f0f1e;
-  --phase-operate: #1175E4;
-  --phase-secure: #FF246B;
+  /* ---- 1. BRAND COLOURS — fixed hex, never theme ---- */
+  --brand-primary:   #1175E4;   /* IThealth blue — nav, hero, CTA banner, links, "Operate" */
+  --brand-secondary: #FF246B;   /* IThealth pink — primary CTA, admin sidebar, "Secure" */
+  --brand-gold:      #EDB600;   /* Gold accent — "Accelerate" */
+  --brand-dark:      #1A1A2E;   /* Body text on light, testimonials bg */
+  --brand-footer:    #0F0F1E;   /* Footer bg (almost-black) */
+
+  /* Modernisation phase accents (lock-up with phase icons) */
+  --phase-operate:    #1175E4;
+  --phase-secure:     #FF246B;
   --phase-streamline: #133258;
   --phase-accelerate: #EDB600;
+
+  /* ---- 2. NEUTRAL SCALE (oklch, achromatic — shadcn base-nova) ---- */
+  --neutral-0:   oklch(1 0 0);
+  --neutral-50:  oklch(0.985 0 0);
+  --neutral-100: oklch(0.97 0 0);
+  --neutral-200: oklch(0.922 0 0);
+  --neutral-300: oklch(0.87 0 0);
+  --neutral-400: oklch(0.708 0 0);
+  --neutral-500: oklch(0.556 0 0);
+  --neutral-600: oklch(0.439 0 0);
+  --neutral-700: oklch(0.371 0 0);
+  --neutral-800: oklch(0.269 0 0);
+  --neutral-900: oklch(0.205 0 0);
+  --neutral-950: oklch(0.145 0 0);
+
+  /* ---- 3. SEMANTIC TOKENS — shadcn contract, light mode default ---- */
+  --background:           var(--neutral-0);
+  --foreground:           var(--neutral-950);
+  --card:                 var(--neutral-0);
+  --card-foreground:      var(--neutral-950);
+  --popover:              var(--neutral-0);
+  --popover-foreground:   var(--neutral-950);
+  --primary:              var(--neutral-900);
+  --primary-foreground:   var(--neutral-50);
+  --secondary:            var(--neutral-100);
+  --secondary-foreground: var(--neutral-900);
+  --muted:                var(--neutral-100);
+  --muted-foreground:     var(--neutral-500);
+  --accent:               var(--neutral-100);
+  --accent-foreground:    var(--neutral-900);
+  --destructive:          oklch(0.577 0.245 27.325);
+  --border:               var(--neutral-200);
+  --input:                var(--neutral-200);
+  --ring:                 var(--neutral-400);
+
+  --chart-1: var(--neutral-300);
+  --chart-2: var(--neutral-500);
+  --chart-3: var(--neutral-600);
+  --chart-4: var(--neutral-700);
+  --chart-5: var(--neutral-800);
+
+  /* shadcn sidebar slot (kept neutral; brand shells colour themselves) */
+  --sidebar: var(--neutral-50);
+  --sidebar-foreground: var(--neutral-950);
+  --sidebar-primary: var(--neutral-900);
+  --sidebar-primary-foreground: var(--neutral-50);
+  --sidebar-accent: var(--neutral-100);
+  --sidebar-accent-foreground: var(--neutral-900);
+  --sidebar-border: var(--neutral-200);
+  --sidebar-ring: var(--neutral-400);
+
+  /* Brand shells — admin (pink), customer (blue), shared white text */
+  --sidebar-admin:        var(--brand-secondary);
+  --sidebar-customer:     var(--brand-primary);
+  --sidebar-on-brand:     #FFFFFF;
+  --sidebar-active:       rgba(255, 255, 255, 0.18);
+  --sidebar-hover:        rgba(255, 255, 255, 0.10);
+
+  /* ---- 4. RADII — base unit 0.625rem (10px) ---- */
+  --radius: 0.625rem;
+
+  /* ---- 5. SIGNATURE BUTTON SHAPE (square top-right, three rounded) ---- */
+  --btn-radius:    50px 0 50px 50px;
+  --btn-radius-sm: 40px 0 40px 40px;
+
+  /* ---- 6. SHADOWS / ELEVATION ---- */
+  --shadow-xs:   0 1px 2px rgba(15, 15, 30, 0.04);
+  --shadow-sm:   0 2px 6px -1px rgba(15, 15, 30, 0.06), 0 1px 2px rgba(15, 15, 30, 0.04);
+  --shadow-md:   0 8px 24px -8px rgba(15, 15, 30, 0.10), 0 2px 4px rgba(15, 15, 30, 0.04);
+  --shadow-lg:   0 20px 40px -12px rgba(0, 0, 0, 0.15);
+  --shadow-ring: 0 0 0 1px rgba(15, 15, 30, 0.08) inset;
+
+  /* ---- 7. TYPOGRAPHY — Poppins, weights 300–700 ---- */
+  --font-sans:    "Poppins", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono:    "Geist Mono", ui-monospace, "SF Mono", Consolas, monospace;
+
+  --fw-extralight: 200;
+  --fw-light:      300;
+  --fw-regular:    400;
+  --fw-medium:     500;
+  --fw-semibold:   600;
+  --fw-bold:       700;
+
+  --fs-display:   clamp(2.75rem, 3vw + 2rem, 4.5rem); /* hero h1 — 44 → 72px */
+  --fs-h1:        clamp(2rem, 1.2vw + 1.6rem, 3rem);  /* 32 → 48px */
+  --fs-h2:        clamp(1.5rem, 0.6vw + 1.2rem, 2.25rem); /* 24 → 36px */
+  --fs-h3:        1.5rem;
+  --fs-h4:        1.25rem;
+  --fs-lg:        1.125rem;
+  --fs-base:      1rem;
+  --fs-sm:        0.875rem;
+  --fs-xs:        0.75rem;
+
+  --lh-tight: 1.1;
+  --lh-snug:  1.25;
+  --lh-base:  1.5;
+  --lh-loose: 1.7;
+
+  --tracking-tight:  -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide:   0.05em;
+  --tracking-widest: 0.18em; /* uppercase eyebrows */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
+  --background:           var(--neutral-950);
+  --foreground:           var(--neutral-50);
+  --card:                 var(--neutral-900);
+  --card-foreground:      var(--neutral-50);
+  --popover:              var(--neutral-900);
+  --popover-foreground:   var(--neutral-50);
+  --primary:              oklch(0.922 0 0);
+  --primary-foreground:   var(--neutral-900);
+  --secondary:            var(--neutral-800);
+  --secondary-foreground: var(--neutral-50);
+  --muted:                var(--neutral-800);
+  --muted-foreground:     var(--neutral-400);
+  --accent:               var(--neutral-800);
+  --accent-foreground:    var(--neutral-50);
+  --destructive:          oklch(0.704 0.191 22.216);
+  --border:               oklch(1 0 0 / 10%);
+  --input:                oklch(1 0 0 / 15%);
+  --ring:                 var(--neutral-500);
+
+  --sidebar: var(--neutral-900);
+  --sidebar-foreground: var(--neutral-50);
   --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-primary-foreground: var(--neutral-50);
+  --sidebar-accent: var(--neutral-800);
+  --sidebar-accent-foreground: var(--neutral-50);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-ring: var(--neutral-500);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
   }
+  body {
+    @apply bg-background text-foreground;
+    font-weight: var(--fw-regular);
+    line-height: var(--lh-base);
+    -webkit-font-smoothing: antialiased;
+  }
 }
+
+/* =============================================================
+   TYPOGRAPHY UTILITY CLASSES — drop-in styling for semantic copy
+   Headings tend to be LIGHT on white; hero is bold on blue.
+   ============================================================= */
+.h-display {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  color: #fff;
+}
+.h1 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-light);
+  font-size: var(--fs-h1);
+  line-height: var(--lh-snug);
+  color: var(--brand-dark);
+}
+.h2 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-extralight);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  color: var(--brand-dark);
+}
+.h3 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-semibold);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  color: var(--brand-dark);
+}
+.h4 {
+  font-family: var(--font-heading);
+  font-weight: var(--fw-medium);
+  font-size: var(--fs-h4);
+  line-height: var(--lh-snug);
+  color: var(--brand-dark);
+}
+
+.p-lead {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-light);
+  color: var(--muted-foreground);
+  line-height: var(--lh-loose);
+}
+.p-muted { color: var(--muted-foreground); }
+.p-sm    { font-size: var(--fs-sm); }
+.p-xs    { font-size: var(--fs-xs); }
+
+.eyebrow {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest);
+  color: var(--brand-primary);
+}
+
+/* =============================================================
+   PHASE ICON UTILITY — phase SVGs at a consistent square size
+   on a white surface only (never on a brand-coloured background).
+   ============================================================= */
+.phase-icon {
+  display: inline-block;
+  width: var(--phase-icon-size, 80px);
+  aspect-ratio: 1 / 1;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.phase-icon.operate    { background-image: url("/phases/operate.svg"); }
+.phase-icon.secure     { background-image: url("/phases/secure.svg"); }
+.phase-icon.streamline { background-image: url("/phases/streamline.svg"); }
+.phase-icon.accelerate { background-image: url("/phases/accelerate.svg"); }
