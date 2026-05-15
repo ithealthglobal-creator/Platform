@@ -22,7 +22,15 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Add, Edit, TrashCan, View } from '@carbon/icons-react'
+import {
+  Add,
+  Edit,
+  TrashCan,
+  View,
+  LogoX,
+  LogoLinkedin,
+  LogoFacebook,
+} from '@carbon/icons-react'
 
 interface BlogPostWithAuthor extends BlogPost {
   profiles: { display_name: string } | null
@@ -155,7 +163,7 @@ export default function BlogPage() {
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[150px]">Author</TableHead>
               <TableHead className="w-[130px]">Published</TableHead>
-              <TableHead className="w-[120px]">Actions</TableHead>
+              <TableHead className="w-[230px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -205,14 +213,58 @@ export default function BlogPage() {
                   <TableCell>
                     <div className="flex items-center gap-1">
                       {post.status === 'published' && post.slug && (
-                        <Button
-                          variant="ghost"
-                          size="icon-sm"
-                          onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
-                          title="View on site"
-                        >
-                          <View size={16} />
-                        </Button>
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => window.open(`/blog/${post.slug}`, '_blank')}
+                            title="View on site"
+                          >
+                            <View size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              const url = `${window.location.origin}/blog/${post.slug}`
+                              window.open(
+                                `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(url)}`,
+                                '_blank',
+                              )
+                            }}
+                            title="Share on X"
+                          >
+                            <LogoX size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              const url = `${window.location.origin}/blog/${post.slug}`
+                              window.open(
+                                `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+                                '_blank',
+                              )
+                            }}
+                            title="Share on LinkedIn"
+                          >
+                            <LogoLinkedin size={16} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => {
+                              const url = `${window.location.origin}/blog/${post.slug}`
+                              window.open(
+                                `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+                                '_blank',
+                              )
+                            }}
+                            title="Share on Facebook"
+                          >
+                            <LogoFacebook size={16} />
+                          </Button>
+                        </>
                       )}
                       <Button
                         variant="ghost"
