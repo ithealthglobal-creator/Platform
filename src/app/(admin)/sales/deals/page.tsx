@@ -130,7 +130,7 @@ export default function SalesDealsPage() {
       {loading ? (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="w-72 flex-shrink-0 rounded-xl bg-slate-100 h-64 animate-pulse" />
+            <div key={i} className="w-72 flex-shrink-0 rounded-xl bg-muted h-64 animate-pulse" />
           ))}
         </div>
       ) : stages.length === 0 ? (
@@ -148,7 +148,7 @@ export default function SalesDealsPage() {
             return (
               <div
                 key={stage.id}
-                className="w-72 flex-shrink-0 rounded-xl bg-slate-100 flex flex-col"
+                className="w-72 flex-shrink-0 rounded-xl bg-muted flex flex-col"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={() => handleDrop(stage.id)}
               >

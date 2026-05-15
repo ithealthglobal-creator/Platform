@@ -58,7 +58,7 @@ function FieldRow({ children }: { children: React.ReactNode }) {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Label className="font-poppins text-xs font-medium text-gray-600">
+    <Label className="font-poppins text-xs font-medium text-muted-foreground">
       {children}
     </Label>
   )
@@ -85,7 +85,7 @@ function TextField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           rows={rows}
-          className="w-full rounded-md border border-gray-200 px-3 py-2 font-poppins text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+          className="w-full rounded-md border border-border px-3 py-2 font-poppins text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
         />
       ) : (
         <Input
@@ -139,7 +139,7 @@ function ToggleField({
         onClick={() => onChange(!value)}
         className={[
           'relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1',
-          value ? 'bg-blue-600' : 'bg-gray-200',
+          value ? 'bg-blue-600' : 'bg-muted',
         ].join(' ')}
       >
         <span
@@ -327,7 +327,7 @@ export default function WebsiteCmsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-border border-t-blue-600" />
       </div>
     )
   }
@@ -525,7 +525,7 @@ export default function WebsiteCmsPage() {
                         value={item as unknown as string}
                         onChange={(e) => onChange('', e.target.value)}
                         rows={3}
-                        className="w-full rounded-md border border-gray-200 px-3 py-2 font-poppins text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
+                        className="w-full rounded-md border border-border px-3 py-2 font-poppins text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-blue-500 resize-y"
                       />
                     )}
                   />
@@ -790,7 +790,7 @@ function PageActions({
   }
 
   return (
-    <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+    <div className="flex items-center justify-end gap-3 pt-2 border-t border-border">
       <Button
         type="button"
         variant="outline"

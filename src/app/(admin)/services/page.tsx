@@ -121,8 +121,8 @@ export default function ServicesPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Services</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">Catalog</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Services</p>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">Catalog</h1>
         </div>
         <Button onClick={() => openWorkspace(null)}>
           <Add size={16} />
@@ -133,12 +133,12 @@ export default function ServicesPage() {
       {loading ? (
         <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-48 animate-pulse rounded-2xl bg-slate-100" />
+            <div key={i} className="h-48 animate-pulse rounded-2xl bg-muted" />
           ))}
         </div>
       ) : services.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="rounded-xl border border-dashed border-border bg-white p-12 text-center">
+          <p className="text-sm text-muted-foreground">
             No services yet. Click <strong>Add Service</strong> to create your first one.
           </p>
         </div>

@@ -348,7 +348,7 @@ export default function SalesFunnelSettingsPage() {
                 type="checkbox"
                 checked={formActive}
                 onChange={(e) => setFormActive(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300"
+                className="h-4 w-4 rounded border-border"
               />
             </label>
           </div>

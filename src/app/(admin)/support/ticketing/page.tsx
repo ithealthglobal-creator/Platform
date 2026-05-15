@@ -48,8 +48,8 @@ export default function TicketingPage() {
     <div>
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Support</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">Ticketing</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Support</p>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">Ticketing</h1>
         </div>
         <div className="flex items-center gap-3">
           <Input

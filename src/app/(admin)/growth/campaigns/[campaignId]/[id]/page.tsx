@@ -118,7 +118,7 @@ export default function AdCreativePreviewPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-6">
         {/* Left: Placement previews */}
-        <div className="rounded-lg border bg-white p-4">
+        <div className="rounded-lg bg-white p-4 ring-1 ring-foreground/10">
           <div className="mb-3 text-sm font-medium text-foreground">Creative preview</div>
           <Tabs defaultValue="fb-feed">
             <TabsList className="flex flex-wrap gap-1">
@@ -129,7 +129,7 @@ export default function AdCreativePreviewPage() {
               <TabsTrigger value="audience-net">Audience Network</TabsTrigger>
             </TabsList>
 
-            <div className="mt-6 flex justify-center bg-gray-50 rounded-md p-4 min-h-[520px]">
+            <div className="mt-6 flex justify-center bg-muted/50 rounded-md p-4 min-h-[520px]">
               <TabsContent value="fb-feed" className="w-full">
                 <FacebookFeedPreview ad={ad} />
               </TabsContent>
@@ -150,7 +150,7 @@ export default function AdCreativePreviewPage() {
         </div>
 
         {/* Right: Landing page */}
-        <div className="rounded-lg border bg-white p-4">
+        <div className="rounded-lg bg-white p-4 ring-1 ring-foreground/10">
           <div className="mb-3 flex items-center justify-between gap-2">
             <div className="text-sm font-medium text-foreground">Conversion page</div>
             {landingUrl && (
@@ -166,11 +166,11 @@ export default function AdCreativePreviewPage() {
           </div>
 
           {!landingUrl ? (
-            <div className="flex items-center justify-center h-[560px] bg-gray-50 rounded-md text-sm text-muted-foreground">
+            <div className="flex items-center justify-center h-[560px] bg-muted/50 rounded-md text-sm text-muted-foreground">
               No landing-page link configured for this ad.
             </div>
           ) : iframeFailed ? (
-            <div className="flex flex-col items-center justify-center h-[560px] bg-gray-50 rounded-md text-center p-6">
+            <div className="flex flex-col items-center justify-center h-[560px] bg-muted/50 rounded-md text-center p-6">
               <div className="text-sm font-medium text-foreground mb-2">Preview unavailable</div>
               <div className="text-xs text-muted-foreground mb-4 break-all max-w-md">
                 {landingUrl}

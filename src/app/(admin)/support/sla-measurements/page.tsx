@@ -60,8 +60,8 @@ export default function SlaMeasurementsPage() {
       {/* Header */}
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Support</p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">SLA Measurements</h1>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Support</p>
+          <h1 className="mt-1 text-2xl font-bold text-foreground">SLA Measurements</h1>
         </div>
         <div className="flex items-center gap-3">
           <Select value={period} onValueChange={(v) => setPeriod(v as Period)}>
@@ -91,7 +91,7 @@ export default function SlaMeasurementsPage() {
       </div>
 
       {loading ? (
-        <div className="py-16 text-center text-slate-400">Loading…</div>
+        <div className="py-16 text-center text-muted-foreground">Loading…</div>
       ) : drillDown ? (
         /* Drill-down view */
         <div>
@@ -102,10 +102,10 @@ export default function SlaMeasurementsPage() {
             ← Back to overview
           </button>
           <div className="mb-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {drillDown.companyName}
             </p>
-            <h2 className="text-xl font-bold text-slate-900">
+            <h2 className="text-xl font-bold text-foreground">
               {drillDown.serviceName ?? 'All Services'}
             </h2>
           </div>
@@ -120,7 +120,7 @@ export default function SlaMeasurementsPage() {
           <SlaKpiCards tickets={tickets} />
 
           <div>
-            <h2 className="mb-3 text-sm font-semibold text-slate-700">By Company</h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">By Company</h2>
             <SlaCompanyTable
               tickets={tickets}
               onRowClick={(companyId, companyName) => setDrillDown({ companyId, companyName })}
@@ -128,7 +128,7 @@ export default function SlaMeasurementsPage() {
           </div>
 
           <div>
-            <h2 className="mb-3 text-sm font-semibold text-slate-700">By Service</h2>
+            <h2 className="mb-3 text-sm font-semibold text-foreground">By Service</h2>
             <SlaServiceTable
               tickets={tickets}
               onRowClick={(serviceId, serviceName) =>

@@ -205,7 +205,7 @@ export default function DashboardPage() {
         {agentOpen ? (
           <PanelGroup direction="horizontal">
             <Panel defaultSize={70} minSize={40}>
-              <div className="h-full bg-gray-50">
+              <div className="h-full bg-muted/50">
                 <DashboardCanvas
                   charts={charts}
                   selectedChartId={selectedChartId}
@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 />
               </div>
             </Panel>
-            <PanelResizeHandle className="w-px bg-gray-200 transition-colors data-[resize-handle-state=hover]:bg-primary" />
+            <PanelResizeHandle className="w-px bg-muted transition-colors data-[resize-handle-state=hover]:bg-primary" />
             <Panel defaultSize={30} minSize={20}>
               <div className="relative h-full">
                 <DashboardGeneratorPanel
@@ -238,7 +238,7 @@ export default function DashboardPage() {
           </PanelGroup>
         ) : (
           <>
-            <div className="h-full bg-gray-50">
+            <div className="h-full bg-muted/50">
               <DashboardCanvas
                 charts={charts}
                 selectedChartId={selectedChartId}
