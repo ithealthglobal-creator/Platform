@@ -140,7 +140,7 @@ export default function BlogPage() {
           </Select>
         </div>
 
-        <Button onClick={() => router.push('/growth/content/blog/new')}>
+        <Button onClick={() => router.push('/growth/awareness/blog/new')}>
           <Add size={16} />
           Add Post
         </Button>
@@ -217,7 +217,7 @@ export default function BlogPage() {
                       <Button
                         variant="ghost"
                         size="icon-sm"
-                        onClick={() => router.push(`/growth/content/blog/${post.id}/edit`)}
+                        onClick={() => router.push(`/growth/awareness/blog/${post.id}/edit`)}
                       >
                         <Edit size={16} />
                       </Button>
