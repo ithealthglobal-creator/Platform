@@ -53,7 +53,9 @@ export default function OrganogramPage() {
 
       const { data, error } = await supabase
         .from('ai_agents')
-        .select('*, ai_agent_hierarchy(*), ai_agent_tools(tool_name, operations)')
+        .select(
+          '*, ai_agent_hierarchy!ai_agent_hierarchy_agent_id_fkey(*), ai_agent_tools(tool_name, operations)'
+        )
         .order('name')
 
       if (error) {
@@ -63,7 +65,10 @@ export default function OrganogramPage() {
       }
 
       const normalised: AgentWithHierarchy[] = (data ?? []).map((row: any) => {
-        const hierarchyRows: any[] = row.ai_agent_hierarchy ?? []
+        // With the explicit !ai_agent_hierarchy_agent_id_fkey hint, PostgREST
+        // returns the row as a single object on a one-to-one embed (or null).
+        const h = row.ai_agent_hierarchy
+        const hierarchyRow = Array.isArray(h) ? h[0] : h
         return {
           id: row.id,
           name: row.name,
@@ -73,14 +78,13 @@ export default function OrganogramPage() {
           system_prompt: row.system_prompt,
           icon: row.icon,
           is_default: row.is_default,
-          hierarchy:
-            hierarchyRows.length > 0
-              ? {
-                  parent_agent_id: hierarchyRows[0].parent_agent_id,
-                  hierarchy_level: hierarchyRows[0].hierarchy_level,
-                  sort_order: hierarchyRows[0].sort_order ?? 0,
-                }
-              : undefined,
+          hierarchy: hierarchyRow
+            ? {
+                parent_agent_id: hierarchyRow.parent_agent_id,
+                hierarchy_level: hierarchyRow.hierarchy_level,
+                sort_order: hierarchyRow.sort_order ?? 0,
+              }
+            : undefined,
           ai_agent_tools: row.ai_agent_tools ?? [],
         }
       })
