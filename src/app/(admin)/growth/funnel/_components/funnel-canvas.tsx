@@ -104,7 +104,7 @@ function FunnelCanvasInner({ metrics, sourceTypes, savedLayout, onLayoutChange }
           parentId: 'group-paid',
           extent: 'parent',
           position: { x: 12, y: 36 + i * ROW_GAP },
-          data: p,
+          data: { ...p },
         })
         edges.push({
           id: `e-paid-${p.id}-website`,
@@ -140,7 +140,7 @@ function FunnelCanvasInner({ metrics, sourceTypes, savedLayout, onLayoutChange }
           parentId: 'group-social',
           extent: 'parent',
           position: { x: 12, y: 36 + i * ROW_GAP },
-          data: p,
+          data: { ...p },
         })
         edges.push({
           id: `e-social-${p.id}-website`,
@@ -176,7 +176,7 @@ function FunnelCanvasInner({ metrics, sourceTypes, savedLayout, onLayoutChange }
           parentId: 'group-blog',
           extent: 'parent',
           position: { x: 12, y: 36 + i * ROW_GAP },
-          data: p,
+          data: { ...p },
         })
         edges.push({
           id: `e-blog-${p.id}-website`,
@@ -207,7 +207,7 @@ function FunnelCanvasInner({ metrics, sourceTypes, savedLayout, onLayoutChange }
         id,
         type: 'step',
         position: { x: COL_X.steps, y: 40 + idx * 130 },
-        data: s,
+        data: { ...s },
       })
       edges.push({
         id: `e-${prevStepId}-${id}`,

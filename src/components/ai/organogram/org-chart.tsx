@@ -357,8 +357,8 @@ export function OrgChart({ agents, onNodeClick }: OrgChartProps) {
               fontFamily="Poppins, sans-serif"
               fill="#94A3B8"
               fontWeight={500}
-              textTransform="uppercase"
               letterSpacing="0.05em"
+              style={{ textTransform: 'uppercase' }}
             >
               Unassigned ({unassigned.length})
             </text>

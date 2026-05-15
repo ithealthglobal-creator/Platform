@@ -270,7 +270,7 @@ export default function SocialPostsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-2">
-            <Select value={pickerBlogId} onValueChange={setPickerBlogId}>
+            <Select value={pickerBlogId} onValueChange={(v) => setPickerBlogId(v ?? '')}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a blog post" />
               </SelectTrigger>

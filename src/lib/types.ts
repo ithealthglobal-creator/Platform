@@ -505,20 +505,6 @@ export interface BlogPost {
   updated_at: string
 }
 
-export type SocialPlatform = 'linkedin' | 'x' | 'facebook' | 'instagram'
-export type SocialPostStatus = 'draft' | 'approved' | 'published'
-
-export interface SocialPost {
-  id: string
-  blog_post_id: string
-  platform: SocialPlatform
-  content: string
-  status: SocialPostStatus
-  created_by: string | null
-  created_at: string
-  updated_at: string
-}
-
 export interface ContactSubmission {
   id: string
   name: string
@@ -939,11 +925,12 @@ export interface ContactInfoContent {
 // ---------------------------------------------------------------------------
 
 export type SocialPlatform = 'linkedin' | 'x' | 'facebook' | 'instagram'
-export type SocialPostStatus = 'draft' | 'scheduled' | 'published'
+export type SocialPostStatus = 'draft' | 'approved' | 'scheduled' | 'published'
 
 export interface SocialPost {
   id: string
-  company_id: string
+  company_id: string | null
+  blog_post_id: string | null
   platform: SocialPlatform
   title: string | null
   content: string | null
@@ -956,6 +943,7 @@ export interface SocialPost {
   reach: number
   engagement: number
   is_active: boolean
+  created_by: string | null
   created_at: string
   updated_at: string
 }
