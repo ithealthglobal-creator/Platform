@@ -605,10 +605,21 @@ export interface SalesLead {
   contact_name: string
   contact_email: string
   notes: string | null
+  utm_source: string | null
+  utm_medium: string | null
+  utm_campaign: string | null
+  utm_content: string | null
+  utm_term: string | null
+  landing_path: string | null
+  referrer: string | null
+  meta_campaign_id: string | null
+  meta_ad_id: string | null
   created_at: string
   updated_at: string
   company?: Company
   assessment_attempt?: AssessmentAttempt
+  meta_campaign?: { id: string; name: string } | null
+  meta_ad?: { id: string; name: string; creative_thumbnail_url: string | null } | null
 }
 
 // Meta Ads types

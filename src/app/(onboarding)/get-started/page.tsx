@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Assessment, AssessmentQuestion, Phase } from '@/lib/types'
+import { captureLeadSourceFromUrl, readLeadSource } from '@/lib/lead-source'
 
 type WizardStep = 'loading' | 'welcome' | 'assessment' | 'details' | 'confirmation' | 'error'
 
@@ -32,6 +33,10 @@ export default function GetStartedPage() {
   const [email, setEmail] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [confirmedEmail, setConfirmedEmail] = useState('')
+
+  useEffect(() => {
+    captureLeadSourceFromUrl()
+  }, [])
 
   useEffect(() => {
     async function fetchData() {
@@ -154,6 +159,7 @@ export default function GetStartedPage() {
 
     setSubmitting(true)
     try {
+      const leadSource = readLeadSource()
       const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -163,6 +169,7 @@ export default function GetStartedPage() {
           email,
           assessment_id: assessment.id,
           answers: formattedAnswers,
+          lead_source: leadSource,
         }),
       })
 
