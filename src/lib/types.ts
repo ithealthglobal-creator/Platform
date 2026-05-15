@@ -505,6 +505,20 @@ export interface BlogPost {
   updated_at: string
 }
 
+export type SocialPlatform = 'linkedin' | 'x' | 'facebook' | 'instagram'
+export type SocialPostStatus = 'draft' | 'approved' | 'published'
+
+export interface SocialPost {
+  id: string
+  blog_post_id: string
+  platform: SocialPlatform
+  content: string
+  status: SocialPostStatus
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface ContactSubmission {
   id: string
   name: string
