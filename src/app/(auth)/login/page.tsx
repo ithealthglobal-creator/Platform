@@ -43,7 +43,7 @@ export default function LoginPage() {
           .eq('id', user.id)
           .single()
         if (profileData?.role === 'customer') {
-          router.replace('/home')
+          router.replace('/portal/home')
         } else {
           router.replace('/dashboard')
         }
