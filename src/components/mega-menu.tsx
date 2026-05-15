@@ -36,13 +36,13 @@ export function MegaMenu() {
 
   const activeL1 = menuTree.find(item => item.level === 1 && subtreeMatches(item))
 
-  if (!activeL1) return <div className="h-12 border-b bg-white" />
+  if (!activeL1) return <div className="h-12 border-b border-border bg-white" />
 
   const l2Items = activeL1.children || []
 
   return (
-    <div ref={menuRef} className="relative border-b bg-white">
-      <div className="flex h-12 items-center gap-1 px-4">
+    <div ref={menuRef} className="relative border-b border-border bg-white">
+      <div className="flex h-12 items-stretch">
         {l2Items.map(item => {
           const isActive = pathname.startsWith(item.route || '')
           const hasChildren = item.children && item.children.length > 0
@@ -57,10 +57,11 @@ export function MegaMenu() {
                   setExpandedL2(null)
                 }
               }}
-              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              style={{ letterSpacing: '-0.005em' }}
+              className={`inline-flex items-center border-r border-border px-4 text-xs font-medium transition-colors ${
                 isActive
-                  ? 'bg-muted text-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  ? 'bg-[var(--neutral-100)] text-[var(--brand-dark)]'
+                  : 'text-muted-foreground hover:bg-[var(--neutral-50)] hover:text-[var(--brand-dark)]'
               }`}
             >
               {item.label}
