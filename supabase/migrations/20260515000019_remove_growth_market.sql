@@ -30,6 +30,11 @@ where tool_type = 'supabase_crud'
   );
 
 -- 3. Drop the Market Specialist agent (its tools are gone in step 2; its purpose was these tables).
+--    Flip is_default first to satisfy the prevent_default_agent_delete trigger.
+update public.ai_agents
+set is_default = false
+where id = 'a0000000-0000-0000-0000-000000000010';
+
 delete from public.ai_agents
 where id = 'a0000000-0000-0000-0000-000000000010';
 

@@ -61,6 +61,15 @@ VALUES (
 )
 ON CONFLICT (agent_id) DO NOTHING;
 
+-- Extend the tool_type CHECK to admit 'agent_admin' before we insert rows
+-- using that value. (Local was extended manually during development; remote
+-- pushes were failing without this step.)
+ALTER TABLE public.ai_agent_tools
+  DROP CONSTRAINT IF EXISTS ai_agent_tools_tool_type_check;
+ALTER TABLE public.ai_agent_tools
+  ADD CONSTRAINT ai_agent_tools_tool_type_check
+  CHECK (tool_type IN ('supabase_crud', 'web_search', 'langchain', 'knowledge', 'dashboard', 'agent_admin'));
+
 -- Dedicated agent_admin tools — narrowly scoped to this one agent. Adding new
 -- agents to this tool_type requires an explicit migration; the generic
 -- supabase_crud factory still refuses ai_agents and ai_agent_tools.
