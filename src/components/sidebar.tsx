@@ -48,7 +48,7 @@ export function Sidebar() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen w-[60px] flex-col items-center bg-[var(--sidebar-admin)] pb-6">
+      <div className="flex h-screen w-[60px] flex-col items-center border-r bg-[var(--brand-secondary)] pb-6">
         {/* Logo row — same height as MegaMenu (h-12) so the logo aligns with the header tab text */}
         <div className="flex h-12 w-full items-center justify-center">
           <Image
