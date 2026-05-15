@@ -96,7 +96,7 @@ export function JourneySection() {
             <h3 className="text-2xl md:text-3xl font-extralight text-[var(--brand-dark)] mb-6">
               Your journey to modernised IT
             </h3>
-            <p className="text-base font-light leading-relaxed text-slate-500">
+            <p className="text-base font-light leading-relaxed text-muted-foreground">
               From Operate&apos;s stable foundations to Secure&apos;s robust protections,
               Streamline&apos;s efficient workflows, and Accelerate&apos;s innovation, each
               phase builds seamlessly guiding businesses toward complete IT
@@ -111,7 +111,7 @@ export function JourneySection() {
               <path
                 d="M 100 310 Q 160 290, 190 230 Q 220 170, 280 150 Q 310 140, 340 90 Q 360 50, 400 30"
                 fill="none"
-                stroke="#cbd5e1"
+                stroke="var(--border)"
                 strokeWidth="2"
                 strokeDasharray="6 6"
               />
