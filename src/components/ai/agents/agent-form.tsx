@@ -1,21 +1,23 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Save, Reset } from '@carbon/icons-react'
+import { Save, Reset, TrashCan } from '@carbon/icons-react'
 import { ToolPermissions, AgentTool } from './tool-permissions'
 
 interface AgentFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any
   onSave: (data: any) => Promise<void>
+  onCancel?: () => void
+  onDelete?: () => void
   saving: boolean
 }
 
-export function AgentForm({ initialData, onSave, saving }: AgentFormProps) {
+export function AgentForm({ initialData, onSave, onCancel, onDelete, saving }: AgentFormProps) {
   const router = useRouter()
 
   const [name, setName] = useState<string>(initialData?.name ?? '')
@@ -32,7 +34,21 @@ export function AgentForm({ initialData, onSave, saving }: AgentFormProps) {
   const [tools, setTools] = useState<AgentTool[]>(initialData?.tools ?? [])
 
   const isDefault = initialData?.is_default === true
+  const isExisting = !!initialData?.id
   const originalSystemPrompt = initialData?.system_prompt ?? ''
+
+  // Re-sync form state when the parent swaps to a different agent or fires a live
+  // refresh after the AI assistant mutates the row.
+  useEffect(() => {
+    setName(initialData?.name ?? '')
+    setDescription(initialData?.description ?? '')
+    setAgentType(initialData?.agent_type ?? 'specialist')
+    setSystemPrompt(initialData?.system_prompt ?? '')
+    setModel(initialData?.model ?? 'gemini-2.5-flash')
+    setTemperature(initialData?.temperature != null ? Number(initialData.temperature) : 0.7)
+    setIcon(initialData?.icon ?? '')
+    setTools(initialData?.tools ?? [])
+  }, [initialData])
 
   async function handleSave() {
     await onSave({ name, description, agent_type: agentType, system_prompt: systemPrompt, model, temperature, icon, tools })
@@ -40,6 +56,11 @@ export function AgentForm({ initialData, onSave, saving }: AgentFormProps) {
 
   function handleResetPrompt() {
     setSystemPrompt(originalSystemPrompt)
+  }
+
+  function handleCancel() {
+    if (onCancel) onCancel()
+    else router.push('/ai/agents')
   }
 
   const inputClass =
@@ -195,19 +216,34 @@ export function AgentForm({ initialData, onSave, saving }: AgentFormProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-3 pt-2">
-        <Button onClick={handleSave} disabled={saving}>
-          <Save size={16} className="mr-2" />
-          {saving ? 'Saving...' : 'Save'}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          onClick={() => router.push('/ai/agents')}
-          disabled={saving}
-        >
-          Cancel
-        </Button>
+      <div className="flex items-center justify-between gap-3 pt-2">
+        <div className="flex items-center gap-3">
+          <Button onClick={handleSave} disabled={saving}>
+            <Save size={16} className="mr-2" />
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleCancel}
+            disabled={saving}
+          >
+            Cancel
+          </Button>
+        </div>
+        {isExisting && onDelete && (
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onDelete}
+            disabled={saving || isDefault}
+            title={isDefault ? 'Default agents cannot be deleted' : 'Delete agent'}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <TrashCan size={16} className="mr-2" />
+            Delete
+          </Button>
+        )}
       </div>
     </div>
   )
